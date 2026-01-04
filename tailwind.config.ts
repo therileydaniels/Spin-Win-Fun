@@ -83,7 +83,7 @@ export default {
         },
       },
       fontFamily: {
-        sans: ["var(--font-sans)"],
+        sans: ["Inter", "var(--font-sans)"],
         serif: ["var(--font-serif)"],
         mono: ["var(--font-mono)"],
       },
@@ -96,10 +96,27 @@ export default {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        "spin-wheel": {
+          "0%": { transform: "rotate(0deg)" },
+          "100%": { transform: "rotate(var(--spin-degrees))" },
+        },
+        "pulse-glow": {
+          "0%, 100%": { boxShadow: "0 0 20px 4px rgba(168, 85, 247, 0.4)" },
+          "50%": { boxShadow: "0 0 30px 8px rgba(168, 85, 247, 0.6)" },
+        },
+        "bounce-in": {
+          "0%": { transform: "scale(0.3)", opacity: "0" },
+          "50%": { transform: "scale(1.05)" },
+          "70%": { transform: "scale(0.9)" },
+          "100%": { transform: "scale(1)", opacity: "1" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "spin-wheel": "spin-wheel var(--spin-duration) cubic-bezier(0.17, 0.67, 0.12, 0.99) forwards",
+        "pulse-glow": "pulse-glow 2s ease-in-out infinite",
+        "bounce-in": "bounce-in 0.5s ease-out forwards",
       },
     },
   },
