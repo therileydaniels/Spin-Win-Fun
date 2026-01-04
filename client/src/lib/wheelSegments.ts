@@ -6,12 +6,21 @@ export interface WheelSegment {
 }
 
 export const WHEEL_SEGMENTS: WheelSegment[] = [
-  { id: 1, label: "Prize 1", color: "#8B5CF6", textColor: "#FFFFFF" },
-  { id: 2, label: "Prize 2", color: "#EC4899", textColor: "#FFFFFF" },
-  { id: 3, label: "Prize 3", color: "#F59E0B", textColor: "#1F2937" },
-  { id: 4, label: "Prize 4", color: "#10B981", textColor: "#FFFFFF" },
-  { id: 5, label: "Prize 5", color: "#3B82F6", textColor: "#FFFFFF" },
-  { id: 6, label: "Prize 6", color: "#EF4444", textColor: "#FFFFFF" },
+  { id: 1, label: "Prize 1", color: "#C9A9A6", textColor: "#2D2926" },
+  { id: 2, label: "Prize 2", color: "#7D8B74", textColor: "#FFFFFF" },
+  { id: 3, label: "Prize 3", color: "#3D5A6C", textColor: "#FFFFFF" },
+  { id: 4, label: "Prize 4", color: "#C4956A", textColor: "#2D2926" },
+  { id: 5, label: "Prize 5", color: "#B8A99A", textColor: "#2D2926" },
+  { id: 6, label: "Prize 6", color: "#6B7B8C", textColor: "#FFFFFF" },
+];
+
+export const WHEEL_COLORS = [
+  "#C9A9A6",
+  "#7D8B74",
+  "#3D5A6C",
+  "#C4956A",
+  "#B8A99A",
+  "#6B7B8C",
 ];
 
 export function getRandomWinner(segments: WheelSegment[]): WheelSegment {

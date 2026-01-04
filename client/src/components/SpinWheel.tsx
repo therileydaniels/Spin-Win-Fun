@@ -66,47 +66,53 @@ export function SpinWheel({ rotation, isSpinning, spinDuration }: SpinWheelProps
     <div className="relative w-full max-w-[500px] aspect-square mx-auto">
       <svg
         viewBox="0 0 500 500"
-        className="w-full h-full drop-shadow-2xl"
+        className="w-full h-full"
         style={{
           transform: `rotate(${rotation}deg)`,
           transition: isSpinning
             ? `transform ${spinDuration}s cubic-bezier(0.17, 0.67, 0.12, 0.99)`
             : "none",
+          filter: "drop-shadow(0 10px 30px rgba(0,0,0,0.15))",
         }}
         data-testid="wheel-svg"
       >
         <defs>
-          <filter id="innerShadow" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur in="SourceAlpha" stdDeviation="3" result="blur" />
-            <feOffset in="blur" dx="2" dy="2" result="offsetBlur" />
-            <feComposite
-              in="SourceGraphic"
-              in2="offsetBlur"
-              operator="over"
-              result="composite"
-            />
-          </filter>
-          <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#F7DC6F" />
-            <stop offset="50%" stopColor="#D4AC0D" />
-            <stop offset="100%" stopColor="#B7950B" />
+          <linearGradient id="outerRingGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#D4AF37" />
+            <stop offset="25%" stopColor="#F5E6A3" />
+            <stop offset="50%" stopColor="#D4AF37" />
+            <stop offset="75%" stopColor="#C5A028" />
+            <stop offset="100%" stopColor="#D4AF37" />
           </linearGradient>
+          <linearGradient id="innerRingGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#2D2926" />
+            <stop offset="50%" stopColor="#4A4543" />
+            <stop offset="100%" stopColor="#2D2926" />
+          </linearGradient>
+          <filter id="segmentShadow" x="-10%" y="-10%" width="120%" height="120%">
+            <feDropShadow dx="0" dy="1" stdDeviation="1" floodOpacity="0.1" />
+          </filter>
         </defs>
 
         <circle
           cx={centerX}
           cy={centerY}
-          r={radius + 12}
-          fill="url(#goldGradient)"
-          className="drop-shadow-lg"
+          r={radius + 15}
+          fill="url(#outerRingGradient)"
         />
         <circle
           cx={centerX}
           cy={centerY}
-          r={radius + 4}
+          r={radius + 8}
+          fill="url(#innerRingGradient)"
+        />
+        <circle
+          cx={centerX}
+          cy={centerY}
+          r={radius + 3}
           fill="none"
-          stroke="#1F2937"
-          strokeWidth="2"
+          stroke="#D4AF37"
+          strokeWidth="1"
         />
 
         {segments.map((segment, index) => {
@@ -126,21 +132,26 @@ export function SpinWheel({ rotation, isSpinning, spinDuration }: SpinWheelProps
               <path
                 d={path}
                 fill={segment.color}
-                stroke="#1F2937"
-                strokeWidth="1"
-                filter="url(#innerShadow)"
+                stroke="#2D2926"
+                strokeWidth="0.5"
+                filter="url(#segmentShadow)"
               />
               <text
                 x={textPos.x}
                 y={textPos.y}
                 fill={segment.textColor}
-                fontSize="16"
+                fontSize="15"
                 fontWeight="600"
+                fontFamily="Inter, sans-serif"
                 textAnchor="middle"
                 dominantBaseline="middle"
                 transform={`rotate(${textPos.angle}, ${textPos.x}, ${textPos.y})`}
-                className="pointer-events-none select-none font-sans"
-                style={{ textShadow: "0 1px 2px rgba(0,0,0,0.3)" }}
+                className="pointer-events-none select-none"
+                style={{ 
+                  textShadow: segment.textColor === "#FFFFFF" 
+                    ? "0 1px 2px rgba(0,0,0,0.3)" 
+                    : "0 1px 1px rgba(255,255,255,0.2)" 
+                }}
               >
                 {segment.label}
               </text>
@@ -151,37 +162,50 @@ export function SpinWheel({ rotation, isSpinning, spinDuration }: SpinWheelProps
         <circle
           cx={centerX}
           cy={centerY}
-          r="25"
-          fill="url(#goldGradient)"
-          stroke="#1F2937"
-          strokeWidth="2"
-          className="drop-shadow-md"
+          r="28"
+          fill="url(#outerRingGradient)"
         />
-        <circle cx={centerX} cy={centerY} r="8" fill="#1F2937" />
+        <circle
+          cx={centerX}
+          cy={centerY}
+          r="22"
+          fill="url(#innerRingGradient)"
+        />
+        <circle
+          cx={centerX}
+          cy={centerY}
+          r="6"
+          fill="#D4AF37"
+        />
       </svg>
 
       <div
-        className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 z-10"
+        className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-2 z-10"
         data-testid="wheel-pointer"
       >
-        <svg width="40" height="50" viewBox="0 0 40 50">
+        <svg width="36" height="48" viewBox="0 0 36 48">
           <defs>
-            <linearGradient id="pointerGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#DC2626" />
-              <stop offset="50%" stopColor="#B91C1C" />
-              <stop offset="100%" stopColor="#7F1D1D" />
+            <linearGradient id="pointerGold" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#D4AF37" />
+              <stop offset="50%" stopColor="#F5E6A3" />
+              <stop offset="100%" stopColor="#C5A028" />
+            </linearGradient>
+            <linearGradient id="pointerDark" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#3D3835" />
+              <stop offset="100%" stopColor="#2D2926" />
             </linearGradient>
             <filter id="pointerShadow" x="-50%" y="-50%" width="200%" height="200%">
-              <feDropShadow dx="0" dy="2" stdDeviation="2" floodOpacity="0.4" />
+              <feDropShadow dx="0" dy="3" stdDeviation="3" floodOpacity="0.3" />
             </filter>
           </defs>
           <polygon
-            points="20,45 5,5 35,5"
-            fill="url(#pointerGradient)"
-            stroke="#F7DC6F"
+            points="18,46 4,8 18,14 32,8"
+            fill="url(#pointerDark)"
+            stroke="url(#pointerGold)"
             strokeWidth="2"
             filter="url(#pointerShadow)"
           />
+          <circle cx="18" cy="8" r="6" fill="url(#pointerGold)" />
         </svg>
       </div>
     </div>

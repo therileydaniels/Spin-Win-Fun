@@ -1,9 +1,11 @@
 import confetti from "canvas-confetti";
 
+const LUXE_COLORS = ["#C9A9A6", "#7D8B74", "#3D5A6C", "#C4956A", "#B8A99A", "#6B7B8C", "#D4AF37"];
+
 export function fireWinConfetti(): void {
   const duration = 3000;
   const animationEnd = Date.now() + duration;
-  const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 };
+  const defaults = { startVelocity: 25, spread: 360, ticks: 80, zIndex: 9999 };
 
   function randomInRange(min: number, max: number): number {
     return Math.random() * (max - min) + min;
@@ -16,29 +18,29 @@ export function fireWinConfetti(): void {
       return clearInterval(interval);
     }
 
-    const particleCount = 50 * (timeLeft / duration);
+    const particleCount = 40 * (timeLeft / duration);
 
     confetti({
       ...defaults,
       particleCount,
       origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 },
-      colors: ["#8B5CF6", "#EC4899", "#F59E0B", "#10B981", "#3B82F6", "#EF4444"],
+      colors: LUXE_COLORS,
     });
     confetti({
       ...defaults,
       particleCount,
       origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },
-      colors: ["#8B5CF6", "#EC4899", "#F59E0B", "#10B981", "#3B82F6", "#EF4444"],
+      colors: LUXE_COLORS,
     });
   }, 250);
 }
 
 export function fireCenterBurst(): void {
   confetti({
-    particleCount: 100,
-    spread: 70,
+    particleCount: 80,
+    spread: 60,
     origin: { x: 0.5, y: 0.5 },
-    colors: ["#8B5CF6", "#EC4899", "#F59E0B", "#10B981", "#3B82F6", "#EF4444"],
+    colors: LUXE_COLORS,
     zIndex: 9999,
   });
 }
