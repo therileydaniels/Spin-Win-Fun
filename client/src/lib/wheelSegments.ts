@@ -28,7 +28,8 @@ export function getRandomWinner(segments: WheelSegment[]): WheelSegment {
 
 export function calculateRotationForWinner(
   winnerIndex: number,
-  totalSegments: number
+  totalSegments: number,
+  currentRotation: number
 ): number {
   const segmentAngle = 360 / totalSegments;
   const segmentStart = winnerIndex * segmentAngle;
@@ -40,9 +41,16 @@ export function calculateRotationForWinner(
   const randomOffsetWithinSafeZone = Math.random() * safeZoneAngle;
   const targetAngle = safeZoneStart + randomOffsetWithinSafeZone;
   
-  const baseRotation = 360 * 5;
-  const angleToTop = 360 - targetAngle;
-  const finalRotation = baseRotation + angleToTop;
+  const currentAngle = ((currentRotation % 360) + 360) % 360;
+  const targetFinalAngle = (360 - targetAngle + 360) % 360;
   
-  return finalRotation;
+  let delta = targetFinalAngle - currentAngle;
+  if (delta < 0) {
+    delta += 360;
+  }
+  
+  const fullSpins = 360 * 5;
+  const totalDelta = fullSpins + delta;
+  
+  return currentRotation + totalDelta;
 }

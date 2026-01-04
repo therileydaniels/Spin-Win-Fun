@@ -52,13 +52,13 @@ export function useWheelSpin(): UseWheelSpinReturn {
       const duration = 4 + Math.random() * 1;
       setSpinDuration(duration);
 
-      const targetRotation = calculateRotationForWinner(
+      const newRotation = calculateRotationForWinner(
         winnerIndex,
-        WHEEL_SEGMENTS.length
+        WHEEL_SEGMENTS.length,
+        rotation
       );
-      const totalRotation = rotation + targetRotation;
 
-      setRotation(totalRotation);
+      setRotation(newRotation);
       setWinner(selectedWinner);
 
       if (timeoutRef.current !== null) {
