@@ -29,9 +29,9 @@ export default function Home() {
   }, [showResult, winner, playWinSound]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/30 text-foreground flex flex-col">
-      <header className="flex items-center justify-between gap-4 px-4 py-3 border-b border-border/50">
-        <h1 className="text-lg font-semibold tracking-tight text-foreground">
+    <div className="min-h-screen bg-background text-foreground flex flex-col">
+      <header className="flex items-center justify-between gap-4 px-4 py-3 border-b border-border">
+        <h1 className="text-xl font-bold tracking-tight bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
           Wheel Spinner
         </h1>
         <div className="flex items-center gap-1">
@@ -40,8 +40,8 @@ export default function Home() {
         </div>
       </header>
 
-      <main className="flex-1 flex flex-col items-center justify-center gap-10 p-4 sm:p-8">
-        <div className="w-full max-w-[360px] sm:max-w-[440px]">
+      <main className="flex-1 flex flex-col items-center justify-center gap-8 p-4 sm:p-8">
+        <div className="w-full max-w-[400px] sm:max-w-[500px]">
           <SpinWheel
             rotation={rotation}
             isSpinning={isSpinning}
@@ -61,12 +61,12 @@ export default function Home() {
             style={{ opacity: showResult ? 1 : 0 }}
             data-testid="text-last-winner"
           >
-            Last winner: <span className="font-medium text-foreground">{winner.label}</span>
+            Last winner: <span className="font-semibold">{winner.label}</span>
           </p>
         )}
       </main>
 
-      <footer className="text-center py-4 text-xs text-muted-foreground/70 border-t border-border/30">
+      <footer className="text-center py-4 text-xs text-muted-foreground border-t border-border">
         <p>For entertainment purposes only</p>
       </footer>
 
