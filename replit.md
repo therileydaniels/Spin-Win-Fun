@@ -38,10 +38,19 @@ Preferred communication style: Simple, everyday language.
 - **Custom Hooks**: Separated into `hooks/` directory for reusable logic (wheel spin, sound, toast)
 
 ### Wheel Spin Logic
-- Client-side winner determination with probability-based selection
+- **Server-side** winner determination with weighted probability selection (POST /api/spin)
+- Probabilities hidden from browser Network tab (only winnerIndex returned)
 - Smooth CSS animations with configurable duration (4-5 seconds with variance)
+- Rotation calculation accounts for accumulated spins to ensure visual alignment
 - Celebration effects using canvas-confetti library
 - Audio feedback for win events
+
+### Segment Customization (Phase 3)
+- Custom segments stored in localStorage with probabilities
+- 2-20 segments supported (add/remove with limits enforced)
+- Editable segment names (max 25 characters, auto-scaling text on wheel)
+- Color picker with 12 preset gradient colors + custom hex input
+- All changes persist across page reloads
 
 ## External Dependencies
 
