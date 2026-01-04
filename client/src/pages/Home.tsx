@@ -4,8 +4,10 @@ import { SpinButton } from "@/components/SpinButton";
 import { WinnerModal } from "@/components/WinnerModal";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { SoundToggle } from "@/components/SoundToggle";
+import { ProbabilityPanel } from "@/components/ProbabilityPanel";
 import { useWheelSpin } from "@/hooks/useWheelSpin";
 import { useSound } from "@/hooks/useSound";
+import { useProbabilities } from "@/hooks/useProbabilities";
 import { fireWinConfetti, fireCenterBurst } from "@/lib/confetti";
 
 export default function Home() {
@@ -19,6 +21,14 @@ export default function Home() {
     spinDuration,
   } = useWheelSpin();
   const { isMuted, toggleMute, playWinSound } = useSound();
+  const {
+    probabilities,
+    setProbability,
+    total,
+    isValid,
+    isEqualOdds,
+    resetToEqual,
+  } = useProbabilities();
 
   useEffect(() => {
     if (showResult && winner) {
@@ -27,6 +37,12 @@ export default function Home() {
       playWinSound();
     }
   }, [showResult, winner, playWinSound]);
+
+  const handleSpin = () => {
+    spin(probabilities);
+  };
+
+  const canSpin = isValid && !isSpinning;
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col relative overflow-hidden">
@@ -55,30 +71,41 @@ export default function Home() {
         </div>
       </header>
 
-      <main className="relative z-10 flex-1 flex flex-col items-center justify-center gap-10 p-4 sm:p-8">
-        <div className="w-full max-w-[380px] sm:max-w-[460px]">
-          <SpinWheel
-            rotation={rotation}
+      <main className="relative z-10 flex-1 flex flex-col lg:flex-row items-center justify-center gap-8 p-4 sm:p-8">
+        <div className="flex flex-col items-center gap-8">
+          <div className="w-full max-w-[340px] sm:max-w-[420px]">
+            <SpinWheel
+              rotation={rotation}
+              isSpinning={isSpinning}
+              spinDuration={spinDuration}
+            />
+          </div>
+
+          <SpinButton
+            onClick={handleSpin}
+            disabled={!canSpin}
             isSpinning={isSpinning}
-            spinDuration={spinDuration}
           />
+
+          {winner && (
+            <p
+              className="text-sm text-muted-foreground transition-opacity duration-300"
+              style={{ opacity: showResult ? 1 : 0 }}
+              data-testid="text-last-winner"
+            >
+              Last winner: <span className="font-semibold text-foreground">{winner.label}</span>
+            </p>
+          )}
         </div>
 
-        <SpinButton
-          onClick={spin}
-          disabled={isSpinning}
-          isSpinning={isSpinning}
+        <ProbabilityPanel
+          probabilities={probabilities}
+          onProbabilityChange={setProbability}
+          total={total}
+          isValid={isValid}
+          isEqualOdds={isEqualOdds}
+          onReset={resetToEqual}
         />
-
-        {winner && (
-          <p
-            className="text-sm text-muted-foreground transition-opacity duration-300"
-            style={{ opacity: showResult ? 1 : 0 }}
-            data-testid="text-last-winner"
-          >
-            Last winner: <span className="font-semibold text-foreground">{winner.label}</span>
-          </p>
-        )}
       </main>
 
       <footer className="relative z-10 text-center py-4 text-xs text-muted-foreground border-t border-white/5">

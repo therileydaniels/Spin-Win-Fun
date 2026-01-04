@@ -2,18 +2,20 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import {
   WHEEL_SEGMENTS,
   WheelSegment,
-  getRandomWinner,
   calculateRotationForWinner,
 } from "@/lib/wheelSegments";
+import { apiRequest } from "@/lib/queryClient";
+import { SpinResponse } from "@shared/schema";
 
 export interface UseWheelSpinReturn {
   isSpinning: boolean;
   rotation: number;
   winner: WheelSegment | null;
   showResult: boolean;
-  spin: () => void;
+  spin: (probabilities: number[]) => void;
   closeResult: () => void;
   spinDuration: number;
+  error: string | null;
 }
 
 export function useWheelSpin(): UseWheelSpinReturn {
@@ -22,6 +24,7 @@ export function useWheelSpin(): UseWheelSpinReturn {
   const [winner, setWinner] = useState<WheelSegment | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [spinDuration, setSpinDuration] = useState(4.5);
+  const [error, setError] = useState<string | null>(null);
   const timeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -32,38 +35,45 @@ export function useWheelSpin(): UseWheelSpinReturn {
     };
   }, []);
 
-  const spin = useCallback(() => {
+  const spin = useCallback(async (probabilities: number[]) => {
     if (isSpinning) return;
 
     setIsSpinning(true);
     setWinner(null);
     setShowResult(false);
+    setError(null);
 
-    const selectedWinner = getRandomWinner(WHEEL_SEGMENTS);
-    const winnerIndex = WHEEL_SEGMENTS.findIndex(
-      (seg) => seg.id === selectedWinner.id
-    );
-    const duration = 4 + Math.random() * 1;
-    setSpinDuration(duration);
+    try {
+      const response = await apiRequest("POST", "/api/spin", { probabilities });
+      const data: SpinResponse = await response.json();
+      const winnerIndex = data.winnerIndex;
+      const selectedWinner = WHEEL_SEGMENTS[winnerIndex];
 
-    const targetRotation = calculateRotationForWinner(
-      winnerIndex,
-      WHEEL_SEGMENTS.length
-    );
-    const totalRotation = rotation + targetRotation;
+      const duration = 4 + Math.random() * 1;
+      setSpinDuration(duration);
 
-    setRotation(totalRotation);
-    setWinner(selectedWinner);
+      const targetRotation = calculateRotationForWinner(
+        winnerIndex,
+        WHEEL_SEGMENTS.length
+      );
+      const totalRotation = rotation + targetRotation;
 
-    if (timeoutRef.current !== null) {
-      clearTimeout(timeoutRef.current);
-    }
+      setRotation(totalRotation);
+      setWinner(selectedWinner);
 
-    timeoutRef.current = window.setTimeout(() => {
+      if (timeoutRef.current !== null) {
+        clearTimeout(timeoutRef.current);
+      }
+
+      timeoutRef.current = window.setTimeout(() => {
+        setIsSpinning(false);
+        setShowResult(true);
+        timeoutRef.current = null;
+      }, duration * 1000);
+    } catch (err) {
       setIsSpinning(false);
-      setShowResult(true);
-      timeoutRef.current = null;
-    }, duration * 1000);
+      setError(err instanceof Error ? err.message : "Failed to spin");
+    }
   }, [isSpinning, rotation]);
 
   const closeResult = useCallback(() => {
@@ -78,5 +88,6 @@ export function useWheelSpin(): UseWheelSpinReturn {
     spin,
     closeResult,
     spinDuration,
+    error,
   };
 }
