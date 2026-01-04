@@ -1,4 +1,5 @@
 import confetti from "canvas-confetti";
+import { GRADIENT_COLORS } from "./wheelSegments";
 
 export function fireWinConfetti(): void {
   const duration = 3000;
@@ -22,13 +23,13 @@ export function fireWinConfetti(): void {
       ...defaults,
       particleCount,
       origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 },
-      colors: ["#8B5CF6", "#EC4899", "#F59E0B", "#10B981", "#3B82F6", "#EF4444"],
+      colors: GRADIENT_COLORS,
     });
     confetti({
       ...defaults,
       particleCount,
       origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },
-      colors: ["#8B5CF6", "#EC4899", "#F59E0B", "#10B981", "#3B82F6", "#EF4444"],
+      colors: GRADIENT_COLORS,
     });
   }, 250);
 }
@@ -38,7 +39,7 @@ export function fireCenterBurst(): void {
     particleCount: 100,
     spread: 70,
     origin: { x: 0.5, y: 0.5 },
-    colors: ["#8B5CF6", "#EC4899", "#F59E0B", "#10B981", "#3B82F6", "#EF4444"],
+    colors: GRADIENT_COLORS,
     zIndex: 9999,
   });
 }
