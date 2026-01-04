@@ -11,7 +11,7 @@ import { useWheelSpin } from "@/hooks/useWheelSpin";
 import { useSound } from "@/hooks/useSound";
 import { useCustomSegments } from "@/hooks/useCustomSegments";
 import { fireWinConfetti, fireCenterBurst } from "@/lib/confetti";
-import { Monitor, X } from "lucide-react";
+import { Monitor, Settings } from "lucide-react";
 
 export default function Home() {
   const {
@@ -118,22 +118,16 @@ export default function Home() {
 
       <main className={`relative z-10 flex-1 flex flex-col ${presentationMode ? "" : "lg:flex-row"} items-center justify-center gap-8 p-4 sm:p-8`}>
         {presentationMode && (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={exitPresentationMode}
-                className="absolute top-4 right-4 text-muted-foreground opacity-50 hover:opacity-100 transition-opacity z-20"
-                data-testid="button-exit-presentation"
-              >
-                <X className="w-5 h-5" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Exit presentation mode (ESC)</p>
-            </TooltipContent>
-          </Tooltip>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={exitPresentationMode}
+            className="absolute top-4 right-4 text-muted-foreground opacity-40 hover:opacity-100 transition-opacity z-20 gap-2"
+            data-testid="button-exit-presentation"
+          >
+            <Settings className="w-4 h-4" />
+            <span className="text-xs">Settings</span>
+          </Button>
         )}
 
         <div className="flex flex-col items-center gap-8">
