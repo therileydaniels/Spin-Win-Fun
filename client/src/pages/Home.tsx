@@ -7,7 +7,7 @@ import { SoundToggle } from "@/components/SoundToggle";
 import { ProbabilityPanel } from "@/components/ProbabilityPanel";
 import { useWheelSpin } from "@/hooks/useWheelSpin";
 import { useSound } from "@/hooks/useSound";
-import { useProbabilities } from "@/hooks/useProbabilities";
+import { useCustomSegments } from "@/hooks/useCustomSegments";
 import { fireWinConfetti, fireCenterBurst } from "@/lib/confetti";
 
 export default function Home() {
@@ -22,13 +22,20 @@ export default function Home() {
   } = useWheelSpin();
   const { isMuted, toggleMute, playWinSound } = useSound();
   const {
+    segments,
     probabilities,
+    addSegment,
+    removeSegment,
+    renameSegment,
+    recolorSegment,
     setProbability,
+    resetToDefault,
+    canAdd,
+    canRemove,
     total,
     isValid,
     isEqualOdds,
-    resetToEqual,
-  } = useProbabilities();
+  } = useCustomSegments();
 
   useEffect(() => {
     if (showResult && winner) {
@@ -39,7 +46,7 @@ export default function Home() {
   }, [showResult, winner, playWinSound]);
 
   const handleSpin = () => {
-    spin(probabilities);
+    spin(probabilities, segments);
   };
 
   const canSpin = isValid && !isSpinning;
@@ -75,6 +82,7 @@ export default function Home() {
         <div className="flex flex-col items-center gap-8">
           <div className="w-full max-w-[340px] sm:max-w-[420px]">
             <SpinWheel
+              segments={segments}
               rotation={rotation}
               isSpinning={isSpinning}
               spinDuration={spinDuration}
@@ -99,12 +107,19 @@ export default function Home() {
         </div>
 
         <ProbabilityPanel
+          segments={segments}
           probabilities={probabilities}
           onProbabilityChange={setProbability}
+          onRename={renameSegment}
+          onRecolor={recolorSegment}
+          onAdd={addSegment}
+          onRemove={removeSegment}
+          onReset={resetToDefault}
           total={total}
           isValid={isValid}
           isEqualOdds={isEqualOdds}
-          onReset={resetToEqual}
+          canAdd={canAdd}
+          canRemove={canRemove}
         />
       </main>
 

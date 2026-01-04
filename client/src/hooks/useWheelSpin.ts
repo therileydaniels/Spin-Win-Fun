@@ -1,18 +1,15 @@
 import { useState, useCallback, useRef, useEffect } from "react";
-import {
-  WHEEL_SEGMENTS,
-  WheelSegment,
-  calculateRotationForWinner,
-} from "@/lib/wheelSegments";
+import { CustomSegment } from "@shared/schema";
+import { calculateRotationForWinner } from "@/lib/wheelSegments";
 import { apiRequest } from "@/lib/queryClient";
 import { SpinResponse } from "@shared/schema";
 
 export interface UseWheelSpinReturn {
   isSpinning: boolean;
   rotation: number;
-  winner: WheelSegment | null;
+  winner: CustomSegment | null;
   showResult: boolean;
-  spin: (probabilities: number[]) => void;
+  spin: (probabilities: number[], segments: CustomSegment[]) => void;
   closeResult: () => void;
   spinDuration: number;
   error: string | null;
@@ -21,7 +18,7 @@ export interface UseWheelSpinReturn {
 export function useWheelSpin(): UseWheelSpinReturn {
   const [isSpinning, setIsSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
-  const [winner, setWinner] = useState<WheelSegment | null>(null);
+  const [winner, setWinner] = useState<CustomSegment | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [spinDuration, setSpinDuration] = useState(4.5);
   const [error, setError] = useState<string | null>(null);
@@ -35,7 +32,7 @@ export function useWheelSpin(): UseWheelSpinReturn {
     };
   }, []);
 
-  const spin = useCallback(async (probabilities: number[]) => {
+  const spin = useCallback(async (probabilities: number[], segments: CustomSegment[]) => {
     if (isSpinning) return;
 
     setIsSpinning(true);
@@ -47,14 +44,14 @@ export function useWheelSpin(): UseWheelSpinReturn {
       const response = await apiRequest("POST", "/api/spin", { probabilities });
       const data: SpinResponse = await response.json();
       const winnerIndex = data.winnerIndex;
-      const selectedWinner = WHEEL_SEGMENTS[winnerIndex];
+      const selectedWinner = segments[winnerIndex];
 
       const duration = 4 + Math.random() * 1;
       setSpinDuration(duration);
 
       const newRotation = calculateRotationForWinner(
         winnerIndex,
-        WHEEL_SEGMENTS.length,
+        segments.length,
         rotation
       );
 

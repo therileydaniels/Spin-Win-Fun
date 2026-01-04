@@ -1,13 +1,34 @@
-import { WHEEL_SEGMENTS } from "@/lib/wheelSegments";
+import { CustomSegment } from "@shared/schema";
 
 interface SpinWheelProps {
+  segments: CustomSegment[];
   rotation: number;
   isSpinning: boolean;
   spinDuration: number;
 }
 
-export function SpinWheel({ rotation, isSpinning, spinDuration }: SpinWheelProps) {
-  const segments = WHEEL_SEGMENTS;
+function adjustColor(hex: string, amount: number): string {
+  const num = parseInt(hex.replace("#", ""), 16);
+  const r = Math.min(255, Math.max(0, (num >> 16) + amount));
+  const g = Math.min(255, Math.max(0, ((num >> 8) & 0x00ff) + amount));
+  const b = Math.min(255, Math.max(0, (num & 0x0000ff) + amount));
+  return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, "0")}`;
+}
+
+function getFontSize(label: string): number {
+  if (label.length <= 8) return 15;
+  if (label.length <= 12) return 13;
+  if (label.length <= 16) return 11;
+  if (label.length <= 20) return 10;
+  return 9;
+}
+
+function truncateLabel(label: string, maxLen: number = 20): string {
+  if (label.length <= maxLen) return label;
+  return label.slice(0, maxLen - 2) + "...";
+}
+
+export function SpinWheel({ segments, rotation, isSpinning, spinDuration }: SpinWheelProps) {
   const segmentAngle = 360 / segments.length;
   const radius = 200;
   const centerX = 250;
@@ -84,7 +105,7 @@ export function SpinWheel({ rotation, isSpinning, spinDuration }: SpinWheelProps
         data-testid="wheel-svg"
       >
         <defs>
-          {segments.map((segment, index) => (
+          {segments.map((segment) => (
             <linearGradient
               key={`gradient-${segment.id}`}
               id={`segmentGradient-${segment.id}`}
@@ -93,8 +114,8 @@ export function SpinWheel({ rotation, isSpinning, spinDuration }: SpinWheelProps
               x2="100%"
               y2="100%"
             >
-              <stop offset="0%" stopColor={segment.gradientStart} />
-              <stop offset="100%" stopColor={segment.gradientEnd} />
+              <stop offset="0%" stopColor={segment.color} />
+              <stop offset="100%" stopColor={adjustColor(segment.color, -30)} />
             </linearGradient>
           ))}
           <filter id="innerGlow" x="-20%" y="-20%" width="140%" height="140%">
@@ -133,6 +154,8 @@ export function SpinWheel({ rotation, isSpinning, spinDuration }: SpinWheelProps
             endAngle
           );
           const textPos = getTextPosition(index);
+          const fontSize = getFontSize(segment.label);
+          const displayLabel = truncateLabel(segment.label);
 
           return (
             <g key={segment.id}>
@@ -145,8 +168,8 @@ export function SpinWheel({ rotation, isSpinning, spinDuration }: SpinWheelProps
               <text
                 x={textPos.x}
                 y={textPos.y}
-                fill={segment.textColor}
-                fontSize="15"
+                fill="#FFFFFF"
+                fontSize={fontSize}
                 fontWeight="600"
                 textAnchor="middle"
                 dominantBaseline="middle"
@@ -157,7 +180,7 @@ export function SpinWheel({ rotation, isSpinning, spinDuration }: SpinWheelProps
                   fontFamily: "Inter, system-ui, sans-serif"
                 }}
               >
-                {segment.label}
+                {displayLabel}
               </text>
             </g>
           );

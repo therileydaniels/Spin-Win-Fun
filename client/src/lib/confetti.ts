@@ -1,5 +1,5 @@
 import confetti from "canvas-confetti";
-import { GRADIENT_COLORS } from "./wheelSegments";
+import { PRESET_COLORS } from "./wheelSegments";
 
 export function fireWinConfetti(): void {
   const duration = 3000;
@@ -23,13 +23,13 @@ export function fireWinConfetti(): void {
       ...defaults,
       particleCount,
       origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 },
-      colors: GRADIENT_COLORS,
+      colors: PRESET_COLORS,
     });
     confetti({
       ...defaults,
       particleCount,
       origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },
-      colors: GRADIENT_COLORS,
+      colors: PRESET_COLORS,
     });
   }, 250);
 }
@@ -39,7 +39,7 @@ export function fireCenterBurst(): void {
     particleCount: 100,
     spread: 70,
     origin: { x: 0.5, y: 0.5 },
-    colors: GRADIENT_COLORS,
+    colors: PRESET_COLORS,
     zIndex: 9999,
   });
 }

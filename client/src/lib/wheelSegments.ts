@@ -1,25 +1,43 @@
+import { CustomSegment } from "@shared/schema";
+
 export interface WheelSegment {
-  id: number;
+  id: string;
   label: string;
-  gradientStart: string;
-  gradientEnd: string;
-  textColor: string;
+  color: string;
 }
 
-export const WHEEL_SEGMENTS: WheelSegment[] = [
-  { id: 1, label: "Prize 1", gradientStart: "#A855F7", gradientEnd: "#7C3AED", textColor: "#FFFFFF" },
-  { id: 2, label: "Prize 2", gradientStart: "#6366F1", gradientEnd: "#4F46E5", textColor: "#FFFFFF" },
-  { id: 3, label: "Prize 3", gradientStart: "#0EA5E9", gradientEnd: "#0284C7", textColor: "#FFFFFF" },
-  { id: 4, label: "Prize 4", gradientStart: "#14B8A6", gradientEnd: "#0D9488", textColor: "#FFFFFF" },
-  { id: 5, label: "Prize 5", gradientStart: "#EC4899", gradientEnd: "#DB2777", textColor: "#FFFFFF" },
-  { id: 6, label: "Prize 6", gradientStart: "#F472B6", gradientEnd: "#A855F7", textColor: "#FFFFFF" },
+export const PRESET_COLORS = [
+  "#A855F7", // Purple
+  "#7C3AED", // Violet
+  "#6366F1", // Indigo
+  "#4F46E5", // Deep indigo
+  "#0EA5E9", // Sky blue
+  "#0284C7", // Deep blue
+  "#14B8A6", // Teal
+  "#0D9488", // Deep teal
+  "#EC4899", // Pink
+  "#DB2777", // Deep pink
+  "#F472B6", // Light pink
+  "#8B5CF6", // Light purple
 ];
 
-export const GRADIENT_COLORS = [
-  "#A855F7", "#7C3AED", "#6366F1", "#4F46E5", 
-  "#0EA5E9", "#0284C7", "#14B8A6", "#0D9488",
-  "#EC4899", "#DB2777", "#F472B6"
+export const DEFAULT_SEGMENTS: CustomSegment[] = [
+  { id: "1", label: "Prize 1", color: "#A855F7" },
+  { id: "2", label: "Prize 2", color: "#6366F1" },
+  { id: "3", label: "Prize 3", color: "#0EA5E9" },
+  { id: "4", label: "Prize 4", color: "#14B8A6" },
+  { id: "5", label: "Prize 5", color: "#EC4899" },
+  { id: "6", label: "Prize 6", color: "#F472B6" },
 ];
+
+export function getNextColor(existingColors: string[]): string {
+  for (const color of PRESET_COLORS) {
+    if (!existingColors.includes(color)) {
+      return color;
+    }
+  }
+  return PRESET_COLORS[existingColors.length % PRESET_COLORS.length];
+}
 
 export function getRandomWinner(segments: WheelSegment[]): WheelSegment {
   const randomIndex = Math.floor(Math.random() * segments.length);

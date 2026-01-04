@@ -1,4 +1,4 @@
-import { WheelSegment } from "@/lib/wheelSegments";
+import { CustomSegment } from "@shared/schema";
 import {
   Dialog,
   DialogContent,
@@ -9,14 +9,24 @@ import {
 import { Button } from "@/components/ui/button";
 import { Sparkles } from "lucide-react";
 
+function adjustColor(hex: string, amount: number): string {
+  const num = parseInt(hex.replace("#", ""), 16);
+  const r = Math.min(255, Math.max(0, (num >> 16) + amount));
+  const g = Math.min(255, Math.max(0, ((num >> 8) & 0x00ff) + amount));
+  const b = Math.min(255, Math.max(0, (num & 0x0000ff) + amount));
+  return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, "0")}`;
+}
+
 interface WinnerModalProps {
   isOpen: boolean;
   onClose: () => void;
-  winner: WheelSegment | null;
+  winner: CustomSegment | null;
 }
 
 export function WinnerModal({ isOpen, onClose, winner }: WinnerModalProps) {
   if (!winner) return null;
+
+  const gradientEnd = adjustColor(winner.color, -30);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -28,8 +38,8 @@ export function WinnerModal({ isOpen, onClose, winner }: WinnerModalProps) {
           <div 
             className="mx-auto mb-4 w-16 h-16 rounded-full flex items-center justify-center shadow-2xl animate-bounce-in"
             style={{
-              background: `linear-gradient(135deg, ${winner.gradientStart}, ${winner.gradientEnd})`,
-              boxShadow: `0 0 30px ${winner.gradientStart}50`
+              background: `linear-gradient(135deg, ${winner.color}, ${gradientEnd})`,
+              boxShadow: `0 0 30px ${winner.color}50`
             }}
           >
             <Sparkles className="w-8 h-8 text-white" />
@@ -46,10 +56,10 @@ export function WinnerModal({ isOpen, onClose, winner }: WinnerModalProps) {
           <div
             className="px-8 py-4 rounded-xl text-center shadow-2xl animate-bounce-in"
             style={{
-              background: `linear-gradient(135deg, ${winner.gradientStart}, ${winner.gradientEnd})`,
-              color: winner.textColor,
+              background: `linear-gradient(135deg, ${winner.color}, ${gradientEnd})`,
+              color: "#FFFFFF",
               animationDelay: "0.1s",
-              boxShadow: `0 10px 40px ${winner.gradientStart}40`
+              boxShadow: `0 10px 40px ${winner.color}40`
             }}
           >
             <p className="text-sm font-medium opacity-80 mb-1">Winner</p>
