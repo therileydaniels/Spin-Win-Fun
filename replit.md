@@ -52,6 +52,13 @@ Preferred communication style: Simple, everyday language.
 - Color picker with 12 preset gradient colors + custom hex input
 - All changes persist across page reloads
 
+### Presentation Mode (Phase 4)
+- Toggle via Monitor icon in header to enter clean presentation view
+- Hides all controls: header, footer, Wheel Settings panel
+- Wheel scales up (600px max) for cinematic audience display
+- Exit via X button (top-right corner) or ESC key
+- Probabilities never visible to audience during presentation
+
 ## External Dependencies
 
 ### Third-Party Services
