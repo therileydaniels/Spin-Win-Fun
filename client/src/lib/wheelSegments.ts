@@ -24,9 +24,18 @@ export function calculateRotationForWinner(
   totalSegments: number
 ): number {
   const segmentAngle = 360 / totalSegments;
-  const segmentMiddle = segmentAngle / 2;
-  const winnerAngle = winnerIndex * segmentAngle + segmentMiddle;
+  const segmentStart = winnerIndex * segmentAngle;
+  const segmentCenter = segmentStart + segmentAngle / 2;
+  
+  const safeZonePercent = 0.8;
+  const safeZoneAngle = segmentAngle * safeZonePercent;
+  const safeZoneStart = segmentCenter - safeZoneAngle / 2;
+  const randomOffsetWithinSafeZone = Math.random() * safeZoneAngle;
+  const targetAngle = safeZoneStart + randomOffsetWithinSafeZone;
+  
   const baseRotation = 360 * 5;
-  const finalRotation = baseRotation + (360 - winnerAngle) + 90;
+  const angleToTop = 360 - targetAngle;
+  const finalRotation = baseRotation + angleToTop;
+  
   return finalRotation;
 }
