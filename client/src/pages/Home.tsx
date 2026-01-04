@@ -29,6 +29,7 @@ export default function Home() {
     renameSegment,
     recolorSegment,
     setProbability,
+    resetProbabilities,
     resetToDefault,
     canAdd,
     canRemove,
@@ -114,7 +115,8 @@ export default function Home() {
           onRecolor={recolorSegment}
           onAdd={addSegment}
           onRemove={removeSegment}
-          onReset={resetToDefault}
+          onResetProbabilities={resetProbabilities}
+          onNewWheel={resetToDefault}
           total={total}
           isValid={isValid}
           isEqualOdds={isEqualOdds}

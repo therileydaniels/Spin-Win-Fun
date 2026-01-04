@@ -1,9 +1,21 @@
+import { useState } from "react";
 import { CustomSegment, MAX_SEGMENTS, MIN_SEGMENTS, MAX_LABEL_LENGTH } from "@shared/schema";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Check, AlertTriangle, Scale, RotateCcw, Trash2, Plus } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Check, AlertTriangle, Scale, Percent, FilePlus2, Trash2, Plus } from "lucide-react";
 import { ColorPicker } from "./ColorPicker";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface ProbabilityPanelProps {
   segments: CustomSegment[];
@@ -13,7 +25,8 @@ interface ProbabilityPanelProps {
   onRecolor: (id: string, color: string) => void;
   onAdd: () => void;
   onRemove: (id: string) => void;
-  onReset: () => void;
+  onResetProbabilities: () => void;
+  onNewWheel: () => void;
   total: number;
   isValid: boolean;
   isEqualOdds: boolean;
@@ -29,32 +42,68 @@ export function ProbabilityPanel({
   onRecolor,
   onAdd,
   onRemove,
-  onReset,
+  onResetProbabilities,
+  onNewWheel,
   total,
   isValid,
   isEqualOdds,
   canAdd,
   canRemove,
 }: ProbabilityPanelProps) {
+  const [showNewWheelDialog, setShowNewWheelDialog] = useState(false);
+
+  const handleNewWheelConfirm = () => {
+    onNewWheel();
+    setShowNewWheelDialog(false);
+  };
+
   return (
-    <Card className="w-full max-w-sm border-white/10 bg-card/80 backdrop-blur-sm">
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between gap-2">
-          <CardTitle className="text-lg font-semibold">Wheel Settings</CardTitle>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onReset}
-            className="text-muted-foreground"
-            data-testid="button-reset-wheel"
-          >
-            <RotateCcw className="w-4 h-4" />
-          </Button>
-        </div>
-        <p className="text-xs text-muted-foreground">
-          {segments.length}/{MAX_SEGMENTS} segments
-        </p>
-      </CardHeader>
+    <>
+      <Card className="w-full max-w-sm border-white/10 bg-card/80 backdrop-blur-sm">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between gap-2">
+            <div>
+              <CardTitle className="text-lg font-semibold">Wheel Settings</CardTitle>
+              <p className="text-xs text-muted-foreground mt-1">
+                {segments.length}/{MAX_SEGMENTS} segments
+              </p>
+            </div>
+            <div className="flex items-center gap-1">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={onResetProbabilities}
+                    className="text-muted-foreground w-8 h-8"
+                    data-testid="button-reset-probability"
+                  >
+                    <Percent className="w-4 h-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Reset probabilities to equal odds</p>
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setShowNewWheelDialog(true)}
+                    className="border-white/10 w-8 h-8"
+                    data-testid="button-new-wheel"
+                  >
+                    <FilePlus2 className="w-4 h-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Start a new wheel</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
+          </div>
+        </CardHeader>
       <CardContent className="space-y-2">
         <div className="max-h-[320px] overflow-y-auto space-y-2 pr-1">
           {segments.map((segment, index) => (
@@ -142,6 +191,24 @@ export function ProbabilityPanel({
           )}
         </div>
       </CardContent>
-    </Card>
+      </Card>
+
+      <AlertDialog open={showNewWheelDialog} onOpenChange={setShowNewWheelDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Start a new wheel?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will clear all your current segments and settings.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel data-testid="button-cancel-new-wheel">Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleNewWheelConfirm} data-testid="button-confirm-new-wheel">
+              New Wheel
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }

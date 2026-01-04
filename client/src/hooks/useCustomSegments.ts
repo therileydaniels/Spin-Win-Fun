@@ -13,6 +13,7 @@ export interface UseCustomSegmentsReturn {
   renameSegment: (id: string, label: string) => void;
   recolorSegment: (id: string, color: string) => void;
   setProbability: (index: number, value: number) => void;
+  resetProbabilities: () => void;
   resetToDefault: () => void;
   canAdd: boolean;
   canRemove: boolean;
@@ -119,6 +120,10 @@ export function useCustomSegments(): UseCustomSegmentsReturn {
     });
   }, []);
 
+  const resetProbabilities = useCallback(() => {
+    setProbabilities(segments.map(() => 0));
+  }, [segments]);
+
   const resetToDefault = useCallback(() => {
     setSegments(DEFAULT_SEGMENTS);
     setProbabilities(DEFAULT_SEGMENTS.map(() => 0));
@@ -138,6 +143,7 @@ export function useCustomSegments(): UseCustomSegmentsReturn {
     renameSegment,
     recolorSegment,
     setProbability,
+    resetProbabilities,
     resetToDefault,
     canAdd,
     canRemove,
