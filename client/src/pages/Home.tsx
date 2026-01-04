@@ -116,19 +116,20 @@ export default function Home() {
         </header>
       )}
 
+      {presentationMode && (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={exitPresentationMode}
+          className="fixed top-4 right-4 text-muted-foreground opacity-40 hover:opacity-100 transition-opacity z-50 gap-2"
+          data-testid="button-exit-presentation"
+        >
+          <Settings className="w-4 h-4" />
+          <span className="text-xs">Settings</span>
+        </Button>
+      )}
+
       <main className={`relative z-10 flex-1 flex flex-col ${presentationMode ? "" : "lg:flex-row"} items-center justify-center gap-8 p-4 sm:p-8`}>
-        {presentationMode && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={exitPresentationMode}
-            className="absolute top-4 right-4 text-muted-foreground opacity-40 hover:opacity-100 transition-opacity z-20 gap-2"
-            data-testid="button-exit-presentation"
-          >
-            <Settings className="w-4 h-4" />
-            <span className="text-xs">Settings</span>
-          </Button>
-        )}
 
         <div className="flex flex-col items-center gap-8">
           <div 
