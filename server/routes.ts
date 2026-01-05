@@ -243,8 +243,8 @@ export async function registerRoutes(
         return res.status(400).json({ error: "Wheel name is required" });
       }
       
-      if (!segments || !Array.isArray(segments)) {
-        return res.status(400).json({ error: "Segments are required" });
+      if (!segments || typeof segments !== "object" || !Array.isArray(segments.segments) || !Array.isArray(segments.probabilities)) {
+        return res.status(400).json({ error: "Segments data is required" });
       }
       
       const wheel = await storage.createWheel({
@@ -276,8 +276,8 @@ export async function registerRoutes(
         return res.status(400).json({ error: "Wheel name is required" });
       }
       
-      if (!segments || !Array.isArray(segments)) {
-        return res.status(400).json({ error: "Segments are required" });
+      if (!segments || typeof segments !== "object" || !Array.isArray(segments.segments) || !Array.isArray(segments.probabilities)) {
+        return res.status(400).json({ error: "Segments data is required" });
       }
       
       const wheel = await storage.updateWheel(wheelId, req.session.userId, {
