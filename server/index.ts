@@ -1,4 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
+import session from "express-session";
+import connectPgSimple from "connect-pg-simple";
+import { Pool } from "pg";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
@@ -11,6 +14,38 @@ declare module "http" {
     rawBody: unknown;
   }
 }
+
+declare module "express-session" {
+  interface SessionData {
+    userId?: number;
+  }
+}
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+});
+
+const PgSession = connectPgSimple(session);
+
+app.use(
+  session({
+    store: new PgSession({
+      pool,
+      tableName: "session",
+      createTableIfMissing: true,
+    }),
+    secret: process.env.SESSION_SECRET || "fallback-dev-secret-change-in-production",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+    },
+    rolling: true, // Refresh session on each request
+  })
+);
 
 app.use(
   express.json({
