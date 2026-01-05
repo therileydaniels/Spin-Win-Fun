@@ -1,0 +1,80 @@
+This is Phase 5 of 9. We're setting up user authentication and the database.
+
+CONTEXT:
+Phases 1-4 are complete — we have a fully functional wheel with rigging, customization, and presentation mode. Now we need user accounts so people can save their wheels (Phase 6).
+
+---
+
+PHASE 5 SCOPE — Build only this:
+
+1. **PostgreSQL Database Setup**
+   - Initialize PostgreSQL database
+   - Create Users table:
+     - id (primary key)
+     - email (unique)
+     - password (hashed)
+     - name (optional)
+     - role (default: "free", options: "free", "paid", "admin")
+     - created_at
+     - updated_at
+
+2. **Sign Up**
+   - Form: email, password, confirm password
+   - Password requirements: minimum 8 characters
+   - Validate email format
+   - Check for existing email
+   - Hash password before storing (bcrypt)
+   - Auto log in after successful sign up
+
+3. **Log In**
+   - Form: email, password
+   - Validate credentials
+   - Create session on success
+   - Show error message on failure (generic: "Invalid email or password")
+
+4. **Log Out**
+   - Clear session
+   - Return to main wheel page (still usable when logged out)
+
+5. **Session Management**
+   - Keep users logged in across page refreshes
+   - Secure session handling
+
+6. **Auth UI**
+   - Add "Sign In" / "Sign Up" button in header (when logged out)
+   - Show user email or name + "Log Out" button (when logged in)
+   - Clean modal or separate page for auth forms
+   - Match our existing gradient/modern aesthetic
+
+7. **Wheel still works without account**
+   - Users can use the wheel without signing in
+   - Account only needed to save wheels (Phase 6)
+
+---
+
+DO NOT BUILD YET:
+- No Google OAuth this phase — keep it simple with email/password first
+- No saving wheels — Phase 6
+- No admin dashboard — Phase 7
+- No subscription logic — Phase 8
+
+---
+
+DATABASE NOTE:
+Also create a Wheels table now (we'll use it in Phase 6):
+- id (primary key)
+- user_id (foreign key to Users)
+- name (wheel name)
+- segments (JSON: array of {name, color, probability})
+- created_at
+- updated_at
+
+This way the schema is ready for Phase 6.
+
+---
+
+Please plan first. Show me:
+1. Database schema
+2. API endpoints for auth
+3. How sessions will work
+4. UI flow for sign up / log in
