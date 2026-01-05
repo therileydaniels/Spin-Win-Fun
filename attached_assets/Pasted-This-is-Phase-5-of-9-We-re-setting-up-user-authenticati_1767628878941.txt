@@ -1,0 +1,112 @@
+This is Phase 5 of 9. We're setting up user authentication and the database.
+
+CONTEXT:
+Phases 1-4 are complete — we have a fully functional wheel with rigging, customization, and presentation mode. Now we need user accounts so people can save their wheels (Phase 6).
+
+---
+
+PHASE 5 SCOPE — Build only this:
+
+1. **PostgreSQL Database Setup**
+   - Initialize PostgreSQL database
+   - Create Users table:
+     - id (primary key)
+     - email (unique)
+     - password (hashed)
+     - name (optional)
+     - role (default: "free", options: "free", "paid", "admin")
+     - created_at
+     - updated_at
+   - Create Wheels table (for Phase 6):
+     - id (primary key)
+     - user_id (foreign key to Users)
+     - name (wheel name)
+     - segments (JSON: array of {name, color, probability})
+     - created_at
+     - updated_at
+
+2. **Sign Up**
+   - Form: email, password, confirm password
+   - Password requirements: minimum 8 characters, at least one number and one letter
+   - Validate email format on server side (not just client)
+   - Check for existing email
+   - Hash password before storing
+   - Auto log in after successful sign up
+
+3. **Log In**
+   - Form: email, password
+   - Validate credentials
+   - Create session on success
+   - Show generic error message on failure: "Invalid email or password" (never reveal which one was wrong)
+
+4. **Log Out**
+   - Clear session
+   - Return to main wheel page (still usable when logged out)
+
+5. **Session Management**
+   - Keep users logged in across page refreshes
+   - Session expiration: 7 days, refreshed on activity
+   - Regenerate session ID after login
+
+6. **Auth UI**
+   - Add "Sign In" / "Sign Up" button in header (when logged out)
+   - Show user email or name + "Log Out" button (when logged in)
+   - Clean modal or separate page for auth forms
+   - Match our existing gradient/modern aesthetic
+
+7. **Wheel still works without account**
+   - Users can use the wheel without signing in
+   - Account only needed to save wheels (Phase 6)
+
+---
+
+SECURITY REQUIREMENTS (Critical):
+
+**Password Security:**
+- Use bcrypt with minimum 10 salt rounds for hashing
+- Never log or expose passwords in any error messages or console
+- Never expose password hashes to the frontend
+
+**Session/Cookie Security:**
+- Cookies must be httpOnly (not accessible via JavaScript)
+- Cookies must have secure flag in production (HTTPS only)
+- Set sameSite to 'strict' or 'lax' to prevent CSRF attacks
+- Regenerate session ID after login (prevents session fixation attacks)
+
+**Database Security:**
+- Use parameterized queries ONLY — never concatenate user input into SQL
+- Drizzle ORM handles this, but double-check any raw queries
+
+**API Security:**
+- Rate limit auth endpoints: max 5 attempts per minute per IP
+- Generic error messages only: "Invalid email or password"
+- Never reveal whether an email exists in the system during login failures
+
+**Input Validation:**
+- Validate email format on server side
+- Sanitize all user inputs
+- Trim whitespace from email before storing
+- The /api/auth/me endpoint should only return safe user data (id, email, name, role) — never the password hash
+
+---
+
+ADMIN ACCESS:
+- After building, provide the SQL command I can run to make myself an admin, like:
+  UPDATE users SET role = 'admin' WHERE email = 'my@email.com';
+
+---
+
+DO NOT BUILD YET:
+- No Google OAuth this phase — keep it simple with email/password first
+- No saving wheels — Phase 6
+- No admin dashboard — Phase 7
+- No subscription logic — Phase 8
+
+---
+
+Please plan first. Show me:
+1. Database schema
+2. API endpoints for auth
+3. How sessions will work
+4. Security measures you'll implement
+5. UI flow for sign up / log in
