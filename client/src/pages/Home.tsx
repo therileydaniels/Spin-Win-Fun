@@ -5,13 +5,15 @@ import { WinnerModal } from "@/components/WinnerModal";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { SoundToggle } from "@/components/SoundToggle";
 import { ProbabilityPanel } from "@/components/ProbabilityPanel";
+import { AuthModal } from "@/components/AuthModal";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useWheelSpin } from "@/hooks/useWheelSpin";
 import { useSound } from "@/hooks/useSound";
 import { useCustomSegments } from "@/hooks/useCustomSegments";
+import { useAuth } from "@/hooks/useAuth";
 import { fireWinConfetti, fireCenterBurst } from "@/lib/confetti";
-import { Monitor, Settings } from "lucide-react";
+import { Monitor, Settings, LogIn, LogOut, User } from "lucide-react";
 
 export default function Home() {
   const {
@@ -41,7 +43,10 @@ export default function Home() {
     isEqualOdds,
   } = useCustomSegments();
 
+  const { user, isAuthenticated, logout, isLoggingOut } = useAuth();
+
   const [presentationMode, setPresentationMode] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
 
   const exitPresentationMode = useCallback(() => {
     setPresentationMode(false);
@@ -94,6 +99,44 @@ export default function Home() {
             Wheel Spinner
           </h1>
           <div className="flex items-center gap-1">
+            {isAuthenticated ? (
+              <>
+                <div className="flex items-center gap-2 px-2 text-sm text-muted-foreground">
+                  <User className="w-4 h-4" />
+                  <span className="hidden sm:inline max-w-[120px] truncate" data-testid="text-user-email">
+                    {user?.name || user?.email}
+                  </span>
+                </div>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => logout()}
+                      disabled={isLoggingOut}
+                      className="text-muted-foreground"
+                      data-testid="button-logout"
+                    >
+                      <LogOut className="w-4 h-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Sign out</p>
+                  </TooltipContent>
+                </Tooltip>
+              </>
+            ) : (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setAuthModalOpen(true)}
+                className="text-muted-foreground gap-2"
+                data-testid="button-signin"
+              >
+                <LogIn className="w-4 h-4" />
+                <span className="hidden sm:inline">Sign In</span>
+              </Button>
+            )}
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
@@ -193,6 +236,7 @@ export default function Home() {
       )}
 
       <WinnerModal isOpen={showResult} onClose={closeResult} winner={winner} />
+      <AuthModal open={authModalOpen} onOpenChange={setAuthModalOpen} />
     </div>
   );
 }
