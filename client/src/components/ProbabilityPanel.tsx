@@ -13,7 +13,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Check, AlertTriangle, Scale, Percent, FilePlus2, Trash2, Plus } from "lucide-react";
+import { Check, AlertTriangle, Scale, Percent, FilePlus2, Trash2, Plus, Save } from "lucide-react";
 import { ColorPicker } from "./ColorPicker";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -27,11 +27,14 @@ interface ProbabilityPanelProps {
   onRemove: (id: string) => void;
   onResetProbabilities: () => void;
   onNewWheel: () => void;
+  onSaveWheel: () => void;
   total: number;
   isValid: boolean;
   isEqualOdds: boolean;
   canAdd: boolean;
   canRemove: boolean;
+  currentWheelName: string | null;
+  hasUnsavedChanges: boolean;
 }
 
 export function ProbabilityPanel({
@@ -44,11 +47,14 @@ export function ProbabilityPanel({
   onRemove,
   onResetProbabilities,
   onNewWheel,
+  onSaveWheel,
   total,
   isValid,
   isEqualOdds,
   canAdd,
   canRemove,
+  currentWheelName,
+  hasUnsavedChanges,
 }: ProbabilityPanelProps) {
   const [showNewWheelDialog, setShowNewWheelDialog] = useState(false);
 
@@ -62,13 +68,36 @@ export function ProbabilityPanel({
       <Card className="w-full max-w-sm border-white/10 bg-card/80 backdrop-blur-sm">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between gap-2">
-            <div>
-              <CardTitle className="text-lg font-semibold">Wheel Settings</CardTitle>
+            <div className="min-w-0 flex-1">
+              <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                <span className="truncate">
+                  {currentWheelName || "Wheel Settings"}
+                </span>
+                {hasUnsavedChanges && (
+                  <span className="text-xs text-amber-400 shrink-0">*</span>
+                )}
+              </CardTitle>
               <p className="text-xs text-muted-foreground mt-1">
                 {segments.length}/{MAX_SEGMENTS} segments
               </p>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 shrink-0">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={onSaveWheel}
+                    className="text-muted-foreground w-8 h-8"
+                    data-testid="button-save-wheel"
+                  >
+                    <Save className="w-4 h-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Save wheel</p>
+                </TooltipContent>
+              </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button

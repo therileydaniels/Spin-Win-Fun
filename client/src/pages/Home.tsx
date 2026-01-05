@@ -1,4 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { SpinWheel } from "@/components/SpinWheel";
 import { SpinButton } from "@/components/SpinButton";
 import { WinnerModal } from "@/components/WinnerModal";
@@ -6,16 +8,20 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { SoundToggle } from "@/components/SoundToggle";
 import { ProbabilityPanel } from "@/components/ProbabilityPanel";
 import { AuthModal } from "@/components/AuthModal";
+import { SaveWheelModal } from "@/components/SaveWheelModal";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useWheelSpin } from "@/hooks/useWheelSpin";
 import { useSound } from "@/hooks/useSound";
 import { useCustomSegments } from "@/hooks/useCustomSegments";
 import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 import { fireWinConfetti, fireCenterBurst } from "@/lib/confetti";
-import { Monitor, Settings, LogIn, LogOut, User } from "lucide-react";
+import { queryClient, apiRequest } from "@/lib/queryClient";
+import { Monitor, Settings, LogIn, LogOut, User, FolderOpen } from "lucide-react";
 
 export default function Home() {
+  const [, setLocation] = useLocation();
   const {
     isSpinning,
     rotation,
@@ -41,12 +47,99 @@ export default function Home() {
     total,
     isValid,
     isEqualOdds,
+    currentWheelId,
+    currentWheelName,
+    hasUnsavedChanges,
+    getWheelData,
+    markSaved,
   } = useCustomSegments();
 
   const { user, isAuthenticated, logout, isLoggingOut } = useAuth();
+  const { toast } = useToast();
 
   const [presentationMode, setPresentationMode] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [saveModalOpen, setSaveModalOpen] = useState(false);
+  const [saveAsMode, setSaveAsMode] = useState(false);
+
+  const createWheelMutation = useMutation({
+    mutationFn: async (name: string) => {
+      const data = getWheelData();
+      const response = await apiRequest("POST", "/api/wheels", {
+        name,
+        segments: data,
+      });
+      return response.json();
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/wheels"] });
+      markSaved(data.wheel.id, data.wheel.name);
+      toast({
+        title: "Wheel saved!",
+        description: `"${data.wheel.name}" has been saved.`,
+      });
+    },
+    onError: (error: any) => {
+      const message = error?.message || "Failed to save wheel";
+      if (message.includes("limit")) {
+        toast({
+          title: "Save limit reached",
+          description: "You've reached the free limit (2 wheels). Upgrade to save unlimited wheels.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: message,
+          variant: "destructive",
+        });
+      }
+    },
+  });
+
+  const updateWheelMutation = useMutation({
+    mutationFn: async ({ id, name }: { id: number; name: string }) => {
+      const data = getWheelData();
+      const response = await apiRequest("PUT", `/api/wheels/${id}`, {
+        name,
+        segments: data,
+      });
+      return response.json();
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/wheels"] });
+      markSaved(data.wheel.id, data.wheel.name);
+      toast({
+        title: "Wheel updated!",
+        description: `"${data.wheel.name}" has been saved.`,
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update wheel. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleSaveWheel = () => {
+    if (!isAuthenticated) {
+      setAuthModalOpen(true);
+      return;
+    }
+    
+    if (currentWheelId && !saveAsMode) {
+      updateWheelMutation.mutate({ id: currentWheelId, name: currentWheelName || "My Wheel" });
+    } else {
+      setSaveAsMode(false);
+      setSaveModalOpen(true);
+    }
+  };
+
+  const handleSaveNew = async (name: string) => {
+    await createWheelMutation.mutateAsync(name);
+  };
 
   const exitPresentationMode = useCallback(() => {
     setPresentationMode(false);
@@ -101,6 +194,22 @@ export default function Home() {
           <div className="flex items-center gap-1">
             {isAuthenticated ? (
               <>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setLocation("/my-wheels")}
+                      className="text-muted-foreground"
+                      data-testid="button-my-wheels"
+                    >
+                      <FolderOpen className="w-4 h-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>My Wheels</p>
+                  </TooltipContent>
+                </Tooltip>
                 <div className="flex items-center gap-2 px-2 text-sm text-muted-foreground">
                   <User className="w-4 h-4" />
                   <span className="hidden sm:inline max-w-[120px] truncate" data-testid="text-user-email">
@@ -220,11 +329,14 @@ export default function Home() {
             onRemove={removeSegment}
             onResetProbabilities={resetProbabilities}
             onNewWheel={resetToDefault}
+            onSaveWheel={handleSaveWheel}
             total={total}
             isValid={isValid}
             isEqualOdds={isEqualOdds}
             canAdd={canAdd}
             canRemove={canRemove}
+            currentWheelName={currentWheelName}
+            hasUnsavedChanges={hasUnsavedChanges}
           />
         )}
       </main>
@@ -237,6 +349,12 @@ export default function Home() {
 
       <WinnerModal isOpen={showResult} onClose={closeResult} winner={winner} />
       <AuthModal open={authModalOpen} onOpenChange={setAuthModalOpen} />
+      <SaveWheelModal
+        open={saveModalOpen}
+        onOpenChange={setSaveModalOpen}
+        onSave={handleSaveNew}
+        defaultName={currentWheelName || "My Wheel"}
+      />
     </div>
   );
 }
