@@ -71,7 +71,8 @@ export async function registerRoutes(
       
       const existingUser = await storage.getUserByEmail(email);
       if (existingUser) {
-        return res.status(400).json({ error: "An account with this email already exists" });
+        console.log("Signup attempt for existing email:", email);
+        return res.status(400).json({ error: "Unable to create account. Please try again or sign in." });
       }
       
       const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);

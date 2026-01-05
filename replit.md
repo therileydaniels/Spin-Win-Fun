@@ -28,8 +28,8 @@ Preferred communication style: Simple, everyday language.
 ### Data Storage
 - **ORM**: Drizzle ORM with PostgreSQL dialect
 - **Schema Location**: `shared/schema.ts` (shared between client and server)
-- **Current Storage**: In-memory storage class (`MemStorage`) for development
-- **Database Ready**: PostgreSQL configuration exists via `DATABASE_URL` environment variable
+- **Storage**: DatabaseStorage class using PostgreSQL
+- **Database**: PostgreSQL via `DATABASE_URL` environment variable
 
 ### Key Design Patterns
 - **Monorepo Structure**: Client (`client/`), server (`server/`), and shared (`shared/`) directories
@@ -56,8 +56,22 @@ Preferred communication style: Simple, everyday language.
 - Toggle via Monitor icon in header to enter clean presentation view
 - Hides all controls: header, footer, Wheel Settings panel
 - Wheel scales up (600px max) for cinematic audience display
-- Exit via X button (top-right corner) or ESC key
+- Exit via Settings button (top-right corner, 40% opacity) or ESC key
 - Probabilities never visible to audience during presentation
+
+### User Authentication (Phase 5)
+- **Database Tables**: Users (id, email, password, name, role, timestamps) and Wheels (for Phase 6)
+- **Sign Up**: Email, password (min 8 chars, 1 letter, 1 number), optional name
+- **Sign In**: Email and password with generic error messages
+- **Session Management**: 7-day sessions with PostgreSQL storage, rolling expiry
+- **Security**: bcrypt (12 rounds), rate limiting (5/min), httpOnly cookies, session regeneration
+- **UI**: AuthModal with tabs for Sign In/Sign Up, header shows user status
+- **Wheel works without account** - auth only needed to save wheels (Phase 6)
+
+**Admin SQL Command**:
+```sql
+UPDATE users SET role = 'admin' WHERE email = 'your@email.com';
+```
 
 ## External Dependencies
 
@@ -71,6 +85,7 @@ Preferred communication style: Simple, everyday language.
 - **Forms**: react-hook-form with zod validation
 - **Database**: drizzle-orm, pg (PostgreSQL client)
 - **Session**: express-session with connect-pg-simple for persistence
+- **Security**: bcrypt for password hashing, express-rate-limit for API protection
 
 ### Development Tools
 - **Replit Plugins**: vite-plugin-runtime-error-modal, vite-plugin-cartographer, vite-plugin-dev-banner
