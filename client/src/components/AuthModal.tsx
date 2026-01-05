@@ -24,20 +24,20 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 
 const signupSchema = z.object({
-  email: z.string().email("Please enter a valid email"),
+  email: z.string().email("Please enter a valid email address."),
   password: z.string()
-    .min(8, "Password must be at least 8 characters")
-    .regex(/[a-zA-Z]/, "Password must contain at least one letter")
-    .regex(/[0-9]/, "Password must contain at least one number"),
+    .min(8, "Password must be at least 8 characters with at least one letter and one number.")
+    .regex(/[a-zA-Z]/, "Password must be at least 8 characters with at least one letter and one number.")
+    .regex(/[0-9]/, "Password must be at least 8 characters with at least one letter and one number."),
   confirmPassword: z.string(),
   name: z.string().optional(),
 }).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
+  message: "Passwords don't match. Please try again.",
   path: ["confirmPassword"],
 });
 
 const loginSchema = z.object({
-  email: z.string().email("Please enter a valid email"),
+  email: z.string().email("Please enter a valid email address."),
   password: z.string().min(1, "Password is required"),
 });
 
@@ -82,7 +82,17 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
       onOpenChange(false);
       signupForm.reset();
     } catch (error: any) {
-      const message = error?.message || "Something went wrong";
+      let message = "Something went wrong. Please try again.";
+      if (error?.message) {
+        const msgLower = error.message.toLowerCase();
+        if (msgLower.includes("already") || msgLower.includes("exists") || msgLower.includes("registered")) {
+          message = "This email is already registered. Try signing in instead.";
+        } else if (msgLower.includes("email") && msgLower.includes("valid")) {
+          message = "Please enter a valid email address.";
+        } else if (typeof error.message === "string" && !error.message.includes("{")) {
+          message = error.message;
+        }
+      }
       toast({
         title: "Sign up failed",
         description: message,
@@ -101,10 +111,9 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
       onOpenChange(false);
       loginForm.reset();
     } catch (error: any) {
-      const message = error?.message || "Invalid email or password";
       toast({
         title: "Sign in failed",
-        description: message,
+        description: "Invalid email or password. Please try again.",
         variant: "destructive",
       });
     }
