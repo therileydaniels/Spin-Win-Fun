@@ -189,6 +189,14 @@ export function useCustomSegments(): UseCustomSegmentsReturn {
   }, []);
 
   const loadWheel = useCallback((id: number, name: string, data: SavedWheelData) => {
+    // Synchronously update localStorage BEFORE state updates
+    // This ensures Home.tsx reads the correct data when it initializes its hook instance
+    localStorage.setItem(SEGMENTS_STORAGE_KEY, JSON.stringify(data.segments));
+    localStorage.setItem(PROBABILITIES_STORAGE_KEY, JSON.stringify(data.probabilities));
+    localStorage.setItem(CURRENT_WHEEL_KEY, String(id));
+    localStorage.setItem(CURRENT_WHEEL_NAME_KEY, name);
+    
+    // Then update React state
     setSegments(data.segments);
     setProbabilities(data.probabilities);
     setCurrentWheelId(id);
