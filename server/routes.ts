@@ -174,5 +174,150 @@ export async function registerRoutes(
     }
   });
 
+  const FREE_WHEEL_LIMIT = 2;
+
+  app.get("/api/wheels", async (req, res) => {
+    if (!req.session.userId) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    
+    try {
+      const wheels = await storage.getWheelsByUserId(req.session.userId);
+      return res.json({ wheels });
+    } catch (error) {
+      console.error("Get wheels error:", error);
+      return res.status(500).json({ error: "Failed to get wheels" });
+    }
+  });
+
+  app.get("/api/wheels/:id", async (req, res) => {
+    if (!req.session.userId) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    
+    try {
+      const wheelId = parseInt(req.params.id);
+      if (isNaN(wheelId)) {
+        return res.status(400).json({ error: "Invalid wheel ID" });
+      }
+      
+      const wheel = await storage.getWheelById(wheelId);
+      if (!wheel) {
+        return res.status(404).json({ error: "Wheel not found" });
+      }
+      
+      if (wheel.userId !== req.session.userId) {
+        return res.status(403).json({ error: "Not authorized" });
+      }
+      
+      return res.json({ wheel });
+    } catch (error) {
+      console.error("Get wheel error:", error);
+      return res.status(500).json({ error: "Failed to get wheel" });
+    }
+  });
+
+  app.post("/api/wheels", async (req, res) => {
+    if (!req.session.userId) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    
+    try {
+      const user = await storage.getUser(req.session.userId);
+      if (!user) {
+        return res.status(401).json({ error: "User not found" });
+      }
+      
+      if (user.role !== "admin") {
+        const count = await storage.getWheelCountByUserId(req.session.userId);
+        if (count >= FREE_WHEEL_LIMIT) {
+          return res.status(403).json({ 
+            error: "Free limit reached",
+            message: "You've reached the free limit (2 wheels). Upgrade to save unlimited wheels."
+          });
+        }
+      }
+      
+      const { name, segments } = req.body;
+      if (!name || typeof name !== "string" || name.trim().length === 0) {
+        return res.status(400).json({ error: "Wheel name is required" });
+      }
+      
+      if (!segments || !Array.isArray(segments)) {
+        return res.status(400).json({ error: "Segments are required" });
+      }
+      
+      const wheel = await storage.createWheel({
+        userId: req.session.userId,
+        name: name.trim(),
+        segments,
+      });
+      
+      return res.json({ wheel });
+    } catch (error) {
+      console.error("Create wheel error:", error);
+      return res.status(500).json({ error: "Failed to save wheel" });
+    }
+  });
+
+  app.put("/api/wheels/:id", async (req, res) => {
+    if (!req.session.userId) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    
+    try {
+      const wheelId = parseInt(req.params.id);
+      if (isNaN(wheelId)) {
+        return res.status(400).json({ error: "Invalid wheel ID" });
+      }
+      
+      const { name, segments } = req.body;
+      if (!name || typeof name !== "string" || name.trim().length === 0) {
+        return res.status(400).json({ error: "Wheel name is required" });
+      }
+      
+      if (!segments || !Array.isArray(segments)) {
+        return res.status(400).json({ error: "Segments are required" });
+      }
+      
+      const wheel = await storage.updateWheel(wheelId, req.session.userId, {
+        name: name.trim(),
+        segments,
+      });
+      
+      if (!wheel) {
+        return res.status(404).json({ error: "Wheel not found" });
+      }
+      
+      return res.json({ wheel });
+    } catch (error) {
+      console.error("Update wheel error:", error);
+      return res.status(500).json({ error: "Failed to update wheel" });
+    }
+  });
+
+  app.delete("/api/wheels/:id", async (req, res) => {
+    if (!req.session.userId) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    
+    try {
+      const wheelId = parseInt(req.params.id);
+      if (isNaN(wheelId)) {
+        return res.status(400).json({ error: "Invalid wheel ID" });
+      }
+      
+      const deleted = await storage.deleteWheel(wheelId, req.session.userId);
+      if (!deleted) {
+        return res.status(404).json({ error: "Wheel not found" });
+      }
+      
+      return res.json({ success: true });
+    } catch (error) {
+      console.error("Delete wheel error:", error);
+      return res.status(500).json({ error: "Failed to delete wheel" });
+    }
+  });
+
   return httpServer;
 }

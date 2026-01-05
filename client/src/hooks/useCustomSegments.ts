@@ -4,6 +4,13 @@ import { DEFAULT_SEGMENTS, getNextColor } from "@/lib/wheelSegments";
 
 const SEGMENTS_STORAGE_KEY = "wheel-segments";
 const PROBABILITIES_STORAGE_KEY = "wheel-probabilities";
+const CURRENT_WHEEL_KEY = "current-wheel-id";
+const CURRENT_WHEEL_NAME_KEY = "current-wheel-name";
+
+export interface SavedWheelData {
+  segments: CustomSegment[];
+  probabilities: number[];
+}
 
 export interface UseCustomSegmentsReturn {
   segments: CustomSegment[];
@@ -20,6 +27,13 @@ export interface UseCustomSegmentsReturn {
   total: number;
   isValid: boolean;
   isEqualOdds: boolean;
+  currentWheelId: number | null;
+  currentWheelName: string | null;
+  hasUnsavedChanges: boolean;
+  loadWheel: (id: number, name: string, data: SavedWheelData) => void;
+  clearCurrentWheel: () => void;
+  markSaved: (id: number, name: string) => void;
+  getWheelData: () => SavedWheelData;
 }
 
 function generateId(): string {
@@ -53,6 +67,24 @@ export function useCustomSegments(): UseCustomSegmentsReturn {
     return DEFAULT_SEGMENTS.map(() => 0);
   });
 
+  const [currentWheelId, setCurrentWheelId] = useState<number | null>(() => {
+    try {
+      const saved = localStorage.getItem(CURRENT_WHEEL_KEY);
+      return saved ? parseInt(saved) : null;
+    } catch {}
+    return null;
+  });
+
+  const [currentWheelName, setCurrentWheelName] = useState<string | null>(() => {
+    try {
+      return localStorage.getItem(CURRENT_WHEEL_NAME_KEY);
+    } catch {}
+    return null;
+  });
+
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [lastSavedState, setLastSavedState] = useState<string | null>(null);
+
   useEffect(() => {
     if (probabilities.length !== segments.length) {
       setProbabilities((prev) => {
@@ -72,6 +104,29 @@ export function useCustomSegments(): UseCustomSegmentsReturn {
   useEffect(() => {
     localStorage.setItem(PROBABILITIES_STORAGE_KEY, JSON.stringify(probabilities));
   }, [probabilities]);
+
+  useEffect(() => {
+    if (currentWheelId !== null) {
+      localStorage.setItem(CURRENT_WHEEL_KEY, String(currentWheelId));
+    } else {
+      localStorage.removeItem(CURRENT_WHEEL_KEY);
+    }
+  }, [currentWheelId]);
+
+  useEffect(() => {
+    if (currentWheelName !== null) {
+      localStorage.setItem(CURRENT_WHEEL_NAME_KEY, currentWheelName);
+    } else {
+      localStorage.removeItem(CURRENT_WHEEL_NAME_KEY);
+    }
+  }, [currentWheelName]);
+
+  useEffect(() => {
+    if (lastSavedState !== null) {
+      const currentState = JSON.stringify({ segments, probabilities });
+      setHasUnsavedChanges(currentState !== lastSavedState);
+    }
+  }, [segments, probabilities, lastSavedState]);
 
   const addSegment = useCallback(() => {
     if (segments.length >= MAX_SEGMENTS) return;
@@ -127,7 +182,40 @@ export function useCustomSegments(): UseCustomSegmentsReturn {
   const resetToDefault = useCallback(() => {
     setSegments(DEFAULT_SEGMENTS);
     setProbabilities(DEFAULT_SEGMENTS.map(() => 0));
+    setCurrentWheelId(null);
+    setCurrentWheelName(null);
+    setLastSavedState(null);
+    setHasUnsavedChanges(false);
   }, []);
+
+  const loadWheel = useCallback((id: number, name: string, data: SavedWheelData) => {
+    setSegments(data.segments);
+    setProbabilities(data.probabilities);
+    setCurrentWheelId(id);
+    setCurrentWheelName(name);
+    const savedState = JSON.stringify({ segments: data.segments, probabilities: data.probabilities });
+    setLastSavedState(savedState);
+    setHasUnsavedChanges(false);
+  }, []);
+
+  const clearCurrentWheel = useCallback(() => {
+    setCurrentWheelId(null);
+    setCurrentWheelName(null);
+    setLastSavedState(null);
+    setHasUnsavedChanges(false);
+  }, []);
+
+  const markSaved = useCallback((id: number, name: string) => {
+    setCurrentWheelId(id);
+    setCurrentWheelName(name);
+    const savedState = JSON.stringify({ segments, probabilities });
+    setLastSavedState(savedState);
+    setHasUnsavedChanges(false);
+  }, [segments, probabilities]);
+
+  const getWheelData = useCallback((): SavedWheelData => {
+    return { segments, probabilities };
+  }, [segments, probabilities]);
 
   const canAdd = segments.length < MAX_SEGMENTS;
   const canRemove = segments.length > MIN_SEGMENTS;
@@ -150,5 +238,12 @@ export function useCustomSegments(): UseCustomSegmentsReturn {
     total,
     isValid,
     isEqualOdds,
+    currentWheelId,
+    currentWheelName,
+    hasUnsavedChanges,
+    loadWheel,
+    clearCurrentWheel,
+    markSaved,
+    getWheelData,
   };
 }
