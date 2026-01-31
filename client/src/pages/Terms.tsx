@@ -56,7 +56,7 @@ export default function Terms() {
           <section className="space-y-3">
             <h2 className="text-lg font-semibold">1. Acceptance of Terms</h2>
             <p className="text-muted-foreground leading-relaxed">
-              By accessing or using [App Name] ("the Service"), you agree to be bound by these Terms of Service. 
+              By accessing or using QuickWheel ("the Service"), you agree to be bound by these Terms of Service. 
               If you do not agree to these terms, please do not use the Service.
             </p>
           </section>
@@ -64,7 +64,7 @@ export default function Terms() {
           <section className="space-y-3">
             <h2 className="text-lg font-semibold">2. Description of Service</h2>
             <p className="text-muted-foreground leading-relaxed">
-              [App Name] is a customizable wheel spinner application designed for entertainment and decision-making purposes. 
+              QuickWheel is a customizable wheel spinner application designed for entertainment and decision-making purposes. 
               Users can create custom wheels, set segment names, colors, and adjust probability weights.
             </p>
             <p className="text-muted-foreground leading-relaxed">
@@ -100,7 +100,7 @@ export default function Terms() {
           <section className="space-y-3">
             <h2 className="text-lg font-semibold">5. Intellectual Property</h2>
             <p className="text-muted-foreground leading-relaxed">
-              [App Name], including its design, code, and branding, is owned by us and protected by intellectual property laws. 
+              QuickWheel, including its design, code, and branding, is owned by us and protected by intellectual property laws. 
               You may not copy, modify, or distribute any part of the Service without permission.
             </p>
             <p className="text-muted-foreground leading-relaxed">
@@ -124,7 +124,7 @@ export default function Terms() {
           <section className="space-y-3">
             <h2 className="text-lg font-semibold">7. Limitation of Liability</h2>
             <p className="text-muted-foreground leading-relaxed">
-              To the maximum extent permitted by law, [App Name] and its operators shall not be liable for any 
+              To the maximum extent permitted by law, QuickWheel and its operators shall not be liable for any 
               indirect, incidental, special, consequential, or punitive damages arising from your use of the Service.
             </p>
           </section>
@@ -141,7 +141,7 @@ export default function Terms() {
           <section className="space-y-3">
             <h2 className="text-lg font-semibold">9. Contact</h2>
             <p className="text-muted-foreground leading-relaxed">
-              If you have questions about these Terms of Service, please contact us at [Contact Email].
+              If you have questions about these Terms of Service, please contact us at BookRD@protonmail.com.
             </p>
           </section>
         </div>

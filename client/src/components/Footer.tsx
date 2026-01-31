@@ -14,7 +14,7 @@ export function Footer() {
           </Link>
         </div>
         <span className="hidden sm:inline">|</span>
-        <span>&copy; 2025 [App Name]. All rights reserved.</span>
+        <span>&copy; 2025 QuickWheel. All rights reserved.</span>
       </div>
     </footer>
   );

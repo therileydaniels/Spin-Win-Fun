@@ -1,6 +1,6 @@
 {
-  "name": "Wheel Spinner - Spin to Win!",
-  "short_name": "Wheel Spinner",
+  "name": "QuickWheel - Spin the Wheel",
+  "short_name": "QuickWheel",
   "description": "A customizable wheel spinner for decisions and games. Set custom probabilities and spin to win!",
   "start_url": "/",
   "display": "standalone",

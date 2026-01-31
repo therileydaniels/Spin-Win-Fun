@@ -56,7 +56,7 @@ export default function Privacy() {
           <section className="space-y-3">
             <h2 className="text-lg font-semibold">1. Information We Collect</h2>
             <p className="text-muted-foreground leading-relaxed">
-              We collect the following types of information when you use [App Name]:
+              We collect the following types of information when you use QuickWheel:
             </p>
             <ul className="list-disc list-inside text-muted-foreground space-y-2 leading-relaxed">
               <li><strong>Account Information:</strong> Email address, name (optional), and password (stored securely using industry-standard hashing)</li>
@@ -131,7 +131,7 @@ export default function Privacy() {
               <li><strong>Correction:</strong> You can update your account information at any time</li>
             </ul>
             <p className="text-muted-foreground leading-relaxed">
-              To exercise these rights, please contact us at [Contact Email].
+              To exercise these rights, please contact us at BookRD@protonmail.com.
             </p>
           </section>
 
@@ -157,7 +157,7 @@ export default function Privacy() {
             <h2 className="text-lg font-semibold">9. Contact</h2>
             <p className="text-muted-foreground leading-relaxed">
               If you have questions or concerns about this Privacy Policy or how we handle your data, 
-              please contact us at [Contact Email].
+              please contact us at BookRD@protonmail.com.
             </p>
           </section>
         </div>
