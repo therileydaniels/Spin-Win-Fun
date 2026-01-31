@@ -1,0 +1,119 @@
+I have new logo and icon files to add to the app. Please replace any existing logos/icons with these new ones.
+
+---
+
+FILES TO ADD:
+
+I'm uploading these files to the project. Please place them in the correct locations:
+
+1. favicon-32x32_.png → Rename to "favicon-32x32.png" and place in client/public/
+2. quickwheel-app-icon-192x192.png → Rename to "icon-192.png" and place in client/public/icons/
+3. quickwheel-app-icon-512x512.png → Rename to "icon-512.png" and place in client/public/icons/
+4. quickwheel-logo-horizontal.png → Rename to "logo.png" and place in client/public/
+
+---
+
+TASK 1: SET UP FOLDER STRUCTURE
+
+Create the icons folder if it doesn't exist:
+client/public/icons/
+
+---
+
+TASK 2: UPDATE INDEX.HTML
+
+Update client/index.html with these tags in the <head>:
+
+<!-- Favicon -->
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+
+<!-- PWA Meta Tags -->
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#A855F7">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="QuickWheel">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+
+<!-- SEO Meta Tags -->
+<meta name="description" content="QuickWheel - A customizable wheel spinner for decisions and games. Create prize wheels, set custom probabilities, and spin to win!">
+
+<!-- Open Graph -->
+<meta property="og:title" content="QuickWheel - Spin the Wheel">
+<meta property="og:description" content="A customizable wheel spinner for decisions and games">
+<meta property="og:type" content="website">
+<meta property="og:image" content="/icons/icon-512.png">
+
+---
+
+TASK 3: UPDATE OR CREATE MANIFEST.JSON
+
+Create or update client/public/manifest.json:
+
+{
+  "name": "QuickWheel",
+  "short_name": "QuickWheel",
+  "description": "A customizable wheel spinner for decisions and games",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#A855F7",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
+
+---
+
+TASK 4: UPDATE HEADER COMPONENT
+
+Find the header component and add the logo. Replace the text "QuickWheel" with:
+- On larger screens: Show the full logo image (logo.png) 
+- On smaller screens: Show just the wheel icon or text "QuickWheel"
+
+The logo should be approximately 150-200px wide in the header, maintaining aspect ratio.
+
+Example implementation:
+<Link to="/">
+  <img 
+    src="/logo.png" 
+    alt="QuickWheel" 
+    className="h-8 sm:h-10 w-auto hidden sm:block"
+  />
+  <span className="sm:hidden text-xl font-bold">QuickWheel</span>
+</Link>
+
+---
+
+TASK 5: REMOVE OLD FAVICON/ICONS
+
+Delete any old favicon or icon files that are no longer needed (like favicon.png, favicon.ico, or any placeholder icons).
+
+---
+
+TASK 6: VERIFY FILE STRUCTURE
+
+After setup, confirm this structure exists:
+client/public/
+  ├── favicon-32x32.png
+  ├── logo.png
+  ├── manifest.json
+  └── icons/
+      ├── icon-192.png
+      └── icon-512.png
+
+---
+
+Please make these changes and confirm what was updated.
