@@ -1,4 +1,4 @@
-import type { Express } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import rateLimit from "express-rate-limit";
 import bcrypt from "bcrypt";
@@ -6,6 +6,19 @@ import { storage } from "./storage";
 import { spinRequestSchema, signupSchema, loginSchema } from "@shared/schema";
 
 const SALT_ROUNDS = 12;
+
+async function requireAdmin(req: Request, res: Response, next: NextFunction) {
+  if (!req.session.userId) {
+    return res.status(401).json({ error: "Not authenticated" });
+  }
+  
+  const user = await storage.getUser(req.session.userId);
+  if (!user || user.role !== "admin") {
+    return res.status(403).json({ error: "Forbidden" });
+  }
+  
+  next();
+}
 
 const authLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
@@ -316,6 +329,80 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Delete wheel error:", error);
       return res.status(500).json({ error: "Failed to delete wheel" });
+    }
+  });
+
+  // Admin routes
+  app.get("/api/admin/stats", requireAdmin, async (req, res) => {
+    try {
+      const stats = await storage.getAdminStats();
+      return res.json(stats);
+    } catch (error) {
+      console.error("Admin stats error:", error);
+      return res.status(500).json({ error: "Failed to get stats" });
+    }
+  });
+
+  app.get("/api/admin/users", requireAdmin, async (req, res) => {
+    try {
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      const search = req.query.search as string | undefined;
+      
+      const result = await storage.getAllUsersWithWheelCount(page, limit, search);
+      return res.json(result);
+    } catch (error) {
+      console.error("Admin users error:", error);
+      return res.status(500).json({ error: "Failed to get users" });
+    }
+  });
+
+  app.put("/api/admin/users/:id/role", requireAdmin, async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      if (isNaN(userId)) {
+        return res.status(400).json({ error: "Invalid user ID" });
+      }
+      
+      const { role } = req.body;
+      if (!role || !['free', 'paid', 'admin'].includes(role)) {
+        return res.status(400).json({ error: "Invalid role" });
+      }
+      
+      const user = await storage.updateUserRole(userId, role);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      console.log(`[ADMIN] User ${req.session.userId} changed user ${userId} role to: ${role}`);
+      return res.json({ success: true, user: storage.getSafeUser(user) });
+    } catch (error) {
+      console.error("Admin role change error:", error);
+      return res.status(500).json({ error: "Failed to change role" });
+    }
+  });
+
+  app.delete("/api/admin/users/:id", requireAdmin, async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      if (isNaN(userId)) {
+        return res.status(400).json({ error: "Invalid user ID" });
+      }
+      
+      if (userId === req.session.userId) {
+        return res.status(400).json({ error: "Cannot delete yourself" });
+      }
+      
+      const deleted = await storage.deleteUserAndWheels(userId);
+      if (!deleted) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      console.log(`[ADMIN] User ${req.session.userId} deleted user ${userId}`);
+      return res.json({ success: true });
+    } catch (error) {
+      console.error("Admin delete user error:", error);
+      return res.status(500).json({ error: "Failed to delete user" });
     }
   });
 

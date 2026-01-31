@@ -18,7 +18,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { fireWinConfetti, fireCenterBurst } from "@/lib/confetti";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { Monitor, Settings, LogIn, LogOut, User, FolderOpen } from "lucide-react";
+import { Monitor, Settings, LogIn, LogOut, User, FolderOpen, Shield } from "lucide-react";
 
 export default function Home() {
   const [, setLocation] = useLocation();
@@ -210,6 +210,24 @@ export default function Home() {
                     <p>My Wheels</p>
                   </TooltipContent>
                 </Tooltip>
+                {user?.role === "admin" && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setLocation("/admin")}
+                        className="text-muted-foreground"
+                        data-testid="button-admin-dashboard"
+                      >
+                        <Shield className="w-4 h-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Admin Dashboard</p>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
                 <div className="flex items-center gap-2 px-2 text-sm text-muted-foreground">
                   <User className="w-4 h-4" />
                   <span className="hidden sm:inline max-w-[120px] truncate" data-testid="text-user-email">
