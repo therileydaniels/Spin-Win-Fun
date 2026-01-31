@@ -18,6 +18,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { fireWinConfetti, fireCenterBurst } from "@/lib/confetti";
 import { queryClient, apiRequest } from "@/lib/queryClient";
+import { Footer } from "@/components/Footer";
 import { Monitor, Settings, LogIn, LogOut, User, FolderOpen, Shield } from "lucide-react";
 
 export default function Home() {
@@ -359,11 +360,7 @@ export default function Home() {
         )}
       </main>
 
-      {!presentationMode && (
-        <footer className="relative z-10 text-center py-4 text-xs text-muted-foreground border-t border-border">
-          <p>For entertainment purposes only</p>
-        </footer>
-      )}
+      {!presentationMode && <Footer />}
 
       <WinnerModal isOpen={showResult} onClose={closeResult} winner={winner} />
       <AuthModal open={authModalOpen} onOpenChange={setAuthModalOpen} />

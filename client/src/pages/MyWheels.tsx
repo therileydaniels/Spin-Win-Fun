@@ -18,6 +18,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Footer } from "@/components/Footer";
 import { ArrowLeft, Trash2, Play, Loader2, CircleDot } from "lucide-react";
 import type { Wheel } from "@shared/schema";
 
@@ -303,6 +304,8 @@ export default function MyWheels() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Footer />
     </div>
   );
 }
