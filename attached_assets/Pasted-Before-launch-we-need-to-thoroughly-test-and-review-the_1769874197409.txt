@@ -1,0 +1,154 @@
+Before launch, we need to thoroughly test and review the app. Please perform the following checks and report back findings — DO NOT fix anything yet, just report.
+
+---
+
+PART 1: SECURITY AUDIT
+
+Check the following and report any issues:
+
+1. **Authentication**
+   - Are passwords hashed with bcrypt (10+ salt rounds)?
+   - Are sessions using httpOnly, secure, and sameSite cookie flags?
+   - Is session ID regenerated after login?
+   - Are auth endpoints rate limited?
+
+2. **API Security**
+   - Do all protected endpoints verify user is logged in?
+   - Do admin endpoints verify user has admin role?
+   - Are all database queries parameterized (no SQL injection risk)?
+   - Are error messages generic (not leaking sensitive info)?
+
+3. **Data Validation**
+   - Is user input validated on the server (not just client)?
+   - Are there length limits on inputs (email, name, wheel name, segment labels)?
+   - Is the probability array validated (correct length, values 0-100, totals correctly)?
+
+4. **Authorization**
+   - Can users only access their own wheels?
+   - Can users only delete/edit their own wheels?
+   - Is the free tier limit (2 wheels) enforced server-side?
+
+5. **Sensitive Data**
+   - Is the password hash ever sent to the frontend? (It shouldn't be)
+   - Are probability weights hidden from the browser network tab in production?
+
+---
+
+PART 2: CODE QUALITY CHECK
+
+Review the codebase for:
+
+1. **Console logs** — Any debug console.log statements that should be removed?
+2. **Commented out code** — Any dead code that should be cleaned up?
+3. **Hardcoded values** — Any magic numbers or strings that should be constants?
+4. **Error handling** — Are errors caught and handled gracefully?
+5. **TypeScript** — Any `any` types that should be properly typed?
+6. **Unused imports** — Any imports not being used?
+
+---
+
+PART 3: MOBILE RESPONSIVENESS TEST
+
+Check each screen on mobile viewport (375px width):
+
+1. **Home/Wheel page**
+   - Does the wheel fit on screen?
+   - Is the spin button easily tappable?
+   - Does the settings panel work on mobile?
+   - Can you edit segments easily?
+
+2. **Presentation Mode**
+   - Does it work on mobile?
+   - Is the exit button reachable?
+
+3. **My Wheels page**
+   - Do wheel cards stack properly?
+   - Are buttons tappable?
+
+4. **Admin Dashboard**
+   - Does the user table scroll horizontally or reformat?
+   - Are all actions accessible?
+
+5. **Auth Modals**
+   - Do forms fit on mobile?
+   - Is keyboard input handled well?
+
+6. **Terms & Privacy pages**
+   - Is text readable?
+   - Does it scroll properly?
+
+---
+
+PART 4: FUNCTIONALITY TEST
+
+Test these user flows and report any bugs:
+
+1. **New User Flow**
+   - Sign up with new account
+   - Create a wheel with custom segments
+   - Set probabilities (total to 100%)
+   - Spin and verify winner matches probability over multiple spins
+   - Save the wheel
+   - Log out and log back in
+   - Load the saved wheel — does it restore correctly?
+
+2. **Presentation Mode Flow**
+   - Enter presentation mode
+   - Verify all controls are hidden
+   - Spin works
+   - Winner displays correctly
+   - Exit presentation mode (button + ESC key)
+
+3. **Edge Cases**
+   - Set one segment to 100% — does it always win?
+   - Set all to 0% — does it pick randomly?
+   - Try to save more than 2 wheels as free user
+   - Try very long segment names (25 chars)
+   - Try adding 20 segments (max)
+   - Try deleting down to 2 segments (min)
+
+4. **Admin Flow**
+   - Access admin dashboard
+   - Change a user's role
+   - View stats
+   - Try to delete yourself (should be blocked)
+
+---
+
+PART 5: BROWSER COMPATIBILITY
+
+Note if testing is possible, check:
+- Chrome
+- Safari
+- Firefox
+- Edge
+- Mobile Safari (iOS)
+- Mobile Chrome (Android)
+
+---
+
+OUTPUT FORMAT:
+
+Please provide a report organized as:
+
+## Security Findings
+- [List any issues found]
+
+## Code Quality Issues
+- [List any issues found]
+
+## Mobile Issues
+- [List any issues found]
+
+## Functionality Bugs
+- [List any issues found]
+
+## Browser Issues
+- [List any issues found]
+
+## Summary
+- Critical issues (must fix):
+- Medium issues (should fix):
+- Minor issues (nice to fix):
+
+DO NOT fix anything yet — just report findings.
