@@ -185,9 +185,20 @@ export default function Home() {
             <img 
               src="/logo.png" 
               alt="QuickWheel" 
-              className="h-16 w-auto object-contain"
+              className="h-8 sm:h-10 w-auto hidden sm:block"
               data-testid="img-logo"
             />
+            <span 
+              className="sm:hidden text-xl font-bold"
+              style={{
+                background: "linear-gradient(135deg, #A855F7, #EC4899, #0EA5E9)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+              }}
+            >
+              QuickWheel
+            </span>
           </a>
           <div className="flex items-center gap-1">
             {isAuthenticated ? (
