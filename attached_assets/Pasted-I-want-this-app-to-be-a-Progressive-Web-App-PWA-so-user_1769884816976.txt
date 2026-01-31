@@ -1,0 +1,85 @@
+I want this app to be a Progressive Web App (PWA) so users can install it on their phones. Please audit what we have and add what's missing.
+
+---
+
+PART 1: AUDIT CURRENT PWA STATUS
+
+Check if we have:
+1. manifest.json (or manifest.webmanifest) file
+2. Service worker registered
+3. Required meta tags in index.html
+4. App icons in various sizes
+
+Report what exists and what's missing.
+
+---
+
+PART 2: CREATE/UPDATE MANIFEST FILE
+
+Create a manifest.json in the client/public folder with:
+
+{
+  "name": "[App Name]",
+  "short_name": "[App Name]",
+  "description": "A customizable wheel spinner for decisions and games",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#A855F7",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
+
+Use our brand colors:
+- theme_color: #A855F7 (purple)
+- background_color: #0f172a (dark mode background)
+
+---
+
+PART 3: CREATE APP ICONS
+
+Create simple app icons for the PWA:
+- 192x192 PNG
+- 512x512 PNG
+
+The icon should be:
+- Simple wheel or spinner design
+- Use our purple gradient colors (#A855F7, #EC4899, #0EA5E9)
+- Look good on both light and dark home screens
+- Work as a maskable icon (important content in center safe zone)
+
+Place icons in client/public/icons/ folder.
+
+---
+
+PART 4: ADD META TAGS TO INDEX.HTML
+
+Add these to the <head> of client/index.html:
+
+<!-- PWA Meta Tags -->
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#A855F7">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="[App Name]">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+
+<!-- SEO Meta Tags -->
+<meta name="description" content="A customizable wheel spinner for decisions and games. Set custom probabilities and spin to win!">
+<meta name="keywords" content="wheel spinner, prize wheel, decision maker, random picker">
+
+<!-- Open Graph (for social sharing) -->
+<meta property="og:title" content="[App Name] - S
