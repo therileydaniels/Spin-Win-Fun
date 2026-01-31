@@ -105,6 +105,12 @@ UPDATE users SET role = 'admin' WHERE email = 'your@email.com';
 - **Replit Plugins**: vite-plugin-runtime-error-modal, vite-plugin-cartographer, vite-plugin-dev-banner
 - **Build**: esbuild for server bundling, Vite for client
 
+### Legal Pages (Phase 8)
+- **Terms of Service**: `/terms` - Comprehensive terms including acceptable use, disclaimer, liability
+- **Privacy Policy**: `/privacy` - Data collection, storage, security, user rights
+- **Footer Component**: Shared footer with Terms/Privacy links and copyright on all pages
+- **Design**: Matches app aesthetic with gradient headers, clean typography, proper section hierarchy
+
 ## Design System
 
 See `STYLE_GUIDE.md` for detailed documentation on:
