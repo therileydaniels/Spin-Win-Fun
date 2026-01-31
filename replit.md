@@ -73,6 +73,20 @@ Preferred communication style: Simple, everyday language.
 UPDATE users SET role = 'admin' WHERE email = 'your@email.com';
 ```
 
+### Admin Dashboard (Phase 7)
+- **Route**: `/admin` - accessible only to users with role = "admin"
+- **Stats Overview**: Total users, users by role (free/paid/admin), total wheels, new users this week/month
+- **Users Management**: Table with email, name, role, wheel count, join date
+- **User Actions**: Role dropdown (free/paid/admin), delete user (with confirmation)
+- **Security**: requireAdmin middleware on all `/api/admin/*` endpoints, 403 for non-admins
+- **UI**: Shield icon in header (visible only to admins), search/filter users, pagination
+
+**Admin API Endpoints**:
+- GET /api/admin/stats - Dashboard statistics
+- GET /api/admin/users?page=1&limit=10&search=email - Paginated user list
+- PUT /api/admin/users/:id/role - Change user role
+- DELETE /api/admin/users/:id - Delete user and their wheels
+
 ## External Dependencies
 
 ### Third-Party Services

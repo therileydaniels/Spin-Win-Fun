@@ -77,15 +77,12 @@ export default function AdminDashboard() {
     enabled: isAuthenticated && user?.role === "admin",
   });
 
+  const usersQueryKey = search 
+    ? `/api/admin/users?page=${page}&limit=10&search=${encodeURIComponent(search)}`
+    : `/api/admin/users?page=${page}&limit=10`;
+  
   const { data: usersData, isLoading: usersLoading } = useQuery<PaginatedUsers>({
-    queryKey: ["/api/admin/users", page, search],
-    queryFn: async () => {
-      const params = new URLSearchParams({ page: String(page), limit: "10" });
-      if (search) params.set("search", search);
-      const res = await fetch(`/api/admin/users?${params}`, { credentials: "include" });
-      if (!res.ok) throw new Error("Failed to fetch users");
-      return res.json();
-    },
+    queryKey: [usersQueryKey],
     enabled: isAuthenticated && user?.role === "admin",
   });
 
@@ -94,7 +91,9 @@ export default function AdminDashboard() {
       await apiRequest("PUT", `/api/admin/users/${userId}/role`, { role });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      queryClient.invalidateQueries({ predicate: (query) => 
+        String(query.queryKey[0]).startsWith("/api/admin/users")
+      });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
       toast({ title: "Role updated", description: "User role has been changed." });
     },
@@ -108,7 +107,9 @@ export default function AdminDashboard() {
       await apiRequest("DELETE", `/api/admin/users/${userId}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      queryClient.invalidateQueries({ predicate: (query) => 
+        String(query.queryKey[0]).startsWith("/api/admin/users")
+      });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
       toast({ title: "User deleted", description: "User and their wheels have been deleted." });
     },
