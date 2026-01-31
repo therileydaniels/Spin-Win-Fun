@@ -34,7 +34,15 @@ app.use(
       tableName: "session",
       createTableIfMissing: true,
     }),
-    secret: process.env.SESSION_SECRET || "fallback-dev-secret-change-in-production",
+    secret: (() => {
+      if (process.env.SESSION_SECRET) {
+        return process.env.SESSION_SECRET;
+      }
+      if (process.env.NODE_ENV === "production") {
+        throw new Error("SESSION_SECRET environment variable must be set in production");
+      }
+      return "fallback-dev-secret-for-development-only";
+    })(),
     resave: false,
     saveUninitialized: false,
     cookie: {
@@ -97,9 +105,18 @@ app.use((req, res, next) => {
 (async () => {
   await registerRoutes(httpServer, app);
 
-  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
+  app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
+    let status = 500;
+    let message = "Internal Server Error";
+    
+    if (err instanceof Error) {
+      message = err.message;
+      if ("status" in err && typeof (err as { status: unknown }).status === "number") {
+        status = (err as { status: number }).status;
+      } else if ("statusCode" in err && typeof (err as { statusCode: unknown }).statusCode === "number") {
+        status = (err as { statusCode: number }).statusCode;
+      }
+    }
 
     res.status(status).json({ message });
     throw err;

@@ -3,9 +3,50 @@ import { createServer, type Server } from "http";
 import rateLimit from "express-rate-limit";
 import bcrypt from "bcrypt";
 import { storage } from "./storage";
-import { spinRequestSchema, signupSchema, loginSchema } from "@shared/schema";
+import { spinRequestSchema, signupSchema, loginSchema, MIN_SEGMENTS, MAX_SEGMENTS, MAX_LABEL_LENGTH } from "@shared/schema";
 
 const SALT_ROUNDS = 12;
+const MAX_WHEEL_NAME_LENGTH = 100;
+const HEX_COLOR_REGEX = /^#[0-9A-Fa-f]{6}$/;
+
+interface SegmentData {
+  segments: Array<{ id: string; label: string; color: string }>;
+  probabilities: number[];
+}
+
+function validateSegments(segments: unknown): { valid: true; data: SegmentData } | { valid: false; error: string } {
+  if (!segments || typeof segments !== "object") {
+    return { valid: false, error: "Segments data is required" };
+  }
+  
+  const data = segments as SegmentData;
+  
+  if (!Array.isArray(data.segments) || !Array.isArray(data.probabilities)) {
+    return { valid: false, error: "Segments data is required" };
+  }
+  
+  if (data.segments.length < MIN_SEGMENTS || data.segments.length > MAX_SEGMENTS) {
+    return { valid: false, error: `Wheel must have between ${MIN_SEGMENTS} and ${MAX_SEGMENTS} segments` };
+  }
+  
+  for (const segment of data.segments) {
+    if (!segment.label || typeof segment.label !== "string") {
+      return { valid: false, error: "Each segment must have a label" };
+    }
+    if (segment.label.length > MAX_LABEL_LENGTH) {
+      return { valid: false, error: `Segment label cannot exceed ${MAX_LABEL_LENGTH} characters` };
+    }
+    if (!segment.color || !HEX_COLOR_REGEX.test(segment.color)) {
+      return { valid: false, error: "Invalid segment color format" };
+    }
+  }
+  
+  if (data.probabilities.length !== data.segments.length) {
+    return { valid: false, error: "Probabilities must match segment count" };
+  }
+  
+  return { valid: true, data };
+}
 
 async function requireAdmin(req: Request, res: Response, next: NextFunction) {
   if (!req.session.userId) {
@@ -84,7 +125,6 @@ export async function registerRoutes(
       
       const existingUser = await storage.getUserByEmail(email);
       if (existingUser) {
-        console.log("Signup attempt for existing email:", email);
         return res.status(400).json({ error: "Unable to create account. Please try again or sign in." });
       }
       
@@ -256,14 +296,19 @@ export async function registerRoutes(
         return res.status(400).json({ error: "Wheel name is required" });
       }
       
-      if (!segments || typeof segments !== "object" || !Array.isArray(segments.segments) || !Array.isArray(segments.probabilities)) {
-        return res.status(400).json({ error: "Segments data is required" });
+      if (name.trim().length > MAX_WHEEL_NAME_LENGTH) {
+        return res.status(400).json({ error: `Wheel name cannot exceed ${MAX_WHEEL_NAME_LENGTH} characters` });
+      }
+      
+      const segmentValidation = validateSegments(segments);
+      if (!segmentValidation.valid) {
+        return res.status(400).json({ error: segmentValidation.error });
       }
       
       const wheel = await storage.createWheel({
         userId: req.session.userId,
         name: name.trim(),
-        segments,
+        segments: segmentValidation.data,
       });
       
       return res.json({ wheel });
@@ -289,13 +334,18 @@ export async function registerRoutes(
         return res.status(400).json({ error: "Wheel name is required" });
       }
       
-      if (!segments || typeof segments !== "object" || !Array.isArray(segments.segments) || !Array.isArray(segments.probabilities)) {
-        return res.status(400).json({ error: "Segments data is required" });
+      if (name.trim().length > MAX_WHEEL_NAME_LENGTH) {
+        return res.status(400).json({ error: `Wheel name cannot exceed ${MAX_WHEEL_NAME_LENGTH} characters` });
+      }
+      
+      const segmentValidation = validateSegments(segments);
+      if (!segmentValidation.valid) {
+        return res.status(400).json({ error: segmentValidation.error });
       }
       
       const wheel = await storage.updateWheel(wheelId, req.session.userId, {
         name: name.trim(),
-        segments,
+        segments: segmentValidation.data,
       });
       
       if (!wheel) {

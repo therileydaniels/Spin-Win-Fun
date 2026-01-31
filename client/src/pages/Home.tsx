@@ -80,8 +80,8 @@ export default function Home() {
         description: `"${data.wheel.name}" has been saved.`,
       });
     },
-    onError: (error: any) => {
-      const message = error?.message || "Failed to save wheel";
+    onError: (error: unknown) => {
+      const message = error instanceof Error ? error.message : "Failed to save wheel";
       if (message.includes("limit")) {
         toast({
           title: "Save limit reached",

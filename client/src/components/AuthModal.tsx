@@ -81,15 +81,15 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
       });
       onOpenChange(false);
       signupForm.reset();
-    } catch (error: any) {
+    } catch (error: unknown) {
       let message = "Something went wrong. Please try again.";
-      if (error?.message) {
+      if (error instanceof Error && error.message) {
         const msgLower = error.message.toLowerCase();
         if (msgLower.includes("already") || msgLower.includes("exists") || msgLower.includes("registered")) {
           message = "This email is already registered. Try signing in instead.";
         } else if (msgLower.includes("email") && msgLower.includes("valid")) {
           message = "Please enter a valid email address.";
-        } else if (typeof error.message === "string" && !error.message.includes("{")) {
+        } else if (!error.message.includes("{")) {
           message = error.message;
         }
       }
@@ -110,7 +110,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
       });
       onOpenChange(false);
       loginForm.reset();
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Sign in failed",
         description: "Invalid email or password. Please try again.",

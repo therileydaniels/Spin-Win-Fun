@@ -138,7 +138,7 @@ export function ProbabilityPanel({
           {segments.map((segment, index) => (
             <div
               key={segment.id}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 py-0.5"
               data-testid={`segment-row-${index}`}
             >
               <ColorPicker
@@ -162,7 +162,7 @@ export function ProbabilityPanel({
                   onChange={(e) =>
                     onProbabilityChange(index, parseInt(e.target.value) || 0)
                   }
-                  className="w-14 h-8 text-center text-sm bg-background/50 border-border"
+                  className="w-16 h-8 text-center text-sm bg-background/50 border-border"
                   data-testid={`input-probability-${index}`}
                 />
                 <span className="text-xs text-muted-foreground w-3">%</span>
