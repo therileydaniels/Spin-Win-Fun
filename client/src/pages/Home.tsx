@@ -181,17 +181,14 @@ export default function Home() {
       
       {!presentationMode && (
         <header className="relative z-10 flex items-center justify-between gap-4 px-4 py-3 border-b border-border">
-          <h1 
-            className="text-xl font-bold tracking-tight"
-            style={{
-              background: "linear-gradient(135deg, #A855F7, #EC4899, #0EA5E9)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
-            }}
-          >
-            Wheel Spinner
-          </h1>
+          <a href="/" className="flex items-center">
+            <img 
+              src="/logo.png" 
+              alt="QuickWheel" 
+              className="h-8 w-auto object-contain"
+              data-testid="img-logo"
+            />
+          </a>
           <div className="flex items-center gap-1">
             {isAuthenticated ? (
               <>
