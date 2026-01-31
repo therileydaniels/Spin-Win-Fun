@@ -43,11 +43,11 @@ export function ColorPicker({ color, onChange }: ColorPickerProps) {
         <Button
           variant="ghost"
           size="icon"
-          className="w-7 h-7 p-0 rounded-md shrink-0"
+          className="p-1 shrink-0"
           data-testid="button-color-picker"
         >
           <div
-            className="w-5 h-5 rounded-sm border border-white/20"
+            className="w-5 h-5 rounded-sm border border-border"
             style={{ backgroundColor: color }}
           />
         </Button>
@@ -61,7 +61,7 @@ export function ColorPicker({ color, onChange }: ColorPickerProps) {
                 onClick={() => handlePresetClick(presetColor)}
                 className={`w-7 h-7 rounded-md border-2 transition-transform hover:scale-110 ${
                   color === presetColor
-                    ? "border-white"
+                    ? "border-foreground"
                     : "border-transparent"
                 }`}
                 style={{ backgroundColor: presetColor }}

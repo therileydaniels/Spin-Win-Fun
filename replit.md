@@ -104,3 +104,13 @@ UPDATE users SET role = 'admin' WHERE email = 'your@email.com';
 ### Development Tools
 - **Replit Plugins**: vite-plugin-runtime-error-modal, vite-plugin-cartographer, vite-plugin-dev-banner
 - **Build**: esbuild for server bundling, Vite for client
+
+## Design System
+
+See `STYLE_GUIDE.md` for detailed documentation on:
+- Typography hierarchy (h1: text-xl font-bold, CardTitle: text-lg font-semibold)
+- Color tokens and role badge colors (Admin: purple, Paid: blue, Free: gray)
+- Border conventions (always use `border-border` for theme adaptation)
+- Shadow usage (only on wheel, spin button, winner modal)
+- Icon button sizing (always use `size="icon"` for h-9 w-9 dimensions)
+- Spacing standards and component patterns
