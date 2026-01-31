@@ -109,7 +109,7 @@ export default function MyWheels() {
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-background text-foreground flex flex-col">
-        <header className="flex items-center justify-between gap-4 px-4 py-3 border-b border-white/10">
+        <header className="flex items-center justify-between gap-4 px-4 py-3 border-b border-border">
           <Button
             variant="ghost"
             size="sm"
@@ -151,7 +151,7 @@ export default function MyWheels() {
         }}
       />
 
-      <header className="relative z-10 flex items-center justify-between gap-4 px-4 py-3 border-b border-white/10">
+      <header className="relative z-10 flex items-center justify-between gap-4 px-4 py-3 border-b border-border">
         <div className="flex items-center gap-4">
           <Button
             variant="ghost"
@@ -191,7 +191,7 @@ export default function MyWheels() {
             <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
           </div>
         ) : wheels.length === 0 ? (
-          <Card className="max-w-md mx-auto text-center border-white/10 bg-card/80 backdrop-blur-sm">
+          <Card className="max-w-md mx-auto text-center border-border bg-card/80 backdrop-blur-sm">
             <CardContent className="pt-6 pb-6">
               <CircleDot className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
               <h2 className="text-lg font-semibold mb-2">No saved wheels yet</h2>
@@ -208,7 +208,7 @@ export default function MyWheels() {
             {wheels.map((wheel) => (
               <Card
                 key={wheel.id}
-                className="border-white/10 bg-card/80 backdrop-blur-sm"
+                className="border-border bg-card/80 backdrop-blur-sm"
                 data-testid={`card-wheel-${wheel.id}`}
               >
                 <CardHeader className="pb-2">
@@ -253,7 +253,7 @@ export default function MyWheels() {
                       variant="outline"
                       size="sm"
                       onClick={() => setDeleteId(wheel.id)}
-                      className="border-white/10"
+                      className="border-border"
                       data-testid={`button-delete-wheel-${wheel.id}`}
                     >
                       <Trash2 className="w-3.5 h-3.5" />

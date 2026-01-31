@@ -179,7 +179,7 @@ export default function Home() {
       />
       
       {!presentationMode && (
-        <header className="relative z-10 flex items-center justify-between gap-4 px-4 py-3 border-b border-white/10">
+        <header className="relative z-10 flex items-center justify-between gap-4 px-4 py-3 border-b border-border">
           <h1 
             className="text-xl font-bold tracking-tight"
             style={{
@@ -360,7 +360,7 @@ export default function Home() {
       </main>
 
       {!presentationMode && (
-        <footer className="relative z-10 text-center py-4 text-xs text-muted-foreground border-t border-white/5">
+        <footer className="relative z-10 text-center py-4 text-xs text-muted-foreground border-t border-border">
           <p>For entertainment purposes only</p>
         </footer>
       )}

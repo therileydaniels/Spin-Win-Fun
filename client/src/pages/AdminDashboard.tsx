@@ -149,7 +149,7 @@ export default function AdminDashboard() {
   if (!isAuthenticated || user?.role !== "admin") {
     return (
       <div className="min-h-screen bg-background text-foreground flex flex-col">
-        <header className="flex items-center justify-between gap-4 px-4 py-3 border-b border-white/10">
+        <header className="flex items-center justify-between gap-4 px-4 py-3 border-b border-border">
           <Button
             variant="ghost"
             size="sm"
@@ -188,7 +188,7 @@ export default function AdminDashboard() {
         }}
       />
 
-      <header className="relative z-10 flex items-center justify-between gap-4 px-4 py-3 border-b border-white/10">
+      <header className="relative z-10 flex items-center justify-between gap-4 px-4 py-3 border-b border-border">
         <div className="flex items-center gap-4">
           <Button
             variant="ghost"
@@ -225,7 +225,7 @@ export default function AdminDashboard() {
           ) : stats ? (
             <>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <Card className="border-white/10 bg-card/80 backdrop-blur-sm">
+                <Card className="border-border bg-card/80 backdrop-blur-sm">
                   <CardHeader className="flex flex-row items-center justify-between gap-2 pb-2">
                     <CardTitle className="text-sm font-medium text-muted-foreground">
                       Total Users
@@ -239,7 +239,7 @@ export default function AdminDashboard() {
                   </CardContent>
                 </Card>
 
-                <Card className="border-white/10 bg-card/80 backdrop-blur-sm">
+                <Card className="border-border bg-card/80 backdrop-blur-sm">
                   <CardHeader className="flex flex-row items-center justify-between gap-2 pb-2">
                     <CardTitle className="text-sm font-medium text-muted-foreground">
                       Total Wheels
@@ -253,7 +253,7 @@ export default function AdminDashboard() {
                   </CardContent>
                 </Card>
 
-                <Card className="border-white/10 bg-card/80 backdrop-blur-sm">
+                <Card className="border-border bg-card/80 backdrop-blur-sm">
                   <CardHeader className="flex flex-row items-center justify-between gap-2 pb-2">
                     <CardTitle className="text-sm font-medium text-muted-foreground">
                       This Week
@@ -267,7 +267,7 @@ export default function AdminDashboard() {
                   </CardContent>
                 </Card>
 
-                <Card className="border-white/10 bg-card/80 backdrop-blur-sm">
+                <Card className="border-border bg-card/80 backdrop-blur-sm">
                   <CardHeader className="flex flex-row items-center justify-between gap-2 pb-2">
                     <CardTitle className="text-sm font-medium text-muted-foreground">
                       This Month
@@ -282,11 +282,11 @@ export default function AdminDashboard() {
                 </Card>
               </div>
 
-              <Card className="border-white/10 bg-card/80 backdrop-blur-sm">
+              <Card className="border-border bg-card/80 backdrop-blur-sm">
                 <CardContent className="py-3">
                   <div className="flex flex-wrap items-center gap-4 text-sm">
                     <span className="text-muted-foreground">Users by role:</span>
-                    <span className="px-2 py-1 bg-green-500/20 text-green-400 rounded-md" data-testid="text-free-count">
+                    <span className="px-2 py-1 bg-gray-500/20 text-gray-400 rounded-md" data-testid="text-free-count">
                       {stats.usersByRole.free} free
                     </span>
                     <span className="px-2 py-1 bg-blue-500/20 text-blue-400 rounded-md" data-testid="text-paid-count">
@@ -302,7 +302,7 @@ export default function AdminDashboard() {
           ) : null}
 
           {/* Users Table */}
-          <Card className="border-white/10 bg-card/80 backdrop-blur-sm">
+          <Card className="border-border bg-card/80 backdrop-blur-sm">
             <CardHeader>
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <CardTitle>Users</CardTitle>
@@ -334,7 +334,7 @@ export default function AdminDashboard() {
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
-                        <tr className="border-b border-white/10">
+                        <tr className="border-b border-border">
                           <th className="text-left py-3 px-2 font-medium text-muted-foreground">Email</th>
                           <th className="text-left py-3 px-2 font-medium text-muted-foreground hidden sm:table-cell">
                             Name
@@ -353,7 +353,7 @@ export default function AdminDashboard() {
                         {usersData.users.map((u) => (
                           <tr
                             key={u.id}
-                            className="border-b border-white/5 hover:bg-white/5"
+                            className="border-b border-border/50 hover:bg-muted/50"
                             data-testid={`row-user-${u.id}`}
                           >
                             <td className="py-3 px-2 truncate max-w-[200px]" data-testid={`text-email-${u.id}`}>
@@ -393,7 +393,7 @@ export default function AdminDashboard() {
                                 size="icon"
                                 onClick={() => setDeleteUser(u)}
                                 disabled={u.id === user?.id}
-                                className="h-8 w-8 text-destructive hover:text-destructive"
+                                className="text-destructive hover:text-destructive"
                                 data-testid={`button-delete-user-${u.id}`}
                               >
                                 <Trash2 className="h-4 w-4" />
@@ -407,7 +407,7 @@ export default function AdminDashboard() {
 
                   {/* Pagination */}
                   {usersData.totalPages > 1 && (
-                    <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/10">
+                    <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
                       <Button
                         variant="outline"
                         size="sm"

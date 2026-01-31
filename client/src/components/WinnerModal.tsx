@@ -31,7 +31,7 @@ export function WinnerModal({ isOpen, onClose, winner }: WinnerModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
-        className="sm:max-w-md border border-white/10 bg-card/95 backdrop-blur-xl"
+        className="sm:max-w-md border border-border bg-card/95 backdrop-blur-xl"
         data-testid="modal-winner"
       >
         <DialogHeader className="text-center">
@@ -71,7 +71,7 @@ export function WinnerModal({ isOpen, onClose, winner }: WinnerModalProps) {
           <Button
             onClick={onClose}
             variant="outline"
-            className="min-w-[120px] border-white/20"
+            className="min-w-[120px] border-border"
             data-testid="button-close-modal"
           >
             Close

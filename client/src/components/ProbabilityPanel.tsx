@@ -65,7 +65,7 @@ export function ProbabilityPanel({
 
   return (
     <>
-      <Card className="w-full max-w-sm border-white/10 bg-card/80 backdrop-blur-sm">
+      <Card className="w-full max-w-sm border-border bg-card/80 backdrop-blur-sm">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between gap-2">
             <div className="min-w-0 flex-1">
@@ -88,7 +88,7 @@ export function ProbabilityPanel({
                     variant="ghost"
                     size="icon"
                     onClick={onSaveWheel}
-                    className="text-muted-foreground w-8 h-8"
+                    className="text-muted-foreground"
                     data-testid="button-save-wheel"
                   >
                     <Save className="w-4 h-4" />
@@ -104,7 +104,7 @@ export function ProbabilityPanel({
                     variant="ghost"
                     size="icon"
                     onClick={onResetProbabilities}
-                    className="text-muted-foreground w-8 h-8"
+                    className="text-muted-foreground"
                     data-testid="button-reset-probability"
                   >
                     <Percent className="w-4 h-4" />
@@ -120,7 +120,7 @@ export function ProbabilityPanel({
                     variant="outline"
                     size="icon"
                     onClick={() => setShowNewWheelDialog(true)}
-                    className="border-white/10 w-8 h-8"
+                    className="border-border"
                     data-testid="button-new-wheel"
                   >
                     <FilePlus2 className="w-4 h-4" />
@@ -150,7 +150,7 @@ export function ProbabilityPanel({
                 value={segment.label}
                 onChange={(e) => onRename(segment.id, e.target.value)}
                 maxLength={MAX_LABEL_LENGTH}
-                className="flex-1 h-8 text-sm bg-background/50 border-white/10"
+                className="flex-1 h-8 text-sm bg-background/50 border-border"
                 data-testid={`input-segment-name-${index}`}
               />
               <div className="flex items-center gap-1">
@@ -162,7 +162,7 @@ export function ProbabilityPanel({
                   onChange={(e) =>
                     onProbabilityChange(index, parseInt(e.target.value) || 0)
                   }
-                  className="w-14 h-8 text-center text-sm bg-background/50 border-white/10"
+                  className="w-14 h-8 text-center text-sm bg-background/50 border-border"
                   data-testid={`input-probability-${index}`}
                 />
                 <span className="text-xs text-muted-foreground w-3">%</span>
@@ -172,7 +172,7 @@ export function ProbabilityPanel({
                 size="icon"
                 onClick={() => onRemove(segment.id)}
                 disabled={!canRemove}
-                className="w-7 h-7 text-muted-foreground hover:text-destructive shrink-0"
+                className="text-muted-foreground hover:text-destructive shrink-0"
                 data-testid={`button-delete-segment-${index}`}
               >
                 <Trash2 className="w-3.5 h-3.5" />
@@ -186,14 +186,14 @@ export function ProbabilityPanel({
           size="sm"
           onClick={onAdd}
           disabled={!canAdd}
-          className="w-full mt-2 border-white/10"
+          className="w-full mt-2 border-border"
           data-testid="button-add-segment"
         >
           <Plus className="w-4 h-4 mr-2" />
           Add Segment
         </Button>
 
-        <div className="pt-3 border-t border-white/10">
+        <div className="pt-3 border-t border-border">
           {isEqualOdds ? (
             <div className="flex items-center gap-2 text-sm">
               <Scale className="w-4 h-4 text-blue-400" />

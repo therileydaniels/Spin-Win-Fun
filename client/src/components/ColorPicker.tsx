@@ -69,7 +69,7 @@ export function ColorPicker({ color, onChange }: ColorPickerProps) {
               />
             ))}
           </div>
-          <div className="flex items-center gap-2 pt-2 border-t border-white/10">
+          <div className="flex items-center gap-2 pt-2 border-t border-border">
             <input
               type="color"
               value={customColor.startsWith("#") ? customColor : "#A855F7"}
@@ -82,7 +82,7 @@ export function ColorPicker({ color, onChange }: ColorPickerProps) {
               value={customColor}
               onChange={handleCustomChange}
               placeholder="#A855F7"
-              className="flex-1 h-8 text-xs bg-background/50 border-white/10"
+              className="flex-1 h-8 text-xs bg-background/50 border-border"
               data-testid="input-color-hex"
             />
           </div>
