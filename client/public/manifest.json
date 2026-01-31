@@ -1,0 +1,26 @@
+{
+  "name": "Wheel Spinner - Spin to Win!",
+  "short_name": "Wheel Spinner",
+  "description": "A customizable wheel spinner for decisions and games. Set custom probabilities and spin to win!",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#A855F7",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["games", "entertainment", "utilities"]
+}
