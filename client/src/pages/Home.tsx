@@ -185,7 +185,7 @@ export default function Home() {
             <img 
               src="/logo.png" 
               alt="QuickWheel" 
-              className="h-8 w-auto object-contain"
+              className="h-12 w-auto object-contain"
               data-testid="img-logo"
             />
           </a>
