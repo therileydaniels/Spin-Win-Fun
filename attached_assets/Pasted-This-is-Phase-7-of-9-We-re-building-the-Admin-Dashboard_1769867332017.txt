@@ -1,0 +1,78 @@
+This is Phase 7 of 9. We're building the Admin Dashboard.
+
+CONTEXT:
+Phases 1-6 are complete — we have a fully functional wheel spinner with user accounts and save/load functionality. The Users table already has a "role" field with values: "free", "paid", "admin". Now we need an admin interface to manage the app.
+
+---
+
+PHASE 7 SCOPE — Build only this:
+
+1. **Admin Route Protection**
+   - Create `/admin` route
+   - Only accessible to users with role = "admin"
+   - If non-admin tries to access, redirect to home page
+   - If not logged in, redirect to home page
+
+2. **Admin Dashboard Page**
+   - Clean, professional layout matching our gradient aesthetic
+   - Header: "Admin Dashboard" with navigation back to main app
+
+3. **Stats Overview Section**
+   - Total users count
+   - Users by role breakdown (free / paid / admin)
+   - Total wheels saved
+   - New users this week/month (if easy to implement)
+
+4. **Users Management Section**
+   - Table listing all users:
+     - Email
+     - Name (if set)
+     - Role (free/paid/admin)
+     - Wheels saved count
+     - Date joined
+   - Search/filter users by email
+   - Pagination if many users (10-20 per page)
+
+5. **User Actions (for each user row)**
+   - Change role dropdown (free ↔ paid ↔ admin)
+   - View user's saved wheels (count + names)
+   - Delete user (with confirmation: "Delete user [email]? This will also delete all their saved wheels.")
+   - Cannot delete yourself
+
+6. **API Endpoints Needed**
+   - GET /api/admin/stats — dashboard statistics
+   - GET /api/admin/users — list all users (with pagination)
+   - PUT /api/admin/users/:id/role — change user role
+   - DELETE /api/admin/users/:id — delete user
+   - All admin endpoints must verify user is admin
+
+---
+
+SECURITY:
+- All admin API endpoints must check req.session.userId AND verify role = "admin"
+- Return 403 Forbidden if non-admin tries to access
+- Admin cannot delete their own account
+- Log admin actions (role changes, deletions) to console
+
+---
+
+UI/UX:
+- Add "Admin" link in header (only visible to admin users)
+- Dashboard should feel powerful but clean
+- Use cards for stats, table for users
+- Match existing gradient/modern aesthetic
+- Mobile responsive
+
+---
+
+DO NOT BUILD:
+- No subscription/payment logic — Phase 8
+- No ads — Phase 9
+
+---
+
+Please plan first. Show me:
+1. API endpoints with request/response structure
+2. Admin dashboard layout
+3. How you'll protect admin routes (frontend + backend)
+4. Any questions before building
