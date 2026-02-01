@@ -19,7 +19,7 @@ import { useToast } from "@/hooks/use-toast";
 import { fireWinConfetti, fireCenterBurst } from "@/lib/confetti";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Footer } from "@/components/Footer";
-import { Monitor, Settings, LogIn, LogOut, User, FolderOpen, Shield } from "lucide-react";
+import { Monitor, Settings, LogIn, LogOut, User, FolderOpen, Shield, ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function Home() {
   const [, setLocation] = useLocation();
@@ -59,6 +59,7 @@ export default function Home() {
   const { toast } = useToast();
 
   const [presentationMode, setPresentationMode] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [saveModalOpen, setSaveModalOpen] = useState(false);
   const [saveAsMode, setSaveAsMode] = useState(false);
@@ -75,6 +76,7 @@ export default function Home() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/wheels"] });
       markSaved(data.wheel.id, data.wheel.name);
+      setSettingsOpen(false);
       toast({
         title: "Wheel saved!",
         description: `"${data.wheel.name}" has been saved.`,
@@ -110,6 +112,7 @@ export default function Home() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/wheels"] });
       markSaved(data.wheel.id, data.wheel.name);
+      setSettingsOpen(false);
       toast({
         title: "Wheel updated!",
         description: `"${data.wheel.name}" has been saved.`,
@@ -308,14 +311,16 @@ export default function Home() {
         </Button>
       )}
 
-      <main className={`relative z-10 flex-1 flex flex-col ${presentationMode ? "" : "lg:flex-row"} items-center justify-center gap-8 p-4 sm:p-8`}>
+      <main className={`relative z-10 flex-1 flex flex-col ${presentationMode ? "" : settingsOpen ? "lg:flex-row" : ""} items-center justify-center gap-8 p-4 sm:p-8`}>
 
         <div className="flex flex-col items-center gap-8">
           <div 
             className={`w-full transition-all duration-300 ${
               presentationMode 
                 ? "max-w-[500px] sm:max-w-[600px]" 
-                : "max-w-[340px] sm:max-w-[420px]"
+                : settingsOpen
+                  ? "max-w-[340px] sm:max-w-[420px]"
+                  : "max-w-[400px] sm:max-w-[500px]"
             }`}
           >
             <SpinWheel
@@ -343,10 +348,34 @@ export default function Home() {
               Last winner: <span className="font-semibold text-foreground">{winner.label}</span>
             </p>
           )}
+
+          {!presentationMode && !settingsOpen && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setSettingsOpen(true)}
+              className="gap-2 text-muted-foreground hover:text-foreground"
+              data-testid="button-open-settings"
+            >
+              <Settings className="w-4 h-4" />
+              <span>Wheel Settings</span>
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          )}
         </div>
 
-        {!presentationMode && (
-          <ProbabilityPanel
+        {!presentationMode && settingsOpen && (
+          <div className="relative">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setSettingsOpen(false)}
+              className="absolute -left-2 top-2 z-10 text-muted-foreground hover:text-foreground lg:block hidden"
+              data-testid="button-collapse-settings"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </Button>
+            <ProbabilityPanel
             segments={segments}
             probabilities={probabilities}
             onProbabilityChange={setProbability}
@@ -364,7 +393,9 @@ export default function Home() {
             canRemove={canRemove}
             currentWheelName={currentWheelName}
             hasUnsavedChanges={hasUnsavedChanges}
+            onClose={() => setSettingsOpen(false)}
           />
+          </div>
         )}
       </main>
 

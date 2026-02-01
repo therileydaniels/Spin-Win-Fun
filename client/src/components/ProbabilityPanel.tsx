@@ -13,7 +13,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Check, AlertTriangle, Scale, Percent, FilePlus2, Trash2, Plus, Save } from "lucide-react";
+import { Check, AlertTriangle, Scale, Percent, FilePlus2, Trash2, Plus, Save, X } from "lucide-react";
 import { ColorPicker } from "./ColorPicker";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -35,6 +35,7 @@ interface ProbabilityPanelProps {
   canRemove: boolean;
   currentWheelName: string | null;
   hasUnsavedChanges: boolean;
+  onClose?: () => void;
 }
 
 export function ProbabilityPanel({
@@ -55,6 +56,7 @@ export function ProbabilityPanel({
   canRemove,
   currentWheelName,
   hasUnsavedChanges,
+  onClose,
 }: ProbabilityPanelProps) {
   const [showNewWheelDialog, setShowNewWheelDialog] = useState(false);
 
@@ -98,6 +100,24 @@ export function ProbabilityPanel({
                   <p>Save wheel</p>
                 </TooltipContent>
               </Tooltip>
+              {onClose && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={onClose}
+                      className="text-muted-foreground lg:hidden"
+                      data-testid="button-close-settings-mobile"
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Close settings</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
