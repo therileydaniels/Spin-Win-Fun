@@ -1,0 +1,127 @@
+A few more security quick wins to implement before launch:
+
+---
+
+QUICK FIX 1: RATE LIMIT THE SPIN ENDPOINT
+
+File: server/routes.ts
+
+Problem: The /api/spin endpoint has no rate limiting, allowing someone to spam it.
+
+Fix: Add rate limiting similar to auth endpoints:
+
+const spinLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 30, // 30 spins per minute (generous but prevents abuse)
+  message: { error: "Too many spins, please slow down" },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+app.post("/api/spin", spinLimiter, (req, res) => {
+  // existing code
+});
+
+---
+
+QUICK FIX 2: ADD PASSWORD MAX LENGTH
+
+File: shared/schema.ts (in signupSchema)
+
+Problem: No max length on password could allow very long passwords that slow down bcrypt.
+
+Fix: Add max length to password validation:
+
+password: z.string()
+  .min(8, "Password must be at least 8 characters")
+  .max(72, "Password cannot exceed 72 characters") // bcrypt limit
+  .regex(/[a-zA-Z]/, "Password must contain at least one letter")
+  .regex(/[0-9]/, "Password must contain at least one number"),
+
+---
+
+QUICK FIX 3: FIX WHEEL COUNT QUERY (N+1)
+
+File: server/storage.ts (getWheelCountByUserId function)
+
+Problem: Currently fetches all wheels and counts in JavaScript.
+
+Fix: Use SQL COUNT instead:
+
+async getWheelCountByUserId(userId: number): Promise<number> {
+  const result = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(wheels)
+    .where(eq(wheels.userId, userId));
+  return Number(result[0]?.count ?? 0);
+}
+
+You'll need to import sql from drizzle-orm if not already.
+
+---
+
+QUICK FIX 4: VERIFY SQL INJECTION SAFETY
+
+Check the admin search functionality. If there's any string interpolation like:
+
+BAD: `WHERE email LIKE '%${search}%'`
+
+It should instead use parameterized queries like:
+
+GOOD: `.where(like(users.email, `%${search}%`))`  // Drizzle handles escaping
+
+Or use the ilike/like operators from Drizzle which are safe.
+
+Please check and fix if there's any raw string interpolation in SQL queries.
+
+---
+
+QUICK FIX 5: BASIC CSRF PROTECTION
+
+For session-based auth, add a simple CSRF check. The easiest approach:
+
+1. Check that state-changing requests (POST, PUT, DELETE) have the correct Content-Type header
+2. Browsers won't send application/json from a form submission attack
+
+Add this middleware before your routes:
+
+const csrfProtection = (req: Request, res: Response, next: NextFunction) => {
+  if (["POST", "PUT", "DELETE", "PATCH"].includes(req.method)) {
+    const contentType = req.headers["content-type"];
+    if (!contentType || !contentType.includes("application/json")) {
+      return res.status(403).json({ error: "Invalid content type" });
+    }
+  }
+  next();
+};
+
+app.use("/api", csrfProtection);
+
+This is a simple protection — forms can't send application/json without JavaScript.
+
+---
+
+QUICK FIX 6: CONFIGURE BASIC CSP
+
+File: server/index.ts (helmet config)
+
+Update helmet to have a basic CSP instead of completely disabled:
+
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"], // needed for Vite dev
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      imgSrc: ["'self'", "data:", "blob:"],
+      connectSrc: ["'self'"],
+    },
+  },
+}));
+
+Note: This may need tweaking if things break. Test after adding.
+
+---
+
+Please implement these quick fixes and confirm each is complete.
