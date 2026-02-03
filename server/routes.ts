@@ -80,6 +80,14 @@ const authLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+const spinLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 30, // 30 spins per minute (generous but prevents abuse)
+  message: { error: "Too many spins, please slow down" },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 function selectWeightedWinner(probabilities: number[]): number {
   const total = probabilities.reduce((a, b) => a + b, 0);
   
@@ -104,7 +112,7 @@ export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
-  app.post("/api/spin", (req, res) => {
+  app.post("/api/spin", spinLimiter, (req, res) => {
     const parsed = spinRequestSchema.safeParse(req.body);
     
     if (!parsed.success) {

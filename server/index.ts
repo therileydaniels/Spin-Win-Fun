@@ -15,7 +15,17 @@ if (process.env.NODE_ENV === "production") {
   
   // Security headers (production only - Vite dev server needs unrestricted access)
   app.use(helmet({
-    contentSecurityPolicy: false, // Disable CSP for inline scripts
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        fontSrc: ["'self'", "https://fonts.gstatic.com"],
+        imgSrc: ["'self'", "data:", "blob:"],
+        connectSrc: ["'self'"],
+        mediaSrc: ["'self'", "https://assets.mixkit.co"], // Audio CDN
+      },
+    },
   }));
 }
 const httpServer = createServer(app);
@@ -75,6 +85,17 @@ app.use(
 );
 
 app.use(express.urlencoded({ extended: false }));
+
+// Basic CSRF protection - require JSON content-type for state-changing requests
+app.use("/api", (req: Request, res: Response, next: NextFunction) => {
+  if (["POST", "PUT", "DELETE", "PATCH"].includes(req.method)) {
+    const contentType = req.headers["content-type"];
+    if (!contentType || !contentType.includes("application/json")) {
+      return res.status(403).json({ error: "Invalid content type" });
+    }
+  }
+  next();
+});
 
 export function log(message: string, source = "express") {
   const formattedTime = new Date().toLocaleTimeString("en-US", {

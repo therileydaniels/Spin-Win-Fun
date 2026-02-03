@@ -73,8 +73,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getWheelCountByUserId(userId: number): Promise<number> {
-    const result = await db.select().from(wheels).where(eq(wheels.userId, userId));
-    return result.length;
+    const result = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(wheels)
+      .where(eq(wheels.userId, userId));
+    return Number(result[0]?.count ?? 0);
   }
 
   async createWheel(wheel: InsertWheel): Promise<Wheel> {
