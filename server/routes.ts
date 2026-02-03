@@ -45,6 +45,17 @@ function validateSegments(segments: unknown): { valid: true; data: SegmentData }
     return { valid: false, error: "Probabilities must match segment count" };
   }
   
+  for (const p of data.probabilities) {
+    if (typeof p !== "number" || !Number.isFinite(p) || p < 0 || p > 100) {
+      return { valid: false, error: "Invalid probability value" };
+    }
+  }
+  
+  const total = data.probabilities.reduce((a, b) => a + b, 0);
+  if (total !== 0 && total !== 100) {
+    return { valid: false, error: "Probabilities must total 100% or all be 0" };
+  }
+  
   return { valid: true, data };
 }
 
@@ -204,7 +215,12 @@ export async function registerRoutes(
         return res.status(500).json({ error: "Could not log out" });
       }
       
-      res.clearCookie("connect.sid");
+      res.clearCookie("connect.sid", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+      });
       return res.json({ success: true });
     });
   });
@@ -395,8 +411,9 @@ export async function registerRoutes(
 
   app.get("/api/admin/users", requireAdmin, async (req, res) => {
     try {
-      const page = parseInt(req.query.page as string) || 1;
-      const limit = parseInt(req.query.limit as string) || 10;
+      const page = Math.max(1, parseInt(req.query.page as string) || 1);
+      const limitRaw = parseInt(req.query.limit as string) || 10;
+      const limit = Math.min(100, Math.max(1, limitRaw));
       const search = req.query.search as string | undefined;
       
       const result = await storage.getAllUsersWithWheelCount(page, limit, search);

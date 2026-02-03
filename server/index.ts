@@ -1,12 +1,23 @@
 import express, { type Request, Response, NextFunction } from "express";
 import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
+import helmet from "helmet";
 import { Pool } from "pg";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
 
 const app = express();
+
+// Trust proxy for secure cookies behind reverse proxy (Replit)
+if (process.env.NODE_ENV === "production") {
+  app.set("trust proxy", 1);
+}
+
+// Security headers
+app.use(helmet({
+  contentSecurityPolicy: false, // Disable CSP for Vite inline scripts
+}));
 const httpServer = createServer(app);
 
 declare module "http" {
@@ -90,11 +101,7 @@ app.use((req, res, next) => {
   res.on("finish", () => {
     const duration = Date.now() - start;
     if (path.startsWith("/api")) {
-      let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
-      if (capturedJsonResponse) {
-        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
-      }
-
+      const logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
       log(logLine);
     }
   });
@@ -118,8 +125,8 @@ app.use((req, res, next) => {
       }
     }
 
+    console.error("Error:", err);
     res.status(status).json({ message });
-    throw err;
   });
 
   // importantly only setup vite in development and after
