@@ -19,6 +19,7 @@ import { useToast } from "@/hooks/use-toast";
 import { fireWinConfetti, fireCenterBurst } from "@/lib/confetti";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Footer } from "@/components/Footer";
+import { InstallPrompt } from "@/components/InstallPrompt";
 import { Monitor, Settings, LogIn, LogOut, User, FolderOpen, Shield, ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function Home() {
@@ -294,6 +295,7 @@ export default function Home() {
             </Tooltip>
             <SoundToggle isMuted={isMuted} onToggle={toggleMute} />
             <ThemeToggle />
+            <InstallPrompt />
           </div>
         </header>
       )}
