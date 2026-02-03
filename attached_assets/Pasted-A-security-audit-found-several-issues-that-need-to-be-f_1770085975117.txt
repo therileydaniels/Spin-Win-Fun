@@ -1,0 +1,142 @@
+A security audit found several issues that need to be fixed before launch. Please fix these in order:
+
+---
+
+🔴 CRITICAL FIX 1: ERROR HANDLER RE-THROWS (CAN CRASH SERVER)
+
+File: server/index.ts (around line 122)
+
+Problem: After sending a response, the error handler does `throw err;` which can crash the server.
+
+Fix: Remove the throw statement. Just log and return.
+
+The error handler should:
+1. Log the error
+2. Send the response
+3. NOT throw
+
+---
+
+🔴 CRITICAL FIX 2: STOP LOGGING FULL API RESPONSES
+
+File: server/index.ts (around lines 86-99)
+
+Problem: All /api/* JSON responses are logged verbatim, which can leak sensitive data like user emails, names, and roles.
+
+Fix: Either:
+A) Remove response body logging entirely in production, OR
+B) Redact sensitive keys (email, password, token) before logging
+
+Simplest fix - just log the request method, path, and status code. Don't log the response body.
+
+---
+
+🔴 CRITICAL FIX 3: ADD SECURITY HEADERS WITH HELMET
+
+File: server/index.ts
+
+Problem: No security headers are set (CSP, X-Frame-Options, etc.)
+
+Fix: Install and add helmet middleware:
+
+1. The package may already be installed, if not: npm install helmet
+2. Add to server/index.ts:
+
+import helmet from "helmet";
+
+// Add near the top of middleware, before routes
+app.use(helmet({
+  contentSecurityPolicy: false, // disable CSP for now since Vite needs inline scripts
+}));
+
+---
+
+🟠 HIGH FIX 4: TRUST PROXY FOR SECURE COOKIES
+
+File: server/index.ts
+
+Problem: Behind a reverse proxy (like Replit), Express thinks requests are HTTP, so secure cookies won't be set correctly.
+
+Fix: Add trust proxy setting in production:
+
+if (process.env.NODE_ENV === "production") {
+  app.set("trust proxy", 1);
+}
+
+Add this BEFORE the session middleware.
+
+---
+
+🟠 HIGH FIX 5: FIX LOGOUT COOKIE CLEARING
+
+File: server/routes.ts (around line 207)
+
+Problem: clearCookie may not work if attributes don't match how the cookie was set.
+
+Fix: Update the logout endpoint to include all cookie attributes:
+
+res.clearCookie("connect.sid", {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "lax",
+  path: "/",
+});
+
+---
+
+🟠 HIGH FIX 6: VALIDATE PROBABILITY VALUES WHEN SAVING WHEELS
+
+File: server/routes.ts (in validateSegments function)
+
+Problem: Probability values aren't validated as numbers, non-negative, within bounds, or summing correctly.
+
+Fix: Add validation for probabilities array:
+
+1. Each value must be a number
+2. Each value must be >= 0 and <= 100
+3. Each value must be finite (not NaN or Infinity)
+4. Total must equal 100 OR all values must be 0
+
+Add this validation in the validateSegments function:
+
+for (const p of data.probabilities) {
+  if (typeof p !== "number" || !Number.isFinite(p) || p < 0 || p > 100) {
+    return { valid: false, error: "Invalid probability value" };
+  }
+}
+
+const total = data.probabilities.reduce((a, b) => a + b, 0);
+if (total !== 0 && total !== 100) {
+  return { valid: false, error: "Probabilities must total 100% or all be 0" };
+}
+
+---
+
+🟠 HIGH FIX 7: CLAMP ADMIN PAGINATION PARAMS
+
+File: server/routes.ts (admin users endpoint, around line 399)
+
+Problem: No cap on limit parameter - someone could request ?limit=1000000 and spike memory.
+
+Fix: Clamp the pagination values:
+
+const page = Math.max(1, parseInt(req.query.page as string) || 1);
+const limitRaw = parseInt(req.query.limit as string) || 10;
+const limit = Math.min(100, Math.max(1, limitRaw)); // Cap at 100
+
+---
+
+🟢 LOW FIX 8: REMOVE UNUSED PASSPORT DEPENDENCY
+
+File: package.json
+
+Problem: passport and passport-local are installed but never used.
+
+Fix: Remove them:
+npm uninstall passport passport-local
+
+Or remove from package.json and run npm install.
+
+---
+
+Please make these fixes in order and confirm each one is complete. These are security-critical for production.
