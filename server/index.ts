@@ -12,12 +12,12 @@ const app = express();
 // Trust proxy for secure cookies behind reverse proxy (Replit)
 if (process.env.NODE_ENV === "production") {
   app.set("trust proxy", 1);
+  
+  // Security headers (production only - Vite dev server needs unrestricted access)
+  app.use(helmet({
+    contentSecurityPolicy: false, // Disable CSP for inline scripts
+  }));
 }
-
-// Security headers
-app.use(helmet({
-  contentSecurityPolicy: false, // Disable CSP for Vite inline scripts
-}));
 const httpServer = createServer(app);
 
 declare module "http" {
