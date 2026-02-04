@@ -13,6 +13,7 @@ export interface UseWheelSpinReturn {
   closeResult: () => void;
   spinDuration: number;
   error: string | null;
+  clearError: () => void;
 }
 
 export function useWheelSpin(): UseWheelSpinReturn {
@@ -77,6 +78,10 @@ export function useWheelSpin(): UseWheelSpinReturn {
     setShowResult(false);
   }, []);
 
+  const clearError = useCallback(() => {
+    setError(null);
+  }, []);
+
   return {
     isSpinning,
     rotation,
@@ -86,5 +91,6 @@ export function useWheelSpin(): UseWheelSpinReturn {
     closeResult,
     spinDuration,
     error,
+    clearError,
   };
 }

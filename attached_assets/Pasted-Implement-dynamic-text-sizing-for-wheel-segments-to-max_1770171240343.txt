@@ -1,0 +1,61 @@
+Implement dynamic text sizing for wheel segments to maximize readability.
+
+**Goal:**
+Text should automatically scale to fill as much of each segment as possible, regardless of:
+- Number of segments (more segments = narrower slices)
+- Text length (longer text needs smaller font)
+
+**Current Behavior:**
+Text is a fixed size and may be too small on large segments or overflow on small segments.
+
+**Desired Behavior:**
+Each segment's text should be the largest size that fits comfortably within that segment's boundaries.
+
+**Implementation Approach:**
+
+1. **In SpinWheel.tsx, create a function to calculate optimal font size:**
+
+function calculateOptimalFontSize(
+  text: string,
+  segmentAngle: number,
+  radius: number,
+  minFontSize: number = 12,
+  maxFontSize: number = 32
+): number {
+  // Approximate available width based on segment angle
+  // Narrower angle = less width available
+  const availableWidth = (radius * 0.6) * (segmentAngle / (Math.PI / 2));
+  
+  // Estimate character width (rough approximation)
+  const charWidth = text.length * 0.6;
+  
+  // Calculate font size that fits
+  let fontSize = availableWidth / charWidth;
+  
+  // Clamp between min and max
+  fontSize = Math.max(minFontSize, Math.min(maxFontSize, fontSize));
+  
+  return fontSize;
+}
+
+2. **When drawing each segment's text:**
+   - Calculate the segment angle (based on number of segments)
+   - Call calculateOptimalFontSize for that segment's text
+   - Use the returned font size for that specific segment
+   - Each segment can have a different font size
+
+3. **Key considerations:**
+   - Very short text (1-3 chars) should use larger font
+   - Very long text should shrink but stay readable (min 12px)
+   - Text should be centered vertically and horizontally in segment
+   - Account for the segment's radial position (text further from center has more space)
+
+**Optional Enhancement:**
+For even better results, use canvas measureText() to actually measure rendered text width and iteratively adjust font size until it fits perfectly.
+
+**Test After:**
+- Create wheel with 2 segments (wide slices, long text) - text should be large
+- Create wheel with 20 segments (narrow slices) - text should shrink to fit
+- Create wheel with short names ("A", "B") - should use max font size
+- Create wheel with long names ("This is a really long segment name") - should shrink appropriately
+- All text should remain readable and centered in each slice

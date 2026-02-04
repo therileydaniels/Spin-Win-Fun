@@ -32,6 +32,8 @@ export default function Home() {
     spin,
     closeResult,
     spinDuration,
+    error: spinError,
+    clearError: clearSpinError,
   } = useWheelSpin();
   const { isMuted, toggleMute, playWinSound } = useSound();
   const {
@@ -167,6 +169,17 @@ export default function Home() {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [presentationMode, exitPresentationMode]);
+
+  useEffect(() => {
+    if (spinError) {
+      toast({
+        title: "Spin failed",
+        description: spinError,
+        variant: "destructive",
+      });
+      clearSpinError();
+    }
+  }, [spinError, toast, clearSpinError]);
 
   const handleSpin = () => {
     spin(probabilities, segments);
