@@ -2,19 +2,26 @@ import { Link } from "wouter";
 
 export function Footer() {
   return (
-    <footer className="relative z-10 border-t border-border py-4 px-4">
-      <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 text-xs text-muted-foreground">
-        <div className="flex items-center gap-4">
-          <Link href="/terms" className="hover:text-foreground transition-colors" data-testid="link-terms">
-            Terms of Service
+    <footer className="relative z-10 border-t border-border/50 py-6 px-6">
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 text-xs text-muted-foreground/70">
+        <div className="flex items-center gap-6">
+          <Link 
+            href="/terms" 
+            className="hover:text-foreground/80 transition-colors duration-200" 
+            data-testid="link-terms"
+          >
+            Terms
           </Link>
-          <span className="hidden sm:inline">|</span>
-          <Link href="/privacy" className="hover:text-foreground transition-colors" data-testid="link-privacy">
-            Privacy Policy
+          <Link 
+            href="/privacy" 
+            className="hover:text-foreground/80 transition-colors duration-200" 
+            data-testid="link-privacy"
+          >
+            Privacy
           </Link>
         </div>
-        <span className="hidden sm:inline">|</span>
-        <span>&copy; 2025 QuickWheel. All rights reserved.</span>
+        <span className="hidden sm:inline text-muted-foreground/40">·</span>
+        <span className="text-muted-foreground/50">&copy; 2025 QuickWheel</span>
       </div>
     </footer>
   );

@@ -286,3 +286,17 @@
     inset: -1px;
   }
 }
+
+/* Subtle pulsing glow animation for spin button */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 4px 20px rgba(139,92,246,0.4), 0 8px 30px rgba(99,102,241,0.2);
+  }
+  50% {
+    box-shadow: 0 4px 25px rgba(139,92,246,0.55), 0 8px 40px rgba(99,102,241,0.35);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2.5s ease-in-out infinite;
+}

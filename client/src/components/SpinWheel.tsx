@@ -185,23 +185,41 @@ export function SpinWheel({ segments, rotation, isSpinning, spinDuration, size }
             <feOffset in="blur" dx="0" dy="0" result="offsetBlur" />
             <feComposite in="SourceGraphic" in2="offsetBlur" operator="over" />
           </filter>
+          <linearGradient id="rimGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#E5E7EB" />
+            <stop offset="25%" stopColor="#9CA3AF" />
+            <stop offset="50%" stopColor="#F3F4F6" />
+            <stop offset="75%" stopColor="#9CA3AF" />
+            <stop offset="100%" stopColor="#D1D5DB" />
+          </linearGradient>
+          <filter id="rimShadow" x="-10%" y="-10%" width="120%" height="120%">
+            <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="#000" floodOpacity="0.3" />
+          </filter>
         </defs>
 
         <circle
           cx={centerX}
           cy={centerY}
-          r={radius + 6}
+          r={radius + 10}
           fill="none"
-          stroke="rgba(255,255,255,0.2)"
-          strokeWidth="2"
-          className="dark:stroke-white/20"
+          stroke="url(#rimGradient)"
+          strokeWidth="6"
+          filter="url(#rimShadow)"
         />
         <circle
           cx={centerX}
           cy={centerY}
-          r={radius + 3}
+          r={radius + 5}
           fill="none"
-          stroke="rgba(255,255,255,0.1)"
+          stroke="rgba(255,255,255,0.3)"
+          strokeWidth="1"
+        />
+        <circle
+          cx={centerX}
+          cy={centerY}
+          r={radius + 2}
+          fill="none"
+          stroke="rgba(0,0,0,0.15)"
           strokeWidth="1"
         />
 
@@ -270,26 +288,42 @@ export function SpinWheel({ segments, rotation, isSpinning, spinDuration, size }
       </svg>
 
       <div
-        className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-2 z-20"
+        className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 z-20"
         data-testid="wheel-pointer"
       >
-        <svg width="36" height="48" viewBox="0 0 36 48">
+        <svg width="40" height="52" viewBox="0 0 40 52">
           <defs>
             <linearGradient id="pointerGradient" x1="0%" y1="0%" x2="0%" y2="100%">
               <stop offset="0%" stopColor="#FFFFFF" />
-              <stop offset="50%" stopColor="#E5E7EB" />
+              <stop offset="30%" stopColor="#F9FAFB" />
+              <stop offset="60%" stopColor="#E5E7EB" />
               <stop offset="100%" stopColor="#9CA3AF" />
             </linearGradient>
             <filter id="pointerShadow" x="-50%" y="-50%" width="200%" height="200%">
-              <feDropShadow dx="0" dy="3" stdDeviation="3" floodColor="#000" floodOpacity="0.4" />
+              <feDropShadow dx="0" dy="4" stdDeviation="4" floodColor="#000" floodOpacity="0.5" />
+            </filter>
+            <filter id="pointerGlow" x="-100%" y="-100%" width="300%" height="300%">
+              <feGaussianBlur in="SourceAlpha" stdDeviation="2" result="blur" />
+              <feFlood floodColor="#A855F7" floodOpacity="0.4" result="color" />
+              <feComposite in="color" in2="blur" operator="in" result="glow" />
+              <feMerge>
+                <feMergeNode in="glow" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
             </filter>
           </defs>
           <polygon
-            points="18,44 4,8 32,8"
+            points="20,48 5,10 35,10"
             fill="url(#pointerGradient)"
-            stroke="rgba(255,255,255,0.5)"
-            strokeWidth="1"
+            stroke="rgba(255,255,255,0.8)"
+            strokeWidth="1.5"
             filter="url(#pointerShadow)"
+          />
+          <polygon
+            points="20,42 10,14 30,14"
+            fill="none"
+            stroke="rgba(255,255,255,0.3)"
+            strokeWidth="1"
           />
         </svg>
       </div>

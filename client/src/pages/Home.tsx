@@ -238,7 +238,7 @@ export default function Home() {
               QuickWheel
             </span>
           </a>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
@@ -254,73 +254,79 @@ export default function Home() {
                 <p>{settingsOpen ? "Close settings" : "Open settings"}</p>
               </TooltipContent>
             </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setLocation("/my-wheels")}
-                  className="text-muted-foreground"
-                  data-testid="button-my-wheels"
-                >
-                  <FolderOpen className="w-5 h-5" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>My Wheels</p>
-              </TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant={showHistory ? "secondary" : "ghost"}
-                  size="icon"
-                  onClick={() => setShowHistory(!showHistory)}
-                  className="text-muted-foreground"
-                  data-testid="button-toggle-history"
-                >
-                  <History className="w-5 h-5" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{showHistory ? "Hide history" : "Show history"}</p>
-              </TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant={removeWinnerMode ? "secondary" : "ghost"}
-                  size="icon"
-                  onClick={() => setRemoveWinnerMode(!removeWinnerMode)}
-                  className="text-muted-foreground"
-                  data-testid="button-toggle-remove-winner"
-                >
-                  <Trash2 className="w-5 h-5" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{removeWinnerMode ? "Remove winner: ON" : "Remove winner: OFF"}</p>
-              </TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setPresentationMode(true)}
-                  className="text-muted-foreground"
-                  data-testid="button-enter-presentation"
-                >
-                  <Monitor className="w-5 h-5" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Enter presentation mode</p>
-              </TooltipContent>
-            </Tooltip>
-            <SoundToggle isMuted={isMuted} onToggle={toggleMute} />
-            <ThemeToggle />
-            <InstallPrompt />
+            
+            <div className="hidden sm:flex items-center gap-1 px-1 py-1 rounded-lg bg-muted/50">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setLocation("/my-wheels")}
+                    className="text-muted-foreground h-8 w-8"
+                    data-testid="button-my-wheels"
+                  >
+                    <FolderOpen className="w-4 h-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>My Wheels</p>
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant={showHistory ? "secondary" : "ghost"}
+                    size="icon"
+                    onClick={() => setShowHistory(!showHistory)}
+                    className="text-muted-foreground h-8 w-8"
+                    data-testid="button-toggle-history"
+                  >
+                    <History className="w-4 h-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{showHistory ? "Hide history" : "Show history"}</p>
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant={removeWinnerMode ? "secondary" : "ghost"}
+                    size="icon"
+                    onClick={() => setRemoveWinnerMode(!removeWinnerMode)}
+                    className="text-muted-foreground h-8 w-8"
+                    data-testid="button-toggle-remove-winner"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{removeWinnerMode ? "Remove winner: ON" : "Remove winner: OFF"}</p>
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setPresentationMode(true)}
+                    className="text-muted-foreground h-8 w-8"
+                    data-testid="button-enter-presentation"
+                  >
+                    <Monitor className="w-4 h-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Enter presentation mode</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
+            
+            <div className="flex items-center gap-1">
+              <SoundToggle isMuted={isMuted} onToggle={toggleMute} />
+              <ThemeToggle />
+              <InstallPrompt />
+            </div>
           </div>
         </header>
       )}
