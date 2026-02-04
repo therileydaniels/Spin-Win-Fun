@@ -75,12 +75,12 @@ export default function Home() {
         color: seg.color,
         probability: wheelData.probabilities[idx],
       }));
-      const result = updateLocalWheel(currentWheelId as unknown as string, {
+      const result = updateLocalWheel(currentWheelId, {
         name: currentWheelName || "My Wheel",
         segments: segmentsWithProb,
       });
       if (result.success && result.wheel) {
-        markSaved(result.wheel.id as unknown as number, result.wheel.name);
+        markSaved(result.wheel.id, result.wheel.name);
         setSettingsOpen(false);
         toast({
           title: "Wheel updated!",
@@ -112,7 +112,7 @@ export default function Home() {
       segments: segmentsWithProb,
     });
     if (result.success && result.wheel) {
-      markSaved(result.wheel.id as unknown as number, result.wheel.name);
+      markSaved(result.wheel.id, result.wheel.name);
       setSaveModalOpen(false);
       setSettingsOpen(false);
       toast({

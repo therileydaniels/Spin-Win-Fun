@@ -65,7 +65,7 @@ export default function MyWheels() {
       segments: wheel.segments.map(s => ({ id: s.id, label: s.label, color: s.color })),
       probabilities: wheel.segments.map(s => s.probability),
     };
-    loadWheel(wheel.id as unknown as number, wheel.name, data);
+    loadWheel(wheel.id, wheel.name, data);
     setLocation("/");
     toast({
       title: "Wheel loaded",

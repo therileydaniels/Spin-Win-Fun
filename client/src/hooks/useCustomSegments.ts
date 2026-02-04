@@ -27,12 +27,12 @@ export interface UseCustomSegmentsReturn {
   total: number;
   isValid: boolean;
   isEqualOdds: boolean;
-  currentWheelId: number | null;
+  currentWheelId: string | null;
   currentWheelName: string | null;
   hasUnsavedChanges: boolean;
-  loadWheel: (id: number, name: string, data: SavedWheelData) => void;
+  loadWheel: (id: string, name: string, data: SavedWheelData) => void;
   clearCurrentWheel: () => void;
-  markSaved: (id: number, name: string) => void;
+  markSaved: (id: string, name: string) => void;
   getWheelData: () => SavedWheelData;
 }
 
@@ -67,10 +67,10 @@ export function useCustomSegments(): UseCustomSegmentsReturn {
     return DEFAULT_SEGMENTS.map(() => 0);
   });
 
-  const [currentWheelId, setCurrentWheelId] = useState<number | null>(() => {
+  const [currentWheelId, setCurrentWheelId] = useState<string | null>(() => {
     try {
       const saved = localStorage.getItem(CURRENT_WHEEL_KEY);
-      return saved ? parseInt(saved) : null;
+      return saved || null;
     } catch {}
     return null;
   });
@@ -188,15 +188,12 @@ export function useCustomSegments(): UseCustomSegmentsReturn {
     setHasUnsavedChanges(false);
   }, []);
 
-  const loadWheel = useCallback((id: number, name: string, data: SavedWheelData) => {
-    // Synchronously update localStorage BEFORE state updates
-    // This ensures Home.tsx reads the correct data when it initializes its hook instance
+  const loadWheel = useCallback((id: string, name: string, data: SavedWheelData) => {
     localStorage.setItem(SEGMENTS_STORAGE_KEY, JSON.stringify(data.segments));
     localStorage.setItem(PROBABILITIES_STORAGE_KEY, JSON.stringify(data.probabilities));
-    localStorage.setItem(CURRENT_WHEEL_KEY, String(id));
+    localStorage.setItem(CURRENT_WHEEL_KEY, id);
     localStorage.setItem(CURRENT_WHEEL_NAME_KEY, name);
     
-    // Then update React state
     setSegments(data.segments);
     setProbabilities(data.probabilities);
     setCurrentWheelId(id);
@@ -213,9 +210,11 @@ export function useCustomSegments(): UseCustomSegmentsReturn {
     setHasUnsavedChanges(false);
   }, []);
 
-  const markSaved = useCallback((id: number, name: string) => {
+  const markSaved = useCallback((id: string, name: string) => {
     setCurrentWheelId(id);
     setCurrentWheelName(name);
+    localStorage.setItem(CURRENT_WHEEL_KEY, id);
+    localStorage.setItem(CURRENT_WHEEL_NAME_KEY, name);
     const savedState = JSON.stringify({ segments, probabilities });
     setLastSavedState(savedState);
     setHasUnsavedChanges(false);
