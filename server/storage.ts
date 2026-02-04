@@ -109,60 +109,113 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAdminStats(): Promise<AdminStats> {
-    const allUsers = await db.select().from(users);
-    const allWheels = await db.select().from(wheels);
-    
     const now = new Date();
     const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
     
-    const usersByRole = { free: 0, paid: 0, admin: 0 };
-    let newUsersThisWeek = 0;
-    let newUsersThisMonth = 0;
+    // Single query for all user stats using SQL aggregations
+    const userStatsResult = await db.select({
+      totalUsers: sql<number>`count(*)`,
+      freeCount: sql<number>`count(*) filter (where ${users.role} = 'free')`,
+      paidCount: sql<number>`count(*) filter (where ${users.role} = 'paid')`,
+      adminCount: sql<number>`count(*) filter (where ${users.role} = 'admin')`,
+      newUsersThisWeek: sql<number>`count(*) filter (where ${users.createdAt} >= ${oneWeekAgo})`,
+      newUsersThisMonth: sql<number>`count(*) filter (where ${users.createdAt} >= ${oneMonthAgo})`,
+    }).from(users);
     
-    for (const user of allUsers) {
-      const role = user.role as 'free' | 'paid' | 'admin';
-      usersByRole[role] = (usersByRole[role] || 0) + 1;
-      
-      const createdAt = new Date(user.createdAt);
-      if (createdAt >= oneWeekAgo) newUsersThisWeek++;
-      if (createdAt >= oneMonthAgo) newUsersThisMonth++;
-    }
+    // Single query for wheel count
+    const wheelCountResult = await db.select({
+      totalWheels: sql<number>`count(*)`,
+    }).from(wheels);
+    
+    const stats = userStatsResult[0];
+    const wheelStats = wheelCountResult[0];
     
     return {
-      totalUsers: allUsers.length,
-      usersByRole,
-      totalWheels: allWheels.length,
-      newUsersThisWeek,
-      newUsersThisMonth,
+      totalUsers: Number(stats?.totalUsers ?? 0),
+      usersByRole: {
+        free: Number(stats?.freeCount ?? 0),
+        paid: Number(stats?.paidCount ?? 0),
+        admin: Number(stats?.adminCount ?? 0),
+      },
+      totalWheels: Number(wheelStats?.totalWheels ?? 0),
+      newUsersThisWeek: Number(stats?.newUsersThisWeek ?? 0),
+      newUsersThisMonth: Number(stats?.newUsersThisMonth ?? 0),
     };
   }
 
   async getAllUsersWithWheelCount(page: number, limit: number, search?: string): Promise<PaginatedUsers> {
-    let baseQuery = db.select().from(users);
+    const offsetVal = (page - 1) * limit;
     
-    if (search && search.trim()) {
-      const escapedSearch = escapeLikePattern(search.trim());
-      baseQuery = baseQuery.where(ilike(users.email, `%${escapedSearch}%`)) as typeof baseQuery;
+    // Build search condition
+    const hasSearch = search && search.trim();
+    const searchPattern = hasSearch ? `%${escapeLikePattern(search.trim())}%` : null;
+    
+    // Single query with LEFT JOIN and GROUP BY to get users with wheel counts
+    // Apply where before groupBy/orderBy/limit/offset for correct query structure
+    let usersResult;
+    if (searchPattern) {
+      usersResult = await db
+        .select({
+          id: users.id,
+          email: users.email,
+          name: users.name,
+          role: users.role,
+          createdAt: users.createdAt,
+          updatedAt: users.updatedAt,
+          wheelsCount: sql<number>`count(${wheels.id})`.as('wheels_count'),
+        })
+        .from(users)
+        .leftJoin(wheels, eq(users.id, wheels.userId))
+        .where(ilike(users.email, searchPattern))
+        .groupBy(users.id)
+        .orderBy(desc(users.createdAt))
+        .limit(limit)
+        .offset(offsetVal);
+    } else {
+      usersResult = await db
+        .select({
+          id: users.id,
+          email: users.email,
+          name: users.name,
+          role: users.role,
+          createdAt: users.createdAt,
+          updatedAt: users.updatedAt,
+          wheelsCount: sql<number>`count(${wheels.id})`.as('wheels_count'),
+        })
+        .from(users)
+        .leftJoin(wheels, eq(users.id, wheels.userId))
+        .groupBy(users.id)
+        .orderBy(desc(users.createdAt))
+        .limit(limit)
+        .offset(offsetVal);
     }
     
-    const allFilteredUsers = await baseQuery.orderBy(desc(users.createdAt));
-    const total = allFilteredUsers.length;
+    // Get total count for pagination (separate query for accuracy)
+    let countResult;
+    if (searchPattern) {
+      countResult = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(users)
+        .where(ilike(users.email, searchPattern));
+    } else {
+      countResult = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(users);
+    }
+    
+    const total = Number(countResult[0]?.count ?? 0);
     const totalPages = Math.ceil(total / limit);
     
-    const offset = (page - 1) * limit;
-    const paginatedUsers = allFilteredUsers.slice(offset, offset + limit);
-    
-    const usersWithWheelCount: UserWithWheelCount[] = await Promise.all(
-      paginatedUsers.map(async (user) => {
-        const wheelCount = await this.getWheelCountByUserId(user.id);
-        const { password, ...safeUser } = user;
-        return {
-          ...safeUser,
-          wheelsCount: wheelCount,
-        };
-      })
-    );
+    const usersWithWheelCount: UserWithWheelCount[] = usersResult.map((user) => ({
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+      wheelsCount: Number(user.wheelsCount ?? 0),
+    }));
     
     return {
       users: usersWithWheelCount,
