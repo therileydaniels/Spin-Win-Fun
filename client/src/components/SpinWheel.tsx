@@ -7,6 +7,51 @@ interface SpinWheelProps {
   spinDuration: number;
 }
 
+function getContrastColor(hexColor: string): string {
+  try {
+    let hex = hexColor.replace('#', '');
+    
+    // Handle shorthand (#RGB or #RGBA) by expanding to full form
+    if (hex.length === 3 || hex.length === 4) {
+      hex = hex.split('').map(c => c + c).join('').slice(0, 6);
+    }
+    
+    // Strip alpha channel if present (#RRGGBBAA)
+    if (hex.length === 8) {
+      hex = hex.slice(0, 6);
+    }
+    
+    // Validate we have exactly 6 hex digits
+    if (hex.length !== 6 || !/^[0-9A-Fa-f]{6}$/.test(hex)) {
+      return '#FFFFFF'; // Default to white text on invalid input
+    }
+    
+    // Parse RGB components
+    const rRaw = parseInt(hex.substring(0, 2), 16) / 255;
+    const gRaw = parseInt(hex.substring(2, 4), 16) / 255;
+    const bRaw = parseInt(hex.substring(4, 6), 16) / 255;
+    
+    // Convert sRGB to linear RGB (WCAG 2.1 compliant)
+    const toLinear = (c: number) => c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+    
+    const r = toLinear(rRaw);
+    const g = toLinear(gRaw);
+    const b = toLinear(bRaw);
+    
+    // Calculate relative luminance (WCAG formula)
+    const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    
+    // Calculate contrast ratios against white and black
+    const contrastWithWhite = (1.0 + 0.05) / (luminance + 0.05);
+    const contrastWithBlack = (luminance + 0.05) / (0.0 + 0.05);
+    
+    // Return the color with better contrast
+    return contrastWithBlack > contrastWithWhite ? '#1a1a1a' : '#FFFFFF';
+  } catch {
+    return '#FFFFFF'; // Fallback to white text on any error
+  }
+}
+
 function adjustColor(hex: string, amount: number): string {
   const num = parseInt(hex.replace("#", ""), 16);
   const r = Math.min(255, Math.max(0, (num >> 16) + amount));
@@ -156,6 +201,8 @@ export function SpinWheel({ segments, rotation, isSpinning, spinDuration }: Spin
           const textPos = getTextPosition(index);
           const fontSize = getFontSize(segment.label);
           const displayLabel = truncateLabel(segment.label);
+          const textColor = getContrastColor(segment.color);
+          const isLightText = textColor === '#FFFFFF';
 
           return (
             <g key={segment.id}>
@@ -168,7 +215,7 @@ export function SpinWheel({ segments, rotation, isSpinning, spinDuration }: Spin
               <text
                 x={textPos.x}
                 y={textPos.y}
-                fill="#FFFFFF"
+                fill={textColor}
                 fontSize={fontSize}
                 fontWeight="600"
                 textAnchor="middle"
@@ -176,7 +223,9 @@ export function SpinWheel({ segments, rotation, isSpinning, spinDuration }: Spin
                 transform={`rotate(${textPos.angle}, ${textPos.x}, ${textPos.y})`}
                 className="pointer-events-none select-none"
                 style={{ 
-                  textShadow: "0 2px 4px rgba(0,0,0,0.3)",
+                  textShadow: isLightText 
+                    ? "0 2px 4px rgba(0,0,0,0.3)" 
+                    : "0 1px 2px rgba(255,255,255,0.3)",
                   fontFamily: "Inter, system-ui, sans-serif"
                 }}
               >
