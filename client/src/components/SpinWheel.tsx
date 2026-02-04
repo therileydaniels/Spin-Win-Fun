@@ -239,7 +239,6 @@ export function SpinWheel({ segments, rotation, isSpinning, spinDuration }: Spin
                 fontWeight="600"
                 textAnchor="middle"
                 dominantBaseline="middle"
-                transform={`rotate(${textPos.angle}, ${textPos.x}, ${textPos.y})`}
                 className="pointer-events-none select-none"
                 style={{ 
                   textShadow: isLightText 
