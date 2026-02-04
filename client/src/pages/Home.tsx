@@ -20,7 +20,7 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Footer } from "@/components/Footer";
 import { InstallPrompt } from "@/components/InstallPrompt";
 import { saveWheelToLocal, updateLocalWheel } from "@/lib/localWheelStorage";
-import { Monitor, Settings, FolderOpen, ChevronLeft, ChevronRight } from "lucide-react";
+import { Monitor, Settings, FolderOpen, ChevronLeft } from "lucide-react";
 
 export default function Home() {
   const [, setLocation] = useLocation();
@@ -203,6 +203,22 @@ export default function Home() {
                 <Button
                   variant="ghost"
                   size="icon"
+                  onClick={() => setSettingsOpen(!settingsOpen)}
+                  className="text-muted-foreground"
+                  data-testid="button-open-settings"
+                >
+                  <Settings className="w-4 h-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Wheel Settings</p>
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
                   onClick={() => setLocation("/my-wheels")}
                   className="text-muted-foreground"
                   data-testid="button-my-wheels"
@@ -286,20 +302,6 @@ export default function Home() {
             >
               Last winner: <span className="font-semibold text-foreground">{winner.label}</span>
             </p>
-          )}
-
-          {!presentationMode && !settingsOpen && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setSettingsOpen(true)}
-              className="gap-2 text-muted-foreground hover:text-foreground"
-              data-testid="button-open-settings"
-            >
-              <Settings className="w-4 h-4" />
-              <span>Wheel Settings</span>
-              <ChevronRight className="w-4 h-4" />
-            </Button>
           )}
         </div>
 
