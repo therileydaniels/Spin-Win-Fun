@@ -242,17 +242,16 @@ export default function Home() {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
-                  variant="ghost"
-                  size="icon"
+                  variant={settingsOpen ? "secondary" : "default"}
                   onClick={() => setSettingsOpen(!settingsOpen)}
-                  className="text-muted-foreground"
                   data-testid="button-open-settings"
                 >
-                  <Settings className="w-5 h-5" />
+                  <Settings className="w-4 h-4 mr-2" />
+                  Customize
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Wheel Settings</p>
+                <p>{settingsOpen ? "Close settings" : "Open settings"}</p>
               </TooltipContent>
             </Tooltip>
             <Tooltip>
@@ -342,26 +341,36 @@ export default function Home() {
       <main className={`relative z-10 flex-1 flex flex-col ${presentationMode ? "" : settingsOpen ? "lg:flex-row" : ""} items-center justify-center gap-8 p-4 sm:p-8`}>
 
         <div className="flex flex-col items-center gap-8">
-          <div 
-            className={`w-full transition-all duration-300 ${
-              presentationMode 
-                ? "max-w-[600px] sm:max-w-[700px]" 
-                : settingsOpen
-                  ? "max-w-[400px] sm:max-w-[480px]"
-                  : "max-w-[550px] sm:max-w-[650px]"
-            }`}
-          >
+          <div className="w-full flex items-center justify-center">
             {isLoading ? (
-              <div className="aspect-square w-full flex items-center justify-center">
-                <Skeleton className="w-[80%] aspect-square rounded-full" />
+              <div 
+                className={`aspect-square flex items-center justify-center transition-all duration-300 ${
+                  presentationMode
+                    ? "w-[320px] md:w-[500px] lg:w-[600px]"
+                    : settingsOpen
+                      ? "w-[280px] md:w-[380px] lg:w-[420px]"
+                      : "w-[320px] md:w-[450px] lg:w-[600px]"
+                }`}
+              >
+                <Skeleton className="w-full aspect-square rounded-full" />
               </div>
             ) : (
-              <SpinWheel
-                segments={segments}
-                rotation={rotation}
-                isSpinning={isSpinning}
-                spinDuration={spinDuration}
-              />
+              <div
+                className={`transition-all duration-300 ${
+                  presentationMode
+                    ? "w-[320px] md:w-[500px] lg:w-[600px]"
+                    : settingsOpen
+                      ? "w-[280px] md:w-[380px] lg:w-[420px]"
+                      : "w-[320px] md:w-[450px] lg:w-[600px]"
+                }`}
+              >
+                <SpinWheel
+                  segments={segments}
+                  rotation={rotation}
+                  isSpinning={isSpinning}
+                  spinDuration={spinDuration}
+                />
+              </div>
             )}
           </div>
 

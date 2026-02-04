@@ -6,6 +6,7 @@ interface SpinWheelProps {
   rotation: number;
   isSpinning: boolean;
   spinDuration: number;
+  size?: number;
 }
 
 function getContrastColor(hexColor: string): string {
@@ -85,11 +86,12 @@ function truncateLabel(label: string, maxLen: number = 20): string {
   return label.slice(0, maxLen - 2) + "...";
 }
 
-export function SpinWheel({ segments, rotation, isSpinning, spinDuration }: SpinWheelProps) {
+export function SpinWheel({ segments, rotation, isSpinning, spinDuration, size }: SpinWheelProps) {
   const segmentAngle = 360 / segments.length;
+  const viewBoxSize = 500;
   const radius = 200;
-  const centerX = 250;
-  const centerY = 250;
+  const centerX = viewBoxSize / 2;
+  const centerY = viewBoxSize / 2;
 
   function polarToCartesian(
     cx: number,
@@ -141,7 +143,10 @@ export function SpinWheel({ segments, rotation, isSpinning, spinDuration }: Spin
   }
 
   return (
-    <div className="relative w-full max-w-[500px] aspect-square mx-auto">
+    <div 
+      className="relative aspect-square mx-auto"
+      style={{ width: size ? `${size}px` : '100%', maxWidth: size ? `${size}px` : '100%' }}
+    >
       <div 
         className="absolute inset-0 rounded-full opacity-60 blur-3xl pointer-events-none"
         style={{
@@ -150,7 +155,7 @@ export function SpinWheel({ segments, rotation, isSpinning, spinDuration }: Spin
       />
       
       <svg
-        viewBox="0 0 500 500"
+        viewBox={`0 0 ${viewBoxSize} ${viewBoxSize}`}
         className="w-full h-full relative z-10"
         style={{
           transform: `rotate(${rotation}deg)`,
