@@ -141,7 +141,7 @@ export function SpinWheel({ segments, rotation, isSpinning, spinDuration }: Spin
   }
 
   return (
-    <div className="relative w-full max-w-[500px] aspect-square mx-auto">
+    <div className="relative w-full aspect-square mx-auto">
       <div 
         className="absolute inset-0 rounded-full opacity-60 blur-3xl pointer-events-none"
         style={{

@@ -239,22 +239,17 @@ export default function Home() {
             </span>
           </a>
           <div className="flex items-center gap-2">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setSettingsOpen(!settingsOpen)}
-                  className="text-muted-foreground"
-                  data-testid="button-open-settings"
-                >
-                  <Settings className="w-5 h-5" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Wheel Settings</p>
-              </TooltipContent>
-            </Tooltip>
+            <Button
+              onClick={() => setSettingsOpen(!settingsOpen)}
+              className="gap-2 text-white border-none shadow-lg"
+              style={{
+                background: "linear-gradient(135deg, #A855F7 0%, #6366F1 50%, #0EA5E9 100%)",
+              }}
+              data-testid="button-open-settings"
+            >
+              <Settings className="w-4 h-4" />
+              <span>Edit</span>
+            </Button>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
@@ -345,10 +340,10 @@ export default function Home() {
           <div 
             className={`w-full transition-all duration-300 ${
               presentationMode 
-                ? "max-w-[600px] sm:max-w-[700px]" 
+                ? "max-w-[70vh]" 
                 : settingsOpen
-                  ? "max-w-[400px] sm:max-w-[480px]"
-                  : "max-w-[550px] sm:max-w-[650px]"
+                  ? "max-w-[min(70vh,calc(100vw-2rem))]"
+                  : "max-w-[min(70vh,calc(100vw-2rem))]"
             }`}
           >
             {isLoading ? (
