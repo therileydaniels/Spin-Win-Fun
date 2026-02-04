@@ -60,12 +60,31 @@ function adjustColor(hex: string, amount: number): string {
   return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, "0")}`;
 }
 
-function getFontSize(label: string): number {
-  if (label.length <= 8) return 15;
-  if (label.length <= 12) return 13;
-  if (label.length <= 16) return 11;
-  if (label.length <= 20) return 10;
-  return 9;
+function calculateOptimalFontSize(
+  text: string,
+  segmentCount: number,
+  radius: number,
+  minFontSize: number = 10,
+  maxFontSize: number = 24
+): number {
+  const segmentAngleRad = (2 * Math.PI) / segmentCount;
+  
+  const textRadialPosition = radius * 0.55;
+  const arcLength = textRadialPosition * segmentAngleRad;
+  const availableWidth = arcLength * 0.75;
+  
+  const avgCharWidth = 0.55;
+  const textLength = text.length;
+  
+  let fontSize = availableWidth / (textLength * avgCharWidth);
+  
+  if (textLength <= 3) {
+    fontSize = Math.min(fontSize, maxFontSize);
+  }
+  
+  fontSize = Math.max(minFontSize, Math.min(maxFontSize, fontSize));
+  
+  return Math.round(fontSize);
 }
 
 function truncateLabel(label: string, maxLen: number = 20): string {
@@ -199,7 +218,7 @@ export function SpinWheel({ segments, rotation, isSpinning, spinDuration }: Spin
             endAngle
           );
           const textPos = getTextPosition(index);
-          const fontSize = getFontSize(segment.label);
+          const fontSize = calculateOptimalFontSize(segment.label, segments.length, radius);
           const displayLabel = truncateLabel(segment.label);
           const textColor = getContrastColor(segment.color);
           const isLightText = textColor === '#FFFFFF';
