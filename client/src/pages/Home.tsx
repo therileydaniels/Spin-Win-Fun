@@ -346,16 +346,16 @@ export default function Home() {
 
       <main className={`relative z-10 flex-1 flex flex-col ${presentationMode ? "" : settingsOpen ? "lg:flex-row" : ""} items-center justify-center gap-6 p-4 sm:p-6`}>
 
-        <div className="flex flex-col items-center gap-6">
-          <div className="relative w-full flex items-center justify-center">
+        <div className="flex flex-col items-center gap-8">
+          <div className="w-full flex items-center justify-center">
             {isLoading ? (
               <div 
                 className={`aspect-square flex items-center justify-center transition-all duration-300 ${
                   presentationMode
-                    ? "w-[280px] md:w-[420px] lg:w-[500px]"
+                    ? "w-[300px] md:w-[400px] lg:w-[450px]"
                     : settingsOpen
-                      ? "w-[240px] md:w-[320px] lg:w-[360px]"
-                      : "w-[280px] md:w-[380px] lg:w-[500px]"
+                      ? "w-[240px] md:w-[300px] lg:w-[340px]"
+                      : "w-[300px] md:w-[380px] lg:w-[450px]"
                 }`}
               >
                 <Skeleton className="w-full aspect-square rounded-full" />
@@ -364,10 +364,10 @@ export default function Home() {
               <div
                 className={`transition-all duration-300 ${
                   presentationMode
-                    ? "w-[280px] md:w-[420px] lg:w-[500px]"
+                    ? "w-[300px] md:w-[400px] lg:w-[450px]"
                     : settingsOpen
-                      ? "w-[240px] md:w-[320px] lg:w-[360px]"
-                      : "w-[280px] md:w-[380px] lg:w-[500px]"
+                      ? "w-[240px] md:w-[300px] lg:w-[340px]"
+                      : "w-[300px] md:w-[380px] lg:w-[450px]"
                 }`}
               >
                 <SpinWheel
@@ -378,14 +378,13 @@ export default function Home() {
                 />
               </div>
             )}
-            <div className="absolute -top-[40px] md:-top-[45px] lg:-top-[50px] left-1/2 transform -translate-x-1/2 z-10">
-              <SpinButton
-                onClick={handleSpin}
-                disabled={!canSpin || isLoading}
-                isSpinning={isSpinning}
-              />
-            </div>
           </div>
+
+          <SpinButton
+            onClick={handleSpin}
+            disabled={!canSpin || isLoading}
+            isSpinning={isSpinning}
+          />
 
           {winner && (
             <p
