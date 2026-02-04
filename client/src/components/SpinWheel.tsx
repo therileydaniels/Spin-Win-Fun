@@ -153,7 +153,7 @@ export function SpinWheel({ segments, rotation, isSpinning, spinDuration }: Spin
       <div
         className="relative w-full h-full rounded-full"
         style={{
-          boxShadow: "0 0 60px rgba(168, 85, 247, 0.25), 0 15px 40px rgba(0, 0, 0, 0.12)",
+          boxShadow: "0 0 30px rgba(168, 85, 247, 0.15), 0 8px 24px rgba(0, 0, 0, 0.08)",
         }}
       >
         <svg
