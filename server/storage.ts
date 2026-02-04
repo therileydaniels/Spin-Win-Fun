@@ -2,6 +2,10 @@ import { type User, type InsertUser, type SafeUser, users, type Wheel, type Inse
 import { db } from "./db";
 import { eq, and, desc, count, gte, ilike, sql } from "drizzle-orm";
 
+function escapeLikePattern(str: string): string {
+  return str.replace(/[%_\\]/g, '\\$&');
+}
+
 export interface AdminStats {
   totalUsers: number;
   usersByRole: { free: number; paid: number; admin: number };
@@ -138,7 +142,8 @@ export class DatabaseStorage implements IStorage {
     let baseQuery = db.select().from(users);
     
     if (search && search.trim()) {
-      baseQuery = baseQuery.where(ilike(users.email, `%${search.trim()}%`)) as typeof baseQuery;
+      const escapedSearch = escapeLikePattern(search.trim());
+      baseQuery = baseQuery.where(ilike(users.email, `%${escapedSearch}%`)) as typeof baseQuery;
     }
     
     const allFilteredUsers = await baseQuery.orderBy(desc(users.createdAt));
