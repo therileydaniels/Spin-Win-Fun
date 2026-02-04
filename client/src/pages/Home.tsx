@@ -197,7 +197,7 @@ export default function Home() {
               QuickWheel
             </span>
           </a>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
@@ -207,7 +207,7 @@ export default function Home() {
                   className="text-muted-foreground"
                   data-testid="button-open-settings"
                 >
-                  <Settings className="w-4 h-4" />
+                  <Settings className="w-5 h-5" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
@@ -223,7 +223,7 @@ export default function Home() {
                   className="text-muted-foreground"
                   data-testid="button-my-wheels"
                 >
-                  <FolderOpen className="w-4 h-4" />
+                  <FolderOpen className="w-5 h-5" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
@@ -239,7 +239,7 @@ export default function Home() {
                   className="text-muted-foreground"
                   data-testid="button-enter-presentation"
                 >
-                  <Monitor className="w-4 h-4" />
+                  <Monitor className="w-5 h-5" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
@@ -272,10 +272,10 @@ export default function Home() {
           <div 
             className={`w-full transition-all duration-300 ${
               presentationMode 
-                ? "max-w-[500px] sm:max-w-[600px]" 
+                ? "max-w-[600px] sm:max-w-[700px]" 
                 : settingsOpen
-                  ? "max-w-[340px] sm:max-w-[420px]"
-                  : "max-w-[400px] sm:max-w-[500px]"
+                  ? "max-w-[400px] sm:max-w-[480px]"
+                  : "max-w-[550px] sm:max-w-[650px]"
             }`}
           >
             <SpinWheel
