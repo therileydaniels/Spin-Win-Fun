@@ -1,0 +1,74 @@
+🎯 PLAN MODE: Comprehensive App Review & Suggestions
+
+I need you to review my QuickWheel app and provide suggestions for improvements.
+
+**About QuickWheel:**
+- Rigged wheel spinner where operators can secretly control probability outcomes
+- React + TypeScript + Vite frontend
+- Node.js + Express backend
+- PostgreSQL + Drizzle ORM
+- Session-based auth with bcrypt
+- PWA-enabled (manifest.json, service worker)
+
+**What's Already Complete:**
+✅ Core wheel UI with spin animation
+✅ Server-side probability rigging
+✅ Segment customization (2-20 segments, colors, names)
+✅ Presentation mode (hides controls)
+✅ User authentication + role system (free/paid/admin)
+✅ Save/load wheels (2 wheel limit for free users)
+✅ Admin dashboard
+✅ Terms & Privacy pages
+✅ Security hardening (rate limiting, bcrypt, CSRF protection, CSP)
+✅ PWA setup
+
+**Please Review For:**
+
+1. **UX/UI Issues**
+   - Confusing flows or unclear interactions
+   - Mobile responsiveness problems
+   - Accessibility concerns
+   - Visual inconsistencies
+
+2. **Performance Optimizations**
+   - Slow queries or inefficient database calls
+   - Bundle size issues
+   - Unnecessary re-renders
+   - Memory leaks
+
+3. **Security Gaps**
+   - Auth vulnerabilities
+   - Data exposure risks
+   - Missing input validation
+   - Session management issues
+
+4. **Code Quality**
+   - Duplicated logic that should be DRY
+   - Components that are too large/complex
+   - Missing error handling
+   - Poor separation of concerns
+
+5. **Feature Improvements**
+   - Small quality-of-life additions
+   - Missing edge case handling
+   - Better defaults or smarter behaviors
+
+**Focus Areas:**
+- client/src/pages/Home.tsx (main wheel page)
+- client/src/components/SpinWheel.tsx (wheel rendering)
+- client/src/components/ProbabilityPanel.tsx (settings panel)
+- server/routes.ts (API logic)
+- shared/schema.ts (database schema + validation)
+
+**Output Format:**
+Organize suggestions by priority:
+- 🔴 Critical (security, broken functionality)
+- 🟡 Important (UX issues, performance problems)
+- 🟢 Nice-to-have (polish, minor improvements)
+
+For each suggestion, explain:
+1. What the issue is
+2. Why it matters
+3. How to fix it (high-level approach)
+
+Do NOT make any code changes - just provide analysis and recommendations.
