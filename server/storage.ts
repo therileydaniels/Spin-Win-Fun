@@ -146,63 +146,39 @@ export class DatabaseStorage implements IStorage {
 
   async getAllUsersWithWheelCount(page: number, limit: number, search?: string): Promise<PaginatedUsers> {
     const offsetVal = (page - 1) * limit;
+    const searchPattern = search?.trim() ? `%${escapeLikePattern(search.trim())}%` : null;
+    const searchCondition = searchPattern ? ilike(users.email, searchPattern) : undefined;
     
-    // Build search condition
-    const hasSearch = search && search.trim();
-    const searchPattern = hasSearch ? `%${escapeLikePattern(search.trim())}%` : null;
+    const userSelect = {
+      id: users.id,
+      email: users.email,
+      name: users.name,
+      role: users.role,
+      createdAt: users.createdAt,
+      updatedAt: users.updatedAt,
+      wheelsCount: sql<number>`count(${wheels.id})`.as('wheels_count'),
+    };
     
-    // Single query with LEFT JOIN and GROUP BY to get users with wheel counts
-    // Apply where before groupBy/orderBy/limit/offset for correct query structure
-    let usersResult;
-    if (searchPattern) {
-      usersResult = await db
-        .select({
-          id: users.id,
-          email: users.email,
-          name: users.name,
-          role: users.role,
-          createdAt: users.createdAt,
-          updatedAt: users.updatedAt,
-          wheelsCount: sql<number>`count(${wheels.id})`.as('wheels_count'),
-        })
-        .from(users)
-        .leftJoin(wheels, eq(users.id, wheels.userId))
-        .where(ilike(users.email, searchPattern))
-        .groupBy(users.id)
-        .orderBy(desc(users.createdAt))
-        .limit(limit)
-        .offset(offsetVal);
-    } else {
-      usersResult = await db
-        .select({
-          id: users.id,
-          email: users.email,
-          name: users.name,
-          role: users.role,
-          createdAt: users.createdAt,
-          updatedAt: users.updatedAt,
-          wheelsCount: sql<number>`count(${wheels.id})`.as('wheels_count'),
-        })
-        .from(users)
-        .leftJoin(wheels, eq(users.id, wheels.userId))
-        .groupBy(users.id)
-        .orderBy(desc(users.createdAt))
-        .limit(limit)
-        .offset(offsetVal);
-    }
+    const baseQuery = db
+      .select(userSelect)
+      .from(users)
+      .leftJoin(wheels, eq(users.id, wheels.userId))
+      .$dynamic();
     
-    // Get total count for pagination (separate query for accuracy)
-    let countResult;
-    if (searchPattern) {
-      countResult = await db
-        .select({ count: sql<number>`count(*)` })
-        .from(users)
-        .where(ilike(users.email, searchPattern));
-    } else {
-      countResult = await db
-        .select({ count: sql<number>`count(*)` })
-        .from(users);
-    }
+    const usersResult = await (searchCondition
+      ? baseQuery.where(searchCondition)
+      : baseQuery
+    )
+      .groupBy(users.id)
+      .orderBy(desc(users.createdAt))
+      .limit(limit)
+      .offset(offsetVal);
+    
+    const countQuery = db.select({ count: sql<number>`count(*)` }).from(users).$dynamic();
+    const countResult = await (searchCondition
+      ? countQuery.where(searchCondition)
+      : countQuery
+    );
     
     const total = Number(countResult[0]?.count ?? 0);
     const totalPages = Math.ceil(total / limit);
