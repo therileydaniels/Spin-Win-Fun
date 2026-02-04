@@ -192,19 +192,11 @@ export function SpinWheel({ segments, rotation, isSpinning, spinDuration }: Spin
         <circle
           cx={centerX}
           cy={centerY}
-          r={radius + 6}
+          r={radius + 2}
           fill="none"
-          stroke="rgba(255,255,255,0.2)"
-          strokeWidth="2"
-          className="dark:stroke-white/20"
-        />
-        <circle
-          cx={centerX}
-          cy={centerY}
-          r={radius + 3}
-          fill="none"
-          stroke="rgba(255,255,255,0.1)"
+          stroke="rgba(255,255,255,0.15)"
           strokeWidth="1"
+          className="dark:stroke-white/15"
         />
 
         {segments.map((segment, index) => {
