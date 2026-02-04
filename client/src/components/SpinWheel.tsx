@@ -143,24 +143,31 @@ export function SpinWheel({ segments, rotation, isSpinning, spinDuration }: Spin
   return (
     <div className="relative w-full aspect-square mx-auto">
       <div 
-        className="absolute inset-0 rounded-full opacity-60 blur-3xl pointer-events-none"
+        className="absolute inset-0 rounded-full blur-3xl pointer-events-none"
         style={{
-          background: "radial-gradient(circle, rgba(139,92,246,0.4) 0%, rgba(236,72,153,0.3) 50%, transparent 70%)"
+          background: "radial-gradient(circle, rgba(139,92,246,0.35) 0%, rgba(236,72,153,0.25) 50%, transparent 70%)",
+          transform: "scale(1.1)",
         }}
       />
       
-      <svg
-        viewBox="0 0 500 500"
-        className="w-full h-full relative z-10"
+      <div
+        className="relative w-full h-full rounded-full"
         style={{
-          transform: `rotate(${rotation}deg)`,
-          transition: isSpinning
-            ? `transform ${spinDuration}s cubic-bezier(0.17, 0.67, 0.12, 0.99)`
-            : "none",
-          filter: "drop-shadow(0 0 30px rgba(139,92,246,0.3))",
+          boxShadow: "0 0 60px rgba(168, 85, 247, 0.25), 0 15px 40px rgba(0, 0, 0, 0.12)",
         }}
-        data-testid="wheel-svg"
       >
+        <svg
+          viewBox="0 0 500 500"
+          className="w-full h-full relative z-10"
+          style={{
+            transform: `rotate(${rotation}deg)`,
+            transition: isSpinning
+              ? `transform ${spinDuration}s cubic-bezier(0.17, 0.67, 0.12, 0.99)`
+              : "none",
+            filter: "drop-shadow(0 0 20px rgba(139,92,246,0.2))",
+          }}
+          data-testid="wheel-svg"
+        >
         <defs>
           {segments.map((segment) => (
             <linearGradient
@@ -263,6 +270,7 @@ export function SpinWheel({ segments, rotation, isSpinning, spinDuration }: Spin
         <circle cx={centerX} cy={centerY} r="10" fill="#111827" />
         <circle cx={centerX} cy={centerY} r="4" fill="rgba(255,255,255,0.3)" />
       </svg>
+      </div>
 
       <div
         className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-2 z-20"

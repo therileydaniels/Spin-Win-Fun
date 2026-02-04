@@ -209,11 +209,15 @@ export default function Home() {
   }, [spinError, toast, clearSpinError]);
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col relative overflow-hidden">
+    <div className="min-h-screen text-foreground flex flex-col relative overflow-hidden"
+      style={{
+        background: "linear-gradient(to bottom, hsl(var(--background)), hsl(270 50% 98%))"
+      }}
+    >
       <div 
-        className="absolute inset-0 opacity-30 pointer-events-none"
+        className="absolute inset-0 pointer-events-none"
         style={{
-          background: "radial-gradient(ellipse at 50% 0%, rgba(139,92,246,0.15) 0%, transparent 50%), radial-gradient(ellipse at 80% 80%, rgba(236,72,153,0.1) 0%, transparent 40%)"
+          background: "radial-gradient(ellipse at 50% 0%, rgba(139,92,246,0.08) 0%, transparent 50%), radial-gradient(ellipse at 80% 80%, rgba(236,72,153,0.05) 0%, transparent 40%)"
         }}
       />
       
