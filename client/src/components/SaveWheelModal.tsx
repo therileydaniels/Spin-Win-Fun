@@ -30,7 +30,7 @@ type NameFormValues = z.infer<typeof nameSchema>;
 interface SaveWheelModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (name: string) => Promise<void>;
+  onSave: (name: string) => void | Promise<void>;
   defaultName?: string;
   title?: string;
   buttonText?: string;

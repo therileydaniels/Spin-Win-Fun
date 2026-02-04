@@ -7,7 +7,6 @@ import { WinnerModal } from "@/components/WinnerModal";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { SoundToggle } from "@/components/SoundToggle";
 import { ProbabilityPanel } from "@/components/ProbabilityPanel";
-import { AuthModal } from "@/components/AuthModal";
 import { SaveWheelModal } from "@/components/SaveWheelModal";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -20,7 +19,8 @@ import { fireWinConfetti, fireCenterBurst } from "@/lib/confetti";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Footer } from "@/components/Footer";
 import { InstallPrompt } from "@/components/InstallPrompt";
-import { Monitor, Settings, LogIn, LogOut, User, FolderOpen, Shield, ChevronLeft, ChevronRight } from "lucide-react";
+import { saveWheelToLocal, updateLocalWheel } from "@/lib/localWheelStorage";
+import { Monitor, Settings, FolderOpen, ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function Home() {
   const [, setLocation] = useLocation();
@@ -58,94 +58,74 @@ export default function Home() {
     markSaved,
   } = useCustomSegments();
 
-  const { user, isAuthenticated, logout, isLoggingOut } = useAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
 
   const [presentationMode, setPresentationMode] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [authModalOpen, setAuthModalOpen] = useState(false);
   const [saveModalOpen, setSaveModalOpen] = useState(false);
   const [saveAsMode, setSaveAsMode] = useState(false);
 
-  const createWheelMutation = useMutation({
-    mutationFn: async (name: string) => {
-      const data = getWheelData();
-      const response = await apiRequest("POST", "/api/wheels", {
-        name,
-        segments: data,
+  const handleSaveWheel = () => {
+    if (currentWheelId && !saveAsMode) {
+      const wheelData = getWheelData();
+      const segmentsWithProb = wheelData.segments.map((seg, idx) => ({
+        id: seg.id,
+        label: seg.label,
+        color: seg.color,
+        probability: wheelData.probabilities[idx],
+      }));
+      const result = updateLocalWheel(currentWheelId as unknown as string, {
+        name: currentWheelName || "My Wheel",
+        segments: segmentsWithProb,
       });
-      return response.json();
-    },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/wheels"] });
-      markSaved(data.wheel.id, data.wheel.name);
-      setSettingsOpen(false);
-      toast({
-        title: "Wheel saved!",
-        description: `"${data.wheel.name}" has been saved.`,
-      });
-    },
-    onError: (error: unknown) => {
-      const message = error instanceof Error ? error.message : "Failed to save wheel";
-      if (message.includes("limit")) {
+      if (result.success && result.wheel) {
+        markSaved(result.wheel.id as unknown as number, result.wheel.name);
+        setSettingsOpen(false);
         toast({
-          title: "Save limit reached",
-          description: "You've reached the free limit (2 wheels). Upgrade to save unlimited wheels.",
-          variant: "destructive",
+          title: "Wheel updated!",
+          description: `"${result.wheel.name}" has been saved.`,
         });
       } else {
         toast({
           title: "Error",
-          description: message,
+          description: result.error || "Failed to update wheel.",
           variant: "destructive",
         });
       }
-    },
-  });
-
-  const updateWheelMutation = useMutation({
-    mutationFn: async ({ id, name }: { id: number; name: string }) => {
-      const data = getWheelData();
-      const response = await apiRequest("PUT", `/api/wheels/${id}`, {
-        name,
-        segments: data,
-      });
-      return response.json();
-    },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/wheels"] });
-      markSaved(data.wheel.id, data.wheel.name);
-      setSettingsOpen(false);
-      toast({
-        title: "Wheel updated!",
-        description: `"${data.wheel.name}" has been saved.`,
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to update wheel. Please try again.",
-        variant: "destructive",
-      });
-    },
-  });
-
-  const handleSaveWheel = () => {
-    if (!isAuthenticated) {
-      setAuthModalOpen(true);
-      return;
-    }
-    
-    if (currentWheelId && !saveAsMode) {
-      updateWheelMutation.mutate({ id: currentWheelId, name: currentWheelName || "My Wheel" });
     } else {
       setSaveAsMode(false);
       setSaveModalOpen(true);
     }
   };
 
-  const handleSaveNew = async (name: string) => {
-    await createWheelMutation.mutateAsync(name);
+  const handleSaveNew = (name: string) => {
+    const wheelData = getWheelData();
+    const segmentsWithProb = wheelData.segments.map((seg, idx) => ({
+      id: seg.id,
+      label: seg.label,
+      color: seg.color,
+      probability: wheelData.probabilities[idx],
+    }));
+    const result = saveWheelToLocal({
+      name,
+      segments: segmentsWithProb,
+    });
+    if (result.success && result.wheel) {
+      markSaved(result.wheel.id as unknown as number, result.wheel.name);
+      setSaveModalOpen(false);
+      setSettingsOpen(false);
+      toast({
+        title: "Wheel saved!",
+        description: `"${result.wheel.name}" has been saved.`,
+      });
+    } else {
+      toast({
+        title: "Error",
+        description: result.error || "Failed to save wheel.",
+        variant: "destructive",
+      });
+    }
   };
 
   const exitPresentationMode = useCallback(() => {
@@ -218,78 +198,22 @@ export default function Home() {
             </span>
           </a>
           <div className="flex items-center gap-1">
-            {isAuthenticated ? (
-              <>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setLocation("/my-wheels")}
-                      className="text-muted-foreground"
-                      data-testid="button-my-wheels"
-                    >
-                      <FolderOpen className="w-4 h-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>My Wheels</p>
-                  </TooltipContent>
-                </Tooltip>
-                {user?.role === "admin" && (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => setLocation("/admin")}
-                        className="text-muted-foreground"
-                        data-testid="button-admin-dashboard"
-                      >
-                        <Shield className="w-4 h-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Admin Dashboard</p>
-                    </TooltipContent>
-                  </Tooltip>
-                )}
-                <div className="flex items-center gap-2 px-2 text-sm text-muted-foreground">
-                  <User className="w-4 h-4" />
-                  <span className="hidden sm:inline max-w-[120px] truncate" data-testid="text-user-email">
-                    {user?.name || user?.email}
-                  </span>
-                </div>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => logout()}
-                      disabled={isLoggingOut}
-                      className="text-muted-foreground"
-                      data-testid="button-logout"
-                    >
-                      <LogOut className="w-4 h-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Sign out</p>
-                  </TooltipContent>
-                </Tooltip>
-              </>
-            ) : (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setAuthModalOpen(true)}
-                className="text-muted-foreground gap-2"
-                data-testid="button-signin"
-              >
-                <LogIn className="w-4 h-4" />
-                <span className="hidden sm:inline">Sign In</span>
-              </Button>
-            )}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setLocation("/my-wheels")}
+                  className="text-muted-foreground"
+                  data-testid="button-my-wheels"
+                >
+                  <FolderOpen className="w-4 h-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>My Wheels</p>
+              </TooltipContent>
+            </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
@@ -417,7 +341,6 @@ export default function Home() {
       {!presentationMode && <Footer />}
 
       <WinnerModal isOpen={showResult} onClose={closeResult} winner={winner} />
-      <AuthModal open={authModalOpen} onOpenChange={setAuthModalOpen} />
       <SaveWheelModal
         open={saveModalOpen}
         onOpenChange={setSaveModalOpen}

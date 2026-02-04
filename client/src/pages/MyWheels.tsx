@@ -1,10 +1,8 @@
-import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { queryClient, apiRequest } from "@/lib/queryClient";
-import { useAuth } from "@/hooks/useAuth";
 import { useCustomSegments, SavedWheelData } from "@/hooks/useCustomSegments";
 import { useToast } from "@/hooks/use-toast";
+import { getLocalWheels, deleteLocalWheel, LocalWheel } from "@/lib/localWheelStorage";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -19,57 +17,41 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Footer } from "@/components/Footer";
-import { ArrowLeft, Trash2, Play, Loader2, CircleDot } from "lucide-react";
-import type { Wheel } from "@shared/schema";
-
-interface WheelWithSegments extends Wheel {
-  segments: {
-    segments: Array<{ id: string; label: string; color: string }>;
-    probabilities: number[];
-  };
-}
+import { ArrowLeft, Trash2, Play, CircleDot, AlertTriangle } from "lucide-react";
 
 export default function MyWheels() {
   const [, setLocation] = useLocation();
-  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const { loadWheel, hasUnsavedChanges } = useCustomSegments();
   const { toast } = useToast();
 
-  const [deleteId, setDeleteId] = useState<number | null>(null);
-  const [loadId, setLoadId] = useState<number | null>(null);
-  const [pendingLoad, setPendingLoad] = useState<WheelWithSegments | null>(null);
+  const [wheels, setWheels] = useState<LocalWheel[]>([]);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [loadId, setLoadId] = useState<string | null>(null);
+  const [pendingLoad, setPendingLoad] = useState<LocalWheel | null>(null);
 
-  const { data, isLoading } = useQuery<{ wheels: WheelWithSegments[] }>({
-    queryKey: ["/api/wheels"],
-    enabled: isAuthenticated,
-  });
+  useEffect(() => {
+    setWheels(getLocalWheels());
+  }, []);
 
-  const deleteMutation = useMutation({
-    mutationFn: async (id: number) => {
-      await apiRequest("DELETE", `/api/wheels/${id}`);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/wheels"] });
+  const handleDelete = (id: string) => {
+    const result = deleteLocalWheel(id);
+    if (result.success) {
+      setWheels(getLocalWheels());
       toast({
         title: "Wheel deleted",
         description: "Your wheel has been deleted.",
       });
-    },
-    onError: () => {
+    } else {
       toast({
         title: "Error",
-        description: "Failed to delete wheel. Please try again.",
+        description: result.error || "Failed to delete wheel.",
         variant: "destructive",
       });
-    },
-  });
-
-  const handleDelete = (id: number) => {
-    deleteMutation.mutate(id);
+    }
     setDeleteId(null);
   };
 
-  const handleLoadClick = (wheel: WheelWithSegments) => {
+  const handleLoadClick = (wheel: LocalWheel) => {
     if (hasUnsavedChanges) {
       setPendingLoad(wheel);
       setLoadId(wheel.id);
@@ -78,12 +60,12 @@ export default function MyWheels() {
     }
   };
 
-  const performLoad = (wheel: WheelWithSegments) => {
+  const performLoad = (wheel: LocalWheel) => {
     const data: SavedWheelData = {
-      segments: wheel.segments.segments,
-      probabilities: wheel.segments.probabilities,
+      segments: wheel.segments.map(s => ({ id: s.id, label: s.label, color: s.color })),
+      probabilities: wheel.segments.map(s => s.probability),
     };
-    loadWheel(wheel.id, wheel.name, data);
+    loadWheel(wheel.id as unknown as number, wheel.name, data);
     setLocation("/");
     toast({
       title: "Wheel loaded",
@@ -99,49 +81,7 @@ export default function MyWheels() {
     setPendingLoad(null);
   };
 
-  if (authLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-background text-foreground flex flex-col">
-        <header className="flex items-center justify-between gap-4 px-4 py-3 border-b border-border">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setLocation("/")}
-            className="gap-2"
-            data-testid="button-back-home"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back
-          </Button>
-          <ThemeToggle />
-        </header>
-        <main className="flex-1 flex items-center justify-center p-4">
-          <Card className="max-w-md w-full text-center">
-            <CardContent className="pt-6">
-              <p className="text-muted-foreground mb-4">
-                Please sign in to view your saved wheels.
-              </p>
-              <Button onClick={() => setLocation("/")} data-testid="button-go-signin">
-                Go to Sign In
-              </Button>
-            </CardContent>
-          </Card>
-        </main>
-      </div>
-    );
-  }
-
-  const wheels = data?.wheels || [];
   const wheelCount = wheels.length;
-  const isAdmin = user?.role === "admin";
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col relative overflow-hidden">
@@ -177,21 +117,22 @@ export default function MyWheels() {
           </h1>
         </div>
         <div className="flex items-center gap-2">
-          {!isAdmin && (
-            <span className="text-sm text-muted-foreground">
-              {wheelCount}/2 saved
-            </span>
-          )}
+          <span className="text-sm text-muted-foreground">
+            {wheelCount}/10 saved
+          </span>
           <ThemeToggle />
         </div>
       </header>
 
       <main className="relative z-10 flex-1 p-4 sm:p-8">
-        {isLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+        <div className="max-w-4xl mx-auto mb-4">
+          <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/50 border border-border text-sm text-muted-foreground">
+            <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+            <span>Wheels are saved locally in your browser. Clearing browser data will delete them.</span>
           </div>
-        ) : wheels.length === 0 ? (
+        </div>
+
+        {wheels.length === 0 ? (
           <Card className="max-w-md mx-auto text-center border-border bg-card/80 backdrop-blur-sm">
             <CardContent className="pt-6 pb-6">
               <CircleDot className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
@@ -217,12 +158,12 @@ export default function MyWheels() {
                     {wheel.name}
                   </CardTitle>
                   <p className="text-xs text-muted-foreground">
-                    {wheel.segments.segments.length} segments
+                    {wheel.segments.length} segments
                   </p>
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-wrap gap-1 mb-3">
-                    {wheel.segments.segments.slice(0, 5).map((seg, idx) => (
+                    {wheel.segments.slice(0, 5).map((seg, idx) => (
                       <div
                         key={idx}
                         className="w-4 h-4 rounded-full"
@@ -230,9 +171,9 @@ export default function MyWheels() {
                         title={seg.label}
                       />
                     ))}
-                    {wheel.segments.segments.length > 5 && (
+                    {wheel.segments.length > 5 && (
                       <span className="text-xs text-muted-foreground ml-1">
-                        +{wheel.segments.segments.length - 5}
+                        +{wheel.segments.length - 5}
                       </span>
                     )}
                   </div>
