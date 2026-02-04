@@ -1,0 +1,106 @@
+Temporarily hide authentication and implement localStorage wheel saving for anonymous users.
+
+**Goals:**
+1. Hide all sign-in/sign-up UI elements (but keep the code intact for future re-enabling)
+2. Allow anonymous users to save wheels to browser localStorage
+3. Make "My Wheels" page work with localStorage instead of requiring auth
+
+---
+
+**Part 1: Hide Authentication UI**
+
+1. **In Home.tsx and any header/nav components:**
+   - Find the sign-in/sign-up buttons
+   - Wrap them in a conditional: {false && <AuthButton />} 
+   - This hides them without deleting code (easy to re-enable later)
+   - Remove or hide any "Log In to Save" messaging
+
+2. **Hide the AuthModal component:**
+   - Set a flag or prop to never show it
+   - Or wrap its render in {false && ...}
+
+3. **Update any auth-gated features:**
+   - Remove warnings about needing to log in to save
+   - Remove free tier limit messaging (2 wheels max)
+
+---
+
+**Part 2: Implement localStorage Wheel Saving**
+
+1. **Create a new utility file: client/src/lib/localWheelStorage.ts**
+
+Create functions for:
+- saveWheelToLocal(wheel: { name: string, segments: any, probabilities: any })
+- getLocalWheels(): Array of saved wheels
+- deleteLocalWheel(wheelId: string)
+- updateLocalWheel(wheelId: string, data: any)
+
+Use this localStorage schema:
+{
+  "quickwheel_saved_wheels": [
+    {
+      "id": "local_uuid_here",
+      "name": "My Wheel",
+      "segments": [...],
+      "probabilities": [...],
+      "createdAt": "timestamp",
+      "updatedAt": "timestamp"
+    }
+  ]
+}
+
+2. **Update SaveWheelModal component:**
+   - When user saves a wheel, call saveWheelToLocal() instead of the API
+   - Generate a local UUID (use crypto.randomUUID() or Date.now())
+   - Store in localStorage
+   - Show success message
+
+3. **Update My Wheels page (MyWheels.tsx):**
+   - On load, call getLocalWheels() instead of fetching from API
+   - Display local wheels in the same UI
+   - Delete and load buttons should work with localStorage functions
+   - Remove any "upgrade to save more" messaging
+   - Optional: Set a reasonable limit like 10 wheels max in localStorage
+
+4. **Update Home.tsx:**
+   - When "Load Wheel" is clicked, fetch from localStorage instead of API
+   - When "Save" is clicked, use localStorage instead of API
+   - Remove auth checks before saving
+
+---
+
+**Part 3: Handle Edge Cases**
+
+1. **localStorage quota:**
+   - Wrap all localStorage calls in try/catch
+   - If quota exceeded, show user-friendly error: "Storage full. Please delete old wheels."
+
+2. **Data persistence warning:**
+   - Add a small notice on My Wheels page: "Wheels are saved locally. Clearing browser data will delete them."
+
+3. **Keep database code intact:**
+   - Don't delete any API endpoints or database functions
+   - Just don't call them from the frontend
+   - This makes it easy to re-enable auth later
+
+---
+
+**Expected Result:**
+
+✅ No sign-in button visible anywhere
+✅ Users can save wheels without authentication
+✅ My Wheels page shows localStorage-saved wheels
+✅ Wheels persist across page refreshes
+✅ All auth code remains intact (hidden, not deleted)
+✅ Easy to re-enable auth later by changing conditionals
+
+---
+
+**Test After:**
+1. Verify sign-in button is hidden
+2. Save a wheel - should work without login
+3. Refresh page - wheel should still be in My Wheels
+4. Save multiple wheels (test up to 10)
+5. Delete a wheel - should remove from localStorage
+6. Load a saved wheel - should populate the spinner
+7. Clear browser data - wheels should disappear (expected behavior)
