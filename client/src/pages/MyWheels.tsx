@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useCustomSegments, SavedWheelData } from "@/hooks/useCustomSegments";
 import { useToast } from "@/hooks/use-toast";
-import { getLocalWheels, deleteLocalWheel, LocalWheel } from "@/lib/localWheelStorage";
+import { getLocalWheels, deleteLocalWheel, duplicateLocalWheel, encodeWheelToUrl, LocalWheel } from "@/lib/localWheelStorage";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -17,7 +17,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Footer } from "@/components/Footer";
-import { ArrowLeft, Trash2, Play, CircleDot, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Trash2, Play, CircleDot, AlertTriangle, Copy, Share2 } from "lucide-react";
 
 export default function MyWheels() {
   const [, setLocation] = useLocation();
@@ -49,6 +49,41 @@ export default function MyWheels() {
       });
     }
     setDeleteId(null);
+  };
+
+  const handleDuplicate = (id: string) => {
+    const result = duplicateLocalWheel(id);
+    if (result.success && result.wheel) {
+      setWheels(getLocalWheels());
+      toast({
+        title: "Wheel duplicated",
+        description: `"${result.wheel.name}" has been created.`,
+      });
+    } else {
+      toast({
+        title: "Error",
+        description: result.error || "Failed to duplicate wheel.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleShare = async (wheel: LocalWheel) => {
+    const encoded = encodeWheelToUrl(wheel);
+    const shareUrl = `${window.location.origin}/?wheel=${encoded}`;
+    
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      toast({
+        title: "Link copied!",
+        description: "Share this link to let others use your wheel.",
+      });
+    } catch {
+      toast({
+        title: "Share link",
+        description: shareUrl,
+      });
+    }
   };
 
   const handleLoadClick = (wheel: LocalWheel) => {
@@ -180,7 +215,7 @@ export default function MyWheels() {
                   <p className="text-xs text-muted-foreground mb-3">
                     Updated {new Date(wheel.updatedAt).toLocaleDateString()}
                   </p>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 mb-2">
                     <Button
                       variant="default"
                       size="sm"
@@ -190,6 +225,27 @@ export default function MyWheels() {
                     >
                       <Play className="w-3.5 h-3.5 mr-1" />
                       Load
+                    </Button>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDuplicate(wheel.id)}
+                      className="flex-1 border-border"
+                      data-testid={`button-duplicate-wheel-${wheel.id}`}
+                    >
+                      <Copy className="w-3.5 h-3.5 mr-1" />
+                      Duplicate
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleShare(wheel)}
+                      className="border-border"
+                      data-testid={`button-share-wheel-${wheel.id}`}
+                    >
+                      <Share2 className="w-3.5 h-3.5" />
                     </Button>
                     <Button
                       variant="outline"

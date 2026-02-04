@@ -7,23 +7,17 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Sparkles } from "lucide-react";
-
-function adjustColor(hex: string, amount: number): string {
-  const num = parseInt(hex.replace("#", ""), 16);
-  const r = Math.min(255, Math.max(0, (num >> 16) + amount));
-  const g = Math.min(255, Math.max(0, ((num >> 8) & 0x00ff) + amount));
-  const b = Math.min(255, Math.max(0, (num & 0x0000ff) + amount));
-  return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, "0")}`;
-}
+import { Sparkles, RotateCcw } from "lucide-react";
+import { adjustColor } from "@/lib/colorUtils";
 
 interface WinnerModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onSpinAgain?: () => void;
   winner: CustomSegment | null;
 }
 
-export function WinnerModal({ isOpen, onClose, winner }: WinnerModalProps) {
+export function WinnerModal({ isOpen, onClose, onSpinAgain, winner }: WinnerModalProps) {
   if (!winner) return null;
 
   const gradientEnd = adjustColor(winner.color, -30);
@@ -68,14 +62,29 @@ export function WinnerModal({ isOpen, onClose, winner }: WinnerModalProps) {
             </p>
           </div>
 
-          <Button
-            onClick={onClose}
-            variant="outline"
-            className="min-w-[120px] border-border"
-            data-testid="button-close-modal"
-          >
-            Close
-          </Button>
+          <div className="flex gap-3">
+            {onSpinAgain && (
+              <Button
+                onClick={() => {
+                  onClose();
+                  onSpinAgain();
+                }}
+                className="min-w-[120px]"
+                data-testid="button-spin-again"
+              >
+                <RotateCcw className="w-4 h-4 mr-2" />
+                Spin Again
+              </Button>
+            )}
+            <Button
+              onClick={onClose}
+              variant="outline"
+              className="min-w-[120px] border-border"
+              data-testid="button-close-modal"
+            >
+              Close
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
