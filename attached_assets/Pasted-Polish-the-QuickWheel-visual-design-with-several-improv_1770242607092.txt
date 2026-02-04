@@ -1,0 +1,100 @@
+Polish the QuickWheel visual design with several improvements.
+
+**Goal 1: Make the wheel much larger**
+
+Wheel should fill ~70% of viewport height, becoming the dominant visual element.
+
+**Implementation:**
+1. In Home.tsx or SpinWheel.tsx, increase wheel dimensions:
+   - Desktop: 500-600px diameter (or 70vh, whichever is smaller)
+   - Tablet: 400-500px diameter  
+   - Mobile: 300-350px diameter
+2. Keep wheel centered with proper spacing to spin button
+3. Ensure responsive behavior on all screen sizes
+
+---
+
+**Goal 2: Convert settings icon to proper button**
+
+Replace the gear icon with a styled button that matches the app's design.
+
+**Implementation:**
+1. Find the settings icon button (top-right area)
+2. Replace with a button containing:
+   - Text: "Settings" or "Wheel Settings"
+   - Optional: Gear icon as prefix
+3. Style to match QuickWheel's design system:
+   - Rounded corners
+   - Subtle gradient or solid color (purple/blue theme)
+   - Clear hover state
+   - Similar visual weight to other UI elements
+
+---
+
+**Goal 3: Add subtle background gradient**
+
+Current pure white background feels stark. Add depth with a very subtle gradient.
+
+**Implementation:**
+1. In Home.tsx or main layout component, update the background
+2. Apply a subtle gradient from white to very light purple/blue tint
+3. Gradient should be barely noticeable - think 5-10% opacity
+4. Direction: top to bottom or radial from center
+
+Example gradients to try:
+- `background: linear-gradient(to bottom, #ffffff, #f8f7ff)`
+- `background: linear-gradient(to bottom, #ffffff, #faf9fe)`
+- `background: radial-gradient(circle at center, #ffffff, #f9f8ff)`
+
+Keep it subtle - should add depth without being distracting.
+
+---
+
+**Goal 4: Add wheel shadow/glow**
+
+Make the wheel "pop" off the page with a subtle drop shadow or soft glow.
+
+**Implementation:**
+1. In SpinWheel.tsx, add a container div around the wheel canvas/SVG
+2. Apply one of these effects:
+
+Option A - Drop shadow (more traditional):
+```css
+box-shadow: 0 10px 40px rgba(168, 85, 247, 0.15);
+```
+
+Option B - Soft glow (more magical):
+```css
+box-shadow: 
+  0 0 60px rgba(168, 85, 247, 0.2),
+  0 10px 30px rgba(0, 0, 0, 0.1);
+```
+
+Option C - Subtle elevation:
+```css
+box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+```
+
+3. The shadow should be subtle - enough to create depth but not overwhelming
+4. Consider making it slightly stronger on hover/during spin (optional)
+5. Ensure shadow doesn't get cut off by parent containers (may need overflow: visible)
+
+---
+
+**Expected Result:**
+
+✅ Wheel is much larger, dominating the page (~70% viewport height)
+✅ Settings is a clear button with text, not just an icon
+✅ Background has subtle depth with very light gradient
+✅ Wheel has soft shadow/glow making it pop off the page
+✅ Overall design feels more polished and intentional
+✅ Everything remains responsive on mobile
+
+---
+
+**Test After:**
+- Check wheel size on desktop, tablet, mobile
+- Verify gradient is subtle and not distracting
+- Confirm shadow/glow looks good and isn't cut off
+- Test settings button is clear and clickable
+- Spin the wheel to ensure animation still looks smooth
