@@ -209,15 +209,11 @@ export default function Home() {
   }, [spinError, toast, clearSpinError]);
 
   return (
-    <div className="min-h-screen text-foreground flex flex-col relative overflow-hidden"
-      style={{
-        background: "linear-gradient(to bottom, hsl(var(--background)), hsl(270 50% 98%))"
-      }}
-    >
+    <div className="min-h-screen bg-background text-foreground flex flex-col relative overflow-hidden">
       <div 
-        className="absolute inset-0 pointer-events-none"
+        className="absolute inset-0 opacity-30 pointer-events-none"
         style={{
-          background: "radial-gradient(ellipse at 50% 0%, rgba(139,92,246,0.08) 0%, transparent 50%), radial-gradient(ellipse at 80% 80%, rgba(236,72,153,0.05) 0%, transparent 40%)"
+          background: "radial-gradient(ellipse at 50% 0%, rgba(139,92,246,0.15) 0%, transparent 50%), radial-gradient(ellipse at 80% 80%, rgba(236,72,153,0.1) 0%, transparent 40%)"
         }}
       />
       
@@ -243,17 +239,22 @@ export default function Home() {
             </span>
           </a>
           <div className="flex items-center gap-2">
-            <Button
-              onClick={() => setSettingsOpen(!settingsOpen)}
-              className="gap-2 text-white border-none shadow-lg"
-              style={{
-                background: "linear-gradient(135deg, #A855F7 0%, #6366F1 50%, #0EA5E9 100%)",
-              }}
-              data-testid="button-open-settings"
-            >
-              <Settings className="w-4 h-4" />
-              <span>Edit</span>
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setSettingsOpen(!settingsOpen)}
+                  className="text-muted-foreground"
+                  data-testid="button-open-settings"
+                >
+                  <Settings className="w-5 h-5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Wheel Settings</p>
+              </TooltipContent>
+            </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
@@ -344,10 +345,10 @@ export default function Home() {
           <div 
             className={`w-full transition-all duration-300 ${
               presentationMode 
-                ? "max-w-[70vh]" 
+                ? "max-w-[600px] sm:max-w-[700px]" 
                 : settingsOpen
-                  ? "max-w-[min(70vh,calc(100vw-2rem))]"
-                  : "max-w-[min(70vh,calc(100vw-2rem))]"
+                  ? "max-w-[400px] sm:max-w-[480px]"
+                  : "max-w-[550px] sm:max-w-[650px]"
             }`}
           >
             {isLoading ? (

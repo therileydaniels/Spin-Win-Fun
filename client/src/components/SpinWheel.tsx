@@ -141,33 +141,26 @@ export function SpinWheel({ segments, rotation, isSpinning, spinDuration }: Spin
   }
 
   return (
-    <div className="relative w-full aspect-square mx-auto">
+    <div className="relative w-full max-w-[500px] aspect-square mx-auto">
       <div 
-        className="absolute inset-0 rounded-full blur-3xl pointer-events-none"
+        className="absolute inset-0 rounded-full opacity-60 blur-3xl pointer-events-none"
         style={{
-          background: "radial-gradient(circle, rgba(139,92,246,0.35) 0%, rgba(236,72,153,0.25) 50%, transparent 70%)",
-          transform: "scale(1.1)",
+          background: "radial-gradient(circle, rgba(139,92,246,0.4) 0%, rgba(236,72,153,0.3) 50%, transparent 70%)"
         }}
       />
       
-      <div
-        className="relative w-full h-full rounded-full"
+      <svg
+        viewBox="0 0 500 500"
+        className="w-full h-full relative z-10"
         style={{
-          boxShadow: "0 0 30px rgba(168, 85, 247, 0.15), 0 8px 24px rgba(0, 0, 0, 0.08)",
+          transform: `rotate(${rotation}deg)`,
+          transition: isSpinning
+            ? `transform ${spinDuration}s cubic-bezier(0.17, 0.67, 0.12, 0.99)`
+            : "none",
+          filter: "drop-shadow(0 0 30px rgba(139,92,246,0.3))",
         }}
+        data-testid="wheel-svg"
       >
-        <svg
-          viewBox="0 0 500 500"
-          className="w-full h-full relative z-10"
-          style={{
-            transform: `rotate(${rotation}deg)`,
-            transition: isSpinning
-              ? `transform ${spinDuration}s cubic-bezier(0.17, 0.67, 0.12, 0.99)`
-              : "none",
-            filter: "drop-shadow(0 0 20px rgba(139,92,246,0.2))",
-          }}
-          data-testid="wheel-svg"
-        >
         <defs>
           {segments.map((segment) => (
             <linearGradient
@@ -192,11 +185,19 @@ export function SpinWheel({ segments, rotation, isSpinning, spinDuration }: Spin
         <circle
           cx={centerX}
           cy={centerY}
-          r={radius + 2}
+          r={radius + 6}
           fill="none"
-          stroke="rgba(255,255,255,0.15)"
+          stroke="rgba(255,255,255,0.2)"
+          strokeWidth="2"
+          className="dark:stroke-white/20"
+        />
+        <circle
+          cx={centerX}
+          cy={centerY}
+          r={radius + 3}
+          fill="none"
+          stroke="rgba(255,255,255,0.1)"
           strokeWidth="1"
-          className="dark:stroke-white/15"
         />
 
         {segments.map((segment, index) => {
@@ -262,7 +263,6 @@ export function SpinWheel({ segments, rotation, isSpinning, spinDuration }: Spin
         <circle cx={centerX} cy={centerY} r="10" fill="#111827" />
         <circle cx={centerX} cy={centerY} r="4" fill="rgba(255,255,255,0.3)" />
       </svg>
-      </div>
 
       <div
         className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-2 z-20"
