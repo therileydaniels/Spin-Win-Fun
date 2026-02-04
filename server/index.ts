@@ -89,6 +89,10 @@ app.use(express.urlencoded({ extended: false }));
 // Basic CSRF protection - require JSON content-type for state-changing requests
 app.use("/api", (req: Request, res: Response, next: NextFunction) => {
   if (["POST", "PUT", "DELETE", "PATCH"].includes(req.method)) {
+    // Exempt logout endpoint - it doesn't require a body
+    if (req.path === "/auth/logout") {
+      return next();
+    }
     const contentType = req.headers["content-type"];
     if (!contentType || !contentType.includes("application/json")) {
       return res.status(403).json({ error: "Invalid content type" });

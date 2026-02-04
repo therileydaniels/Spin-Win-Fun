@@ -157,6 +157,7 @@ export async function registerRoutes(
       
       req.session.regenerate((err) => {
         if (err) {
+          console.error("Signup session regenerate error:", err);
           return res.status(500).json({ error: "Session error" });
         }
         
@@ -164,6 +165,7 @@ export async function registerRoutes(
         
         req.session.save((err) => {
           if (err) {
+            console.error("Signup session save error:", err);
             return res.status(500).json({ error: "Session error" });
           }
           
@@ -198,6 +200,7 @@ export async function registerRoutes(
       
       req.session.regenerate((err) => {
         if (err) {
+          console.error("Login session regenerate error:", err);
           return res.status(500).json({ error: "Session error" });
         }
         
@@ -205,6 +208,7 @@ export async function registerRoutes(
         
         req.session.save((err) => {
           if (err) {
+            console.error("Login session save error:", err);
             return res.status(500).json({ error: "Session error" });
           }
           
