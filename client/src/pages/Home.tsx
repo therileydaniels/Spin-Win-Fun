@@ -378,7 +378,7 @@ export default function Home() {
                 />
               </div>
             )}
-            <div className="absolute top-[100px] md:top-[120px] lg:top-[140px] left-1/2 transform -translate-x-1/2 z-10">
+            <div className="absolute -top-[40px] md:-top-[45px] lg:-top-[50px] left-1/2 transform -translate-x-1/2 z-10">
               <SpinButton
                 onClick={handleSpin}
                 disabled={!canSpin || isLoading}
