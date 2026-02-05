@@ -188,7 +188,13 @@ export default function Home() {
       if (e.key === "Escape" && presentationMode) {
         exitPresentationMode();
       }
+      // Only trigger spin on spacebar if user is NOT typing in an input/textarea
       if (e.key === " " && canSpin && !showResult) {
+        const target = e.target as HTMLElement;
+        const tagName = target.tagName.toUpperCase();
+        if (tagName === "INPUT" || tagName === "TEXTAREA" || target.isContentEditable) {
+          return; // Allow normal spacebar behavior in text fields
+        }
         e.preventDefault();
         handleSpin();
       }
