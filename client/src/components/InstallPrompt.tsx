@@ -53,17 +53,16 @@ export function InstallPrompt() {
       <TooltipTrigger asChild>
         <Button
           variant="outline"
-          size="sm"
+          size="icon"
           onClick={handleInstall}
-          className="gap-2 bg-gradient-to-r from-purple-500/10 to-pink-500/10 border-purple-500/30 hover:border-purple-500/50 hover:from-purple-500/20 hover:to-pink-500/20 text-purple-600 dark:text-purple-400"
+          className="h-9 w-9 bg-gradient-to-r from-purple-500/10 to-pink-500/10 border-purple-500/30 hover:border-purple-500/50 hover:from-purple-500/20 hover:to-pink-500/20"
           data-testid="button-install-app"
         >
           <img 
             src="/favicon-32x32.png" 
-            alt="QuickWheel" 
-            className="h-4 w-4"
+            alt="Install QuickWheel" 
+            className="h-5 w-5"
           />
-          <span className="hidden sm:inline">Install</span>
         </Button>
       </TooltipTrigger>
       <TooltipContent>

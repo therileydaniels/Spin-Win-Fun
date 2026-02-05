@@ -244,10 +244,11 @@ export default function Home() {
                 <Button
                   variant={settingsOpen ? "secondary" : "default"}
                   onClick={() => setSettingsOpen(!settingsOpen)}
+                  className="gap-2"
                   data-testid="button-open-settings"
                 >
-                  <Settings className="w-4 h-4 mr-2" />
-                  Customize
+                  <Settings className="w-4 h-4" />
+                  <span className="hidden sm:inline">Customize</span>
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
