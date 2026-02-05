@@ -281,10 +281,11 @@ export function SpinWheel({ segments, rotation, isSpinning, spinDuration, size }
             startAngle,
             endAngle
           );
+          // Only show text on wheel if 12 or fewer segments
+          const showTextOnWheel = segments.length <= 12;
           const textPos = getTextPosition(index, segments.length);
           const displayLabel = truncateLabel(segment.label);
           const textLines = splitTextForWideSegment(displayLabel, segments.length);
-          // Recalculate font size based on longest line
           const longestLine = textLines.reduce((a, b) => a.length > b.length ? a : b, '');
           const fontSize = calculateOptimalFontSize(longestLine, segments.length, radius);
           const textColor = getContrastColor(segment.color);
@@ -300,8 +301,10 @@ export function SpinWheel({ segments, rotation, isSpinning, spinDuration, size }
                 fill={`url(#segmentGradient-${segment.id})`}
                 stroke="rgba(255,255,255,0.15)"
                 strokeWidth="1"
-              />
-              {textLines.map((line, lineIndex) => (
+              >
+                <title>{segment.label}</title>
+              </path>
+              {showTextOnWheel && textLines.map((line, lineIndex) => (
                 <text
                   key={lineIndex}
                   x={textPos.x}
