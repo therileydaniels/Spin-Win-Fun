@@ -1,0 +1,208 @@
+🎯 PLAN MODE: Comprehensive final audit before launch
+
+Perform a thorough review of QuickWheel to ensure it's production-ready.
+
+**About QuickWheel:**
+- Rigged wheel spinner (operators secretly control probabilities)
+- React + TypeScript + Express + PostgreSQL
+- Session-based auth (currently hidden from UI)
+- localStorage for anonymous wheel saving
+- PWA-enabled
+
+---
+
+**PART 1: CODE QUALITY & ORGANIZATION**
+
+Review for:
+
+**File Structure:**
+- Are files logically organized?
+- Any duplicate code that should be consolidated?
+- Missing separation of concerns?
+
+**Component Quality:**
+- Are components too large or doing too much?
+- Proper prop typing?
+- Missing error boundaries?
+
+**Code Cleanliness:**
+- Console.logs left in production code?
+- Commented-out code that should be removed?
+- TODO comments that need addressing?
+- Unused imports or variables?
+
+**Type Safety:**
+- Any `any` types that should be specific?
+- Missing type definitions?
+- Inconsistent typing?
+
+---
+
+**PART 2: SECURITY AUDIT**
+
+We've done security passes before, but double-check:
+
+**Input Validation:**
+- All user inputs validated (segment names, wheel names, probabilities)?
+- Max lengths enforced?
+- SQL injection prevention (using Drizzle ORM correctly)?
+
+**Authentication & Sessions:**
+- Session security (httpOnly cookies, secure flags)?
+- Password hashing still using bcrypt with 12 rounds?
+- Rate limiting on sensitive endpoints?
+
+**API Security:**
+- CSRF protection in place?
+- Proper error handling (no stack traces to client)?
+- Admin routes properly protected?
+
+**Client-Side Security:**
+- No sensitive data in localStorage?
+- No API keys or secrets exposed in frontend?
+- XSS prevention?
+
+---
+
+**PART 3: FUNCTIONALITY TESTING**
+
+Test all core features:
+
+**Wheel Functionality:**
+- ✓ Spin works with proper animation
+- ✓ Probability rigging works (server-side calculation)
+- ✓ Winner selection is correct
+- ✓ Confetti triggers on win
+- ✓ Text is readable on all segment colors
+- ✓ Dynamic text sizing works for all segment counts
+
+**Segment Customization:**
+- ✓ Add/remove segments (2-20 limit enforced)
+- ✓ Rename segments (25 char max)
+- ✓ Color picker works
+- ✓ Changes save properly
+
+**Probability Controls:**
+- ✓ Percentage inputs work
+- ✓ Validation enforces 100% total
+- ✓ Default (all 0) gives equal odds
+- ✓ Settings panel opens/closes properly
+
+**localStorage Saving (Anonymous Users):**
+- ✓ Save wheel works
+- ✓ Load wheel works
+- ✓ Delete wheel works
+- ✓ My Wheels page shows saved wheels
+- ✓ Persistence across page refresh
+- ✓ Proper error handling for quota exceeded
+
+**Hidden Auth (For Future):**
+- ✓ Auth code still intact (not broken)
+- ✓ Database queries still work
+- ✓ Easy to re-enable when needed
+
+**PWA:**
+- ✓ manifest.json valid
+- ✓ Service worker registered
+- ✓ Installable on mobile
+- ✓ Icons display correctly
+
+**Presentation Mode:**
+- ✓ Hides all controls
+- ✓ ESC to exit works
+- ✓ Spin still works in presentation mode
+
+---
+
+**PART 4: EDGE CASES & ERROR HANDLING**
+
+Check handling of:
+
+**User Errors:**
+- Empty segment names?
+- Invalid probability values (negative, > 100, non-numbers)?
+- Trying to delete last segment?
+- Network failures during spin?
+- localStorage full?
+
+**Browser Compatibility:**
+- Works in Chrome, Firefox, Safari?
+- Mobile browsers (iOS Safari, Chrome Mobile)?
+- Responsive on all screen sizes?
+
+**Performance:**
+- Any memory leaks?
+- Unnecessary re-renders?
+- Large bundle size issues?
+
+---
+
+**PART 5: UX POLISH**
+
+Review for:
+- Loading states on all async actions?
+- Clear error messages when things fail?
+- Disabled states on buttons when appropriate?
+- Smooth transitions and animations?
+- Any confusing UI patterns?
+
+---
+
+**PART 6: PRODUCTION READINESS**
+
+Before launch checklist:
+
+**Environment:**
+- Environment variables properly set?
+- Production database ready?
+- CORS configured correctly?
+
+**Performance:**
+- Images optimized?
+- Unnecessary dependencies removed?
+- Build optimized for production?
+
+**Legal:**
+- Terms of Service present and linked?
+- Privacy Policy present and linked?
+- Copyright notice in footer?
+
+**Branding:**
+- Favicon set correctly?
+- PWA icons all sizes present?
+- Logo displays properly?
+- Domain ready (quickwheel.co)?
+
+---
+
+**OUTPUT FORMAT:**
+
+Organize findings by priority:
+
+**🔴 CRITICAL (Must fix before launch):**
+- Security vulnerabilities
+- Broken core functionality
+- Data loss risks
+
+**🟡 IMPORTANT (Should fix soon):**
+- Poor UX that confuses users
+- Performance issues
+- Missing error handling
+
+**🟢 NICE-TO-HAVE (Polish for v2):**
+- Code organization improvements
+- Minor UX enhancements
+- Optimization opportunities
+
+For each issue, provide:
+1. What the problem is
+2. Where it is (file + line if possible)
+3. Why it matters
+4. How to fix it
+
+For code quality issues, suggest specific refactoring if needed.
+
+---
+
+**After Review:**
+Give me a production readiness score (1-10) and your honest assessment: Is QuickWheel ready to launch?
