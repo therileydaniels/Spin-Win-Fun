@@ -59,18 +59,28 @@ function calculateOptimalFontSize(
   segmentCount: number,
   radius: number,
   minFontSize: number = 10,
-  maxFontSize: number = 24
+  maxFontSize: number = 28
 ): number {
   const segmentAngleRad = (2 * Math.PI) / segmentCount;
   
-  const textRadialPosition = radius * 0.55;
+  // For wide segments (2-4), position text further out and use more space
+  const textRadiusFactor = segmentCount <= 4 ? 0.58 : 0.55;
+  const textRadialPosition = radius * textRadiusFactor;
   const arcLength = textRadialPosition * segmentAngleRad;
-  const availableWidth = arcLength * 0.75;
+  
+  // Wide segments can use more of the arc, narrow segments need more margin
+  const arcUsageFactor = segmentCount <= 4 ? 0.85 : 0.75;
+  const availableWidth = arcLength * arcUsageFactor;
   
   const avgCharWidth = 0.55;
   const textLength = text.length;
   
   let fontSize = availableWidth / (textLength * avgCharWidth);
+  
+  // For wide segments with short text, allow larger fonts
+  if (segmentCount <= 4 && textLength <= 10) {
+    maxFontSize = 32;
+  }
   
   if (textLength <= 3) {
     fontSize = Math.min(fontSize, maxFontSize);
@@ -84,6 +94,42 @@ function calculateOptimalFontSize(
 function truncateLabel(label: string, maxLen: number = 20): string {
   if (label.length <= maxLen) return label;
   return label.slice(0, maxLen - 2) + "...";
+}
+
+// Split long text into multiple lines for wide segments
+function splitTextForWideSegment(text: string, segmentCount: number): string[] {
+  // Only split for wide segments (2-4 segments)
+  if (segmentCount > 4) return [text];
+  
+  // Short text doesn't need splitting
+  if (text.length <= 12) return [text];
+  
+  // Try to split at a space near the middle
+  const words = text.split(' ');
+  if (words.length === 1) {
+    // No spaces - don't split single words
+    return [text];
+  }
+  
+  // Find the best split point (closest to middle)
+  const midpoint = text.length / 2;
+  let bestSplitIndex = 0;
+  let bestDistance = text.length;
+  let charCount = 0;
+  
+  for (let i = 0; i < words.length - 1; i++) {
+    charCount += words[i].length + 1; // +1 for space
+    const distance = Math.abs(charCount - midpoint);
+    if (distance < bestDistance) {
+      bestDistance = distance;
+      bestSplitIndex = i;
+    }
+  }
+  
+  const line1 = words.slice(0, bestSplitIndex + 1).join(' ');
+  const line2 = words.slice(bestSplitIndex + 1).join(' ');
+  
+  return [line1, line2];
 }
 
 export function SpinWheel({ segments, rotation, isSpinning, spinDuration, size }: SpinWheelProps) {
@@ -135,9 +181,11 @@ export function SpinWheel({ segments, rotation, isSpinning, spinDuration, size }
     ].join(" ");
   }
 
-  function getTextPosition(index: number) {
+  function getTextPosition(index: number, segmentCount: number) {
     const angle = index * segmentAngle + segmentAngle / 2;
-    const textRadius = radius * 0.65;
+    // For wide segments (2-4), position text further from center to use more space
+    const textRadiusFactor = segmentCount <= 4 ? 0.58 : 0.65;
+    const textRadius = radius * textRadiusFactor;
     const pos = polarToCartesian(centerX, centerY, textRadius, angle);
     return { x: pos.x, y: pos.y, angle: angle };
   }
@@ -233,11 +281,17 @@ export function SpinWheel({ segments, rotation, isSpinning, spinDuration, size }
             startAngle,
             endAngle
           );
-          const textPos = getTextPosition(index);
-          const fontSize = calculateOptimalFontSize(segment.label, segments.length, radius);
+          const textPos = getTextPosition(index, segments.length);
           const displayLabel = truncateLabel(segment.label);
+          const textLines = splitTextForWideSegment(displayLabel, segments.length);
+          // Recalculate font size based on longest line
+          const longestLine = textLines.reduce((a, b) => a.length > b.length ? a : b, '');
+          const fontSize = calculateOptimalFontSize(longestLine, segments.length, radius);
           const textColor = getContrastColor(segment.color);
           const isLightText = textColor === '#FFFFFF';
+          const lineHeight = fontSize * 1.2;
+          const totalTextHeight = lineHeight * textLines.length;
+          const startY = textPos.y - (totalTextHeight / 2) + (lineHeight / 2);
 
           return (
             <g key={segment.id}>
@@ -247,24 +301,27 @@ export function SpinWheel({ segments, rotation, isSpinning, spinDuration, size }
                 stroke="rgba(255,255,255,0.15)"
                 strokeWidth="1"
               />
-              <text
-                x={textPos.x}
-                y={textPos.y}
-                fill={textColor}
-                fontSize={fontSize}
-                fontWeight="600"
-                textAnchor="middle"
-                dominantBaseline="middle"
-                className="pointer-events-none select-none"
-                style={{ 
-                  textShadow: isLightText 
-                    ? "0 2px 4px rgba(0,0,0,0.3)" 
-                    : "0 1px 2px rgba(255,255,255,0.3)",
-                  fontFamily: "Inter, system-ui, sans-serif"
-                }}
-              >
-                {displayLabel}
-              </text>
+              {textLines.map((line, lineIndex) => (
+                <text
+                  key={lineIndex}
+                  x={textPos.x}
+                  y={startY + (lineIndex * lineHeight)}
+                  fill={textColor}
+                  fontSize={fontSize}
+                  fontWeight="600"
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                  className="pointer-events-none select-none"
+                  style={{ 
+                    textShadow: isLightText 
+                      ? "0 2px 4px rgba(0,0,0,0.3)" 
+                      : "0 1px 2px rgba(255,255,255,0.3)",
+                    fontFamily: "Inter, system-ui, sans-serif"
+                  }}
+                >
+                  {line}
+                </text>
+              ))}
             </g>
           );
         })}
