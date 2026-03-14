@@ -16,6 +16,7 @@ import {
 import { Check, AlertTriangle, Scale, Percent, FilePlus2, Trash2, Plus, Save, X, Share2, Monitor } from "lucide-react";
 import { ColorPicker } from "./ColorPicker";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { COLOR_PALETTES } from "@/lib/colorPalettes";
 
 interface ProbabilityPanelProps {
   segments: CustomSegment[];
@@ -26,6 +27,7 @@ interface ProbabilityPanelProps {
   onAdd: () => void;
   onRemove: (id: string) => void;
   onResetProbabilities: () => void;
+  onApplyColorPalette: (colors: string[]) => void;
   onNewWheel: () => void;
   onSaveWheel: () => void;
   onShare: () => void;
@@ -48,6 +50,7 @@ export function ProbabilityPanel({
   onRecolor,
   onAdd,
   onRemove,
+  onApplyColorPalette,
   onResetProbabilities,
   onNewWheel,
   onSaveWheel,
@@ -248,6 +251,31 @@ export function ProbabilityPanel({
           <Plus className="w-4 h-4 mr-2" />
           Add Segment
         </Button>
+
+        <div className="pt-3 border-t border-border space-y-2">
+          <p className="text-xs text-muted-foreground">Color Themes</p>
+          <div className="flex gap-2 overflow-x-auto pb-1">
+            {COLOR_PALETTES.map((palette) => (
+              <button
+                key={palette.name}
+                onClick={() => onApplyColorPalette(palette.colors)}
+                className="flex flex-col items-center gap-1 shrink-0 rounded-md px-2 py-1.5 hover:bg-accent transition-colors"
+                data-testid={`palette-${palette.name.toLowerCase()}`}
+              >
+                <div className="flex gap-0.5">
+                  {palette.colors.slice(0, 5).map((color, i) => (
+                    <div
+                      key={i}
+                      className="w-3 h-3 rounded-full"
+                      style={{ backgroundColor: color }}
+                    />
+                  ))}
+                </div>
+                <span className="text-[10px] text-muted-foreground">{palette.name}</span>
+              </button>
+            ))}
+          </div>
+        </div>
 
         <div className="pt-3 border-t border-border">
           {isEqualOdds ? (

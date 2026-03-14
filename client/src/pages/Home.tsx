@@ -37,6 +37,7 @@ export default function Home() {
     removeSegment,
     renameSegment,
     recolorSegment,
+    applyColorPalette,
     setProbability,
     resetProbabilities,
     resetToDefault,
@@ -336,6 +337,7 @@ export default function Home() {
               onProbabilityChange={setProbability}
               onRename={renameSegment}
               onRecolor={recolorSegment}
+              onApplyColorPalette={applyColorPalette}
               onAdd={addSegment}
               onRemove={removeSegment}
               onResetProbabilities={resetProbabilities}
