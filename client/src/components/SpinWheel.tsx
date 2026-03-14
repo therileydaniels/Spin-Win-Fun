@@ -204,6 +204,8 @@ export function SpinWheel({ segments, rotation, isSpinning, spinDuration, size }
       
       <svg
         viewBox={`0 0 ${viewBoxSize} ${viewBoxSize}`}
+        role="img"
+        aria-label={`Prize wheel with ${segments.length} segments: ${segments.map(s => s.label).join(', ')}`}
         className="w-full h-full relative z-10"
         style={{
           transform: `rotate(${rotation}deg)`,

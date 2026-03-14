@@ -32,15 +32,23 @@ export function InstallPrompt() {
 
   const handleInstall = async () => {
     if (!deferredPrompt) return;
-    
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    
-    if (outcome === 'accepted') {
-      setShowInstall(false);
+
+    try {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+
+      if (outcome === 'accepted') {
+        setShowInstall(false);
+        toast({
+          title: "App installed!",
+          description: "QuickWheel has been added to your home screen.",
+        });
+      }
+    } catch {
       toast({
-        title: "App installed!",
-        description: "QuickWheel has been added to your home screen.",
+        title: "Installation failed",
+        description: "Could not install the app. Please try again.",
+        variant: "destructive",
       });
     }
     setDeferredPrompt(null);

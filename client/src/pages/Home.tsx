@@ -1,30 +1,23 @@
 import { useEffect, useState, useCallback } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { useLocation } from "wouter";
 import { SpinWheel } from "@/components/SpinWheel";
 import { SpinButton } from "@/components/SpinButton";
 import { WinnerModal } from "@/components/WinnerModal";
-import { ThemeToggle } from "@/components/ThemeToggle";
-import { SoundToggle } from "@/components/SoundToggle";
 import { ProbabilityPanel } from "@/components/ProbabilityPanel";
 import { SaveWheelModal } from "@/components/SaveWheelModal";
+import { WheelHeader } from "@/components/WheelHeader";
+import { HistoryPanel } from "@/components/HistoryPanel";
 import { Button } from "@/components/ui/button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useWheelSpin } from "@/hooks/useWheelSpin";
 import { useSound } from "@/hooks/useSound";
 import { useCustomSegments } from "@/hooks/useCustomSegments";
-import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { fireWinConfetti, fireCenterBurst } from "@/lib/confetti";
-import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Footer } from "@/components/Footer";
-import { InstallPrompt } from "@/components/InstallPrompt";
 import { saveWheelToLocal, updateLocalWheel, decodeWheelFromUrl } from "@/lib/localWheelStorage";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Monitor, Settings, FolderOpen, ChevronLeft, History, Trash2 } from "lucide-react";
+import { Settings, ChevronLeft } from "lucide-react";
 
 export default function Home() {
-  const [, setLocation] = useLocation();
   const {
     isSpinning,
     rotation,
@@ -60,7 +53,6 @@ export default function Home() {
     loadWheel,
   } = useCustomSegments();
 
-  const { user } = useAuth();
   const { toast } = useToast();
 
   const [presentationMode, setPresentationMode] = useState(false);
@@ -75,7 +67,7 @@ export default function Home() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const wheelParam = params.get("wheel");
-    
+
     if (wheelParam) {
       const decoded = decodeWheelFromUrl(wheelParam);
       if (decoded && decoded.segments.length >= 2) {
@@ -163,17 +155,19 @@ export default function Home() {
   useEffect(() => {
     if (showResult && winner) {
       fireCenterBurst();
-      fireWinConfetti();
+      const cleanupConfetti = fireWinConfetti();
       playWinSound();
-      
+
       setSpinHistory(prev => [
         { label: winner.label, color: winner.color, timestamp: new Date() },
         ...prev.slice(0, 9)
       ]);
-      
+
       if (removeWinnerMode && segments.length > 2) {
         removeSegment(winner.id);
       }
+
+      return cleanupConfetti;
     }
   }, [showResult, winner, playWinSound, removeWinnerMode, segments.length, removeSegment]);
 
@@ -188,12 +182,11 @@ export default function Home() {
       if (e.key === "Escape" && presentationMode) {
         exitPresentationMode();
       }
-      // Only trigger spin on spacebar if user is NOT typing in an input/textarea
       if (e.key === " " && canSpin && !showResult) {
         const target = e.target as HTMLElement;
         const tagName = target.tagName.toUpperCase();
         if (tagName === "INPUT" || tagName === "TEXTAREA" || target.isContentEditable) {
-          return; // Allow normal spacebar behavior in text fields
+          return;
         }
         e.preventDefault();
         handleSpin();
@@ -214,128 +207,33 @@ export default function Home() {
     }
   }, [spinError, toast, clearSpinError]);
 
+  const wheelSizeClass = presentationMode
+    ? "w-[300px] md:w-[400px] lg:w-[450px]"
+    : settingsOpen
+      ? "w-[240px] md:w-[300px] lg:w-[340px]"
+      : "w-[300px] md:w-[380px] lg:w-[450px]";
+
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col relative overflow-hidden">
-      <div 
+      <div
         className="absolute inset-0 opacity-30 pointer-events-none"
         style={{
           background: "radial-gradient(ellipse at 50% 0%, rgba(139,92,246,0.15) 0%, transparent 50%), radial-gradient(ellipse at 80% 80%, rgba(236,72,153,0.1) 0%, transparent 40%)"
         }}
       />
-      
+
       {!presentationMode && (
-        <header className="relative z-10 flex items-center justify-between gap-4 px-4 py-3 border-b border-border">
-          <a href="/" className="flex items-center">
-            <img 
-              src="/logo.png" 
-              alt="QuickWheel" 
-              className="h-8 sm:h-10 w-auto hidden sm:block"
-              data-testid="img-logo"
-            />
-            <span 
-              className="sm:hidden text-xl font-bold"
-              style={{
-                background: "linear-gradient(135deg, #A855F7, #EC4899, #0EA5E9)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-              }}
-            >
-              QuickWheel
-            </span>
-          </a>
-          <div className="flex items-center gap-3">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant={settingsOpen ? "secondary" : "default"}
-                  onClick={() => setSettingsOpen(!settingsOpen)}
-                  className="gap-2"
-                  data-testid="button-open-settings"
-                >
-                  <Settings className="w-4 h-4" />
-                  <span className="hidden sm:inline">Customize</span>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{settingsOpen ? "Close settings" : "Open settings"}</p>
-              </TooltipContent>
-            </Tooltip>
-            
-            <div className="hidden sm:flex items-center gap-1 px-1 py-1 rounded-lg bg-muted/50">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setLocation("/my-wheels")}
-                    className="text-muted-foreground h-8 w-8"
-                    data-testid="button-my-wheels"
-                  >
-                    <FolderOpen className="w-4 h-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>My Wheels</p>
-                </TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant={showHistory ? "secondary" : "ghost"}
-                    size="icon"
-                    onClick={() => setShowHistory(!showHistory)}
-                    className="text-muted-foreground h-8 w-8"
-                    data-testid="button-toggle-history"
-                  >
-                    <History className="w-4 h-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{showHistory ? "Hide history" : "Show history"}</p>
-                </TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant={removeWinnerMode ? "secondary" : "ghost"}
-                    size="icon"
-                    onClick={() => setRemoveWinnerMode(!removeWinnerMode)}
-                    className="text-muted-foreground h-8 w-8"
-                    data-testid="button-toggle-remove-winner"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{removeWinnerMode ? "Remove winner: ON" : "Remove winner: OFF"}</p>
-                </TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setPresentationMode(true)}
-                    className="text-muted-foreground h-8 w-8"
-                    data-testid="button-enter-presentation"
-                  >
-                    <Monitor className="w-4 h-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Enter presentation mode</p>
-                </TooltipContent>
-              </Tooltip>
-            </div>
-            
-            <div className="flex items-center gap-1">
-              <SoundToggle isMuted={isMuted} onToggle={toggleMute} />
-              <ThemeToggle />
-              <InstallPrompt />
-            </div>
-          </div>
-        </header>
+        <WheelHeader
+          settingsOpen={settingsOpen}
+          onToggleSettings={() => setSettingsOpen(!settingsOpen)}
+          showHistory={showHistory}
+          onToggleHistory={() => setShowHistory(!showHistory)}
+          removeWinnerMode={removeWinnerMode}
+          onToggleRemoveWinner={() => setRemoveWinnerMode(!removeWinnerMode)}
+          onEnterPresentation={() => setPresentationMode(true)}
+          isMuted={isMuted}
+          onToggleMute={toggleMute}
+        />
       )}
 
       {presentationMode && (
@@ -345,6 +243,7 @@ export default function Home() {
           onClick={exitPresentationMode}
           className="fixed top-4 right-4 text-muted-foreground opacity-40 hover:opacity-100 transition-opacity z-50 gap-2"
           data-testid="button-exit-presentation"
+          aria-label="Exit presentation mode"
         >
           <Settings className="w-4 h-4" />
           <span className="text-xs">Settings</span>
@@ -352,31 +251,14 @@ export default function Home() {
       )}
 
       <main className={`relative z-10 flex-1 flex flex-col ${presentationMode ? "" : settingsOpen ? "lg:flex-row" : ""} items-center justify-center gap-6 p-4 sm:p-6`}>
-
         <div className="flex flex-col items-center gap-8">
           <div className="w-full flex items-center justify-center">
             {isLoading ? (
-              <div 
-                className={`aspect-square flex items-center justify-center transition-all duration-300 ${
-                  presentationMode
-                    ? "w-[300px] md:w-[400px] lg:w-[450px]"
-                    : settingsOpen
-                      ? "w-[240px] md:w-[300px] lg:w-[340px]"
-                      : "w-[300px] md:w-[380px] lg:w-[450px]"
-                }`}
-              >
+              <div className={`aspect-square flex items-center justify-center transition-all duration-300 ${wheelSizeClass}`}>
                 <Skeleton className="w-full aspect-square rounded-full" />
               </div>
             ) : (
-              <div
-                className={`transition-all duration-300 ${
-                  presentationMode
-                    ? "w-[300px] md:w-[400px] lg:w-[450px]"
-                    : settingsOpen
-                      ? "w-[240px] md:w-[300px] lg:w-[340px]"
-                      : "w-[300px] md:w-[380px] lg:w-[450px]"
-                }`}
-              >
+              <div className={`transition-all duration-300 ${wheelSizeClass}`}>
                 <SpinWheel
                   segments={segments}
                   rotation={rotation}
@@ -414,81 +296,43 @@ export default function Home() {
               onClick={() => setSettingsOpen(false)}
               className="absolute -left-2 top-2 z-10 text-muted-foreground hover:text-foreground lg:block hidden"
               data-testid="button-collapse-settings"
+              aria-label="Collapse settings"
             >
               <ChevronLeft className="w-4 h-4" />
             </Button>
             <ProbabilityPanel
-            segments={segments}
-            probabilities={probabilities}
-            onProbabilityChange={setProbability}
-            onRename={renameSegment}
-            onRecolor={recolorSegment}
-            onAdd={addSegment}
-            onRemove={removeSegment}
-            onResetProbabilities={resetProbabilities}
-            onNewWheel={resetToDefault}
-            onSaveWheel={handleSaveWheel}
-            total={total}
-            isValid={isValid}
-            isEqualOdds={isEqualOdds}
-            canAdd={canAdd}
-            canRemove={canRemove}
-            currentWheelName={currentWheelName}
-            hasUnsavedChanges={hasUnsavedChanges}
-            onClose={() => setSettingsOpen(false)}
-          />
+              segments={segments}
+              probabilities={probabilities}
+              onProbabilityChange={setProbability}
+              onRename={renameSegment}
+              onRecolor={recolorSegment}
+              onAdd={addSegment}
+              onRemove={removeSegment}
+              onResetProbabilities={resetProbabilities}
+              onNewWheel={resetToDefault}
+              onSaveWheel={handleSaveWheel}
+              total={total}
+              isValid={isValid}
+              isEqualOdds={isEqualOdds}
+              canAdd={canAdd}
+              canRemove={canRemove}
+              currentWheelName={currentWheelName}
+              hasUnsavedChanges={hasUnsavedChanges}
+              onClose={() => setSettingsOpen(false)}
+            />
           </div>
         )}
       </main>
 
       {!presentationMode && showHistory && (
-        <div className="fixed right-4 top-20 z-40 w-64 max-h-[60vh] overflow-y-auto rounded-lg border border-border bg-card/95 backdrop-blur-xl shadow-xl p-4">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold">Spin History</h3>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setShowHistory(false)}
-              className="h-6 w-6 text-muted-foreground"
-              data-testid="button-close-history"
-            >
-              <span className="text-lg">&times;</span>
-            </Button>
-          </div>
-          {spinHistory.length === 0 ? (
-            <p className="text-xs text-muted-foreground text-center py-4">
-              No spins yet. Spin the wheel to see history!
-            </p>
-          ) : (
-            <div className="space-y-2">
-              {spinHistory.map((entry, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center gap-2 p-2 rounded-md bg-muted/50"
-                  data-testid={`history-entry-${idx}`}
-                >
-                  <div
-                    className="w-4 h-4 rounded-full flex-shrink-0"
-                    style={{ background: entry.color }}
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{entry.label}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {entry.timestamp.toLocaleTimeString()}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        <HistoryPanel entries={spinHistory} onClose={() => setShowHistory(false)} />
       )}
 
       {!presentationMode && <Footer />}
 
-      <WinnerModal 
-        isOpen={showResult} 
-        onClose={closeResult} 
+      <WinnerModal
+        isOpen={showResult}
+        onClose={closeResult}
         winner={winner}
         onSpinAgain={canSpin ? handleSpin : undefined}
       />

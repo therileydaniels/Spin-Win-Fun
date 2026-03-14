@@ -46,7 +46,19 @@ export function useCustomSegments(): UseCustomSegmentsReturn {
       const saved = localStorage.getItem(SEGMENTS_STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length >= MIN_SEGMENTS && parsed.length <= MAX_SEGMENTS) {
+        if (
+          Array.isArray(parsed) &&
+          parsed.length >= MIN_SEGMENTS &&
+          parsed.length <= MAX_SEGMENTS &&
+          parsed.every(
+            (s: unknown) =>
+              typeof s === "object" &&
+              s !== null &&
+              typeof (s as Record<string, unknown>).id === "string" &&
+              typeof (s as Record<string, unknown>).label === "string" &&
+              typeof (s as Record<string, unknown>).color === "string"
+          )
+        ) {
           return parsed;
         }
       }

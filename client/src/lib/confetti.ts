@@ -1,7 +1,7 @@
 import confetti from "canvas-confetti";
 import { PRESET_COLORS } from "./wheelSegments";
 
-export function fireWinConfetti(): void {
+export function fireWinConfetti(): (() => void) {
   const duration = 3000;
   const animationEnd = Date.now() + duration;
   const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 };
@@ -14,7 +14,8 @@ export function fireWinConfetti(): void {
     const timeLeft = animationEnd - Date.now();
 
     if (timeLeft <= 0) {
-      return clearInterval(interval);
+      clearInterval(interval);
+      return;
     }
 
     const particleCount = 50 * (timeLeft / duration);
@@ -32,6 +33,8 @@ export function fireWinConfetti(): void {
       colors: PRESET_COLORS,
     });
   }, 250);
+
+  return () => clearInterval(interval);
 }
 
 export function fireCenterBurst(): void {

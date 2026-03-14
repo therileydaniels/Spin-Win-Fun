@@ -300,3 +300,15 @@
 .animate-pulse-glow {
   animation: pulse-glow 2.5s ease-in-out infinite;
 }
+
+/* Brand gradient used for headings and buttons */
+.bg-gradient-brand {
+  background: linear-gradient(135deg, #A855F7, #EC4899, #0EA5E9);
+}
+
+.text-gradient-brand {
+  background: linear-gradient(135deg, #A855F7, #EC4899, #0EA5E9);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}

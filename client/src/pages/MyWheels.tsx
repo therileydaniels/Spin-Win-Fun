@@ -139,15 +139,7 @@ export default function MyWheels() {
             <ArrowLeft className="w-4 h-4" />
             Back
           </Button>
-          <h1 
-            className="text-xl font-bold tracking-tight"
-            style={{
-              background: "linear-gradient(135deg, #A855F7, #EC4899, #0EA5E9)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
-            }}
-          >
+          <h1 className="text-xl font-bold tracking-tight text-gradient-brand">
             My Wheels
           </h1>
         </div>

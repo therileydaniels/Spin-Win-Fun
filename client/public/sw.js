@@ -1,11 +1,12 @@
-const CACHE_NAME = 'quickwheel-v1';
+const CACHE_NAME = 'quickwheel-v2';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
   '/favicon-32x32.png',
   '/icons/icon-192.png',
-  '/icons/icon-512.png'
+  '/icons/icon-512.png',
+  '/sounds/win.mp3'
 ];
 
 // Install - cache static assets
@@ -24,7 +25,7 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames
-          .filter((name) => name !== CACHE_NAME)
+          .filter((name) => name.startsWith('quickwheel-') && name !== CACHE_NAME)
           .map((name) => caches.delete(name))
       );
     })
@@ -36,10 +37,10 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   // Skip non-GET requests
   if (event.request.method !== 'GET') return;
-  
+
   // Skip API requests - always go to network
   if (event.request.url.includes('/api/')) return;
-  
+
   event.respondWith(
     fetch(event.request)
       .then((response) => {

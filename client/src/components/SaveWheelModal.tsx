@@ -59,7 +59,8 @@ export function SaveWheelModal({
       await onSave(values.name);
       onOpenChange(false);
       form.reset({ name: "My Wheel" });
-    } catch (error) {
+    } catch {
+      // Error display is handled by the caller via toast
     } finally {
       setIsSaving(false);
     }

@@ -1,8 +1,5 @@
 import express, { type Request, Response, NextFunction } from "express";
-import session from "express-session";
-import connectPgSimple from "connect-pg-simple";
 import helmet from "helmet";
-import { Pool } from "pg";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
@@ -12,94 +9,39 @@ const app = express();
 // Trust proxy for secure cookies behind reverse proxy (Replit)
 if (process.env.NODE_ENV === "production") {
   app.set("trust proxy", 1);
-  
+
+  // Redirect HTTP to HTTPS in production
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    if (req.headers["x-forwarded-proto"] !== "https") {
+      return res.redirect(301, `https://${req.hostname}${req.originalUrl}`);
+    }
+    next();
+  });
+
   // Security headers (production only - Vite dev server needs unrestricted access)
   app.use(helmet({
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        scriptSrc: ["'self'"],
+        styleSrc: ["'self'", "https://fonts.googleapis.com"],
         fontSrc: ["'self'", "https://fonts.gstatic.com"],
         imgSrc: ["'self'", "data:", "blob:"],
         connectSrc: ["'self'"],
-        mediaSrc: ["'self'", "https://assets.mixkit.co"], // Audio CDN
+        mediaSrc: ["'self'"],
       },
     },
   }));
 }
 const httpServer = createServer(app);
 
-declare module "http" {
-  interface IncomingMessage {
-    rawBody: unknown;
-  }
-}
-
-declare module "express-session" {
-  interface SessionData {
-    userId?: number;
-  }
-}
-
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-});
-
-const PgSession = connectPgSimple(session);
-
-app.use(
-  session({
-    store: new PgSession({
-      pool,
-      tableName: "session",
-      createTableIfMissing: true,
-    }),
-    secret: (() => {
-      if (process.env.SESSION_SECRET) {
-        return process.env.SESSION_SECRET;
-      }
-      if (process.env.NODE_ENV === "production") {
-        throw new Error("SESSION_SECRET environment variable must be set in production");
-      }
-      return "fallback-dev-secret-for-development-only";
-    })(),
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-    },
-    rolling: true, // Refresh session on each request
-  })
-);
-
 app.use(
   express.json({
-    verify: (req, _res, buf) => {
-      req.rawBody = buf;
-    },
+    limit: "100kb",
   }),
 );
 
 app.use(express.urlencoded({ extended: false }));
-
-// Basic CSRF protection - require JSON content-type for state-changing requests
-app.use("/api", (req: Request, res: Response, next: NextFunction) => {
-  if (["POST", "PUT", "DELETE", "PATCH"].includes(req.method)) {
-    // Exempt logout endpoint - it doesn't require a body
-    if (req.path === "/auth/logout") {
-      return next();
-    }
-    const contentType = req.headers["content-type"];
-    if (!contentType || !contentType.includes("application/json")) {
-      return res.status(403).json({ error: "Invalid content type" });
-    }
-  }
-  next();
-});
 
 export function log(message: string, source = "express") {
   const formattedTime = new Date().toLocaleTimeString("en-US", {
@@ -138,20 +80,19 @@ app.use((req, res, next) => {
   await registerRoutes(httpServer, app);
 
   app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
-    let status = 500;
-    let message = "Internal Server Error";
-    
-    if (err instanceof Error) {
-      message = err.message;
-      if ("status" in err && typeof (err as { status: unknown }).status === "number") {
-        status = (err as { status: number }).status;
-      } else if ("statusCode" in err && typeof (err as { statusCode: unknown }).statusCode === "number") {
-        status = (err as { statusCode: number }).statusCode;
-      }
-    }
+    const status =
+      err instanceof Error &&
+      "status" in err &&
+      typeof (err as { status: unknown }).status === "number"
+        ? (err as { status: number }).status
+        : err instanceof Error &&
+          "statusCode" in err &&
+          typeof (err as { statusCode: unknown }).statusCode === "number"
+          ? (err as { statusCode: number }).statusCode
+          : 500;
 
     console.error("Error:", err);
-    res.status(status).json({ message });
+    res.status(status).json({ message: status >= 500 ? "Internal Server Error" : (err instanceof Error ? err.message : "Internal Server Error") });
   });
 
   // importantly only setup vite in development and after
@@ -173,7 +114,6 @@ app.use((req, res, next) => {
     {
       port,
       host: "0.0.0.0",
-      reusePort: true,
     },
     () => {
       log(`serving on port ${port}`);
