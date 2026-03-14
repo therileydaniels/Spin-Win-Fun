@@ -13,7 +13,7 @@ import { useCustomSegments } from "@/hooks/useCustomSegments";
 import { useToast } from "@/hooks/use-toast";
 import { fireWinConfetti, fireCenterBurst } from "@/lib/confetti";
 import { Footer } from "@/components/Footer";
-import { saveWheelToLocal, updateLocalWheel, decodeWheelFromUrl } from "@/lib/localWheelStorage";
+import { saveWheelToLocal, updateLocalWheel, decodeWheelFromUrl, encodeWheelToUrl } from "@/lib/localWheelStorage";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Settings, ChevronLeft } from "lucide-react";
 
@@ -151,6 +151,36 @@ export default function Home() {
   const exitPresentationMode = useCallback(() => {
     setPresentationMode(false);
   }, []);
+
+  const handleShare = useCallback(() => {
+    const data = getWheelData();
+    const wheel = {
+      id: "share",
+      name: currentWheelName || "My Wheel",
+      segments: data.segments.map((s, i) => ({ ...s, probability: data.probabilities[i] })),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    const encoded = encodeWheelToUrl(wheel);
+    const url = `${window.location.origin}/?wheel=${encoded}`;
+    navigator.clipboard.writeText(url);
+    toast({ title: "Share link copied!" });
+  }, [getWheelData, currentWheelName, toast]);
+
+  const handleOBSEmbed = useCallback(() => {
+    const data = getWheelData();
+    const wheel = {
+      id: "obs",
+      name: currentWheelName || "My Wheel",
+      segments: data.segments.map((s, i) => ({ ...s, probability: data.probabilities[i] })),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    const encoded = encodeWheelToUrl(wheel);
+    const url = `${window.location.origin}/embed?wheel=${encoded}&bg=dark`;
+    navigator.clipboard.writeText(url);
+    toast({ title: "OBS link copied!", description: "Paste as browser source in OBS" });
+  }, [getWheelData, currentWheelName, toast]);
 
   useEffect(() => {
     if (showResult && winner) {
@@ -311,6 +341,8 @@ export default function Home() {
               onResetProbabilities={resetProbabilities}
               onNewWheel={resetToDefault}
               onSaveWheel={handleSaveWheel}
+              onShare={handleShare}
+              onOBSEmbed={handleOBSEmbed}
               total={total}
               isValid={isValid}
               isEqualOdds={isEqualOdds}

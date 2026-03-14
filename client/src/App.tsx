@@ -7,6 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Home from "@/pages/Home";
 
 const MyWheels = lazy(() => import("@/pages/MyWheels"));
+const Embed = lazy(() => import("@/pages/Embed"));
 const Terms = lazy(() => import("@/pages/Terms"));
 const Privacy = lazy(() => import("@/pages/Privacy"));
 const NotFound = lazy(() => import("@/pages/not-found"));
@@ -16,6 +17,7 @@ function Router() {
     <Suspense fallback={<div className="min-h-screen bg-background" />}>
       <Switch>
         <Route path="/" component={Home} />
+        <Route path="/embed" component={Embed} />
         <Route path="/my-wheels" component={MyWheels} />
         <Route path="/terms" component={Terms} />
         <Route path="/privacy" component={Privacy} />
