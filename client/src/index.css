@@ -301,13 +301,38 @@
   animation: pulse-glow 2.5s ease-in-out infinite;
 }
 
+@keyframes idle-breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+
+.animate-idle-breathe {
+  animation: idle-breathe 3s ease-in-out infinite;
+}
+
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 200ms ease-out both;
+}
+
+
 /* Brand gradient used for headings and buttons */
 .bg-gradient-brand {
-  background: linear-gradient(135deg, #A855F7, #EC4899, #0EA5E9);
+  background: linear-gradient(135deg, #B44AFF, #F43F8A, #0099FF);
 }
 
 .text-gradient-brand {
-  background: linear-gradient(135deg, #A855F7, #EC4899, #0EA5E9);
+  background: linear-gradient(135deg, #B44AFF, #F43F8A, #0099FF);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

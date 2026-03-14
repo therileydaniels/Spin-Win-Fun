@@ -28,7 +28,7 @@ export default function Privacy() {
             <ArrowLeft className="w-4 h-4" />
             Back
           </Button>
-          <h1 className="text-xl font-bold tracking-tight text-gradient-brand">
+          <h1 className="text-xl font-extrabold tracking-tight text-gradient-brand">
             Privacy Policy
           </h1>
         </div>

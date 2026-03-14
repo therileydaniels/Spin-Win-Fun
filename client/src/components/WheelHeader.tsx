@@ -42,7 +42,7 @@ export const WheelHeader = memo(function WheelHeader({
           data-testid="img-logo"
         />
         <span
-          className="sm:hidden text-xl font-bold bg-gradient-brand bg-clip-text text-transparent"
+          className="sm:hidden text-xl font-extrabold tracking-tight bg-gradient-brand bg-clip-text text-transparent"
         >
           QuickWheel
         </span>

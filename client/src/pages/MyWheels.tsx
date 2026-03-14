@@ -121,9 +121,9 @@ export default function MyWheels() {
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col relative overflow-hidden">
       <div 
-        className="absolute inset-0 opacity-30 pointer-events-none"
+        className="absolute inset-0 opacity-20 pointer-events-none"
         style={{
-          background: "radial-gradient(ellipse at 50% 0%, rgba(139,92,246,0.15) 0%, transparent 50%), radial-gradient(ellipse at 80% 80%, rgba(236,72,153,0.1) 0%, transparent 40%)"
+          background: "radial-gradient(ellipse at 50% 0%, rgba(139,92,246,0.1) 0%, transparent 50%), radial-gradient(ellipse at 80% 80%, rgba(236,72,153,0.08) 0%, transparent 40%), radial-gradient(ellipse at 20% 50%, rgba(59,130,246,0.06) 0%, transparent 40%)"
         }}
       />
 
@@ -139,7 +139,7 @@ export default function MyWheels() {
             <ArrowLeft className="w-4 h-4" />
             Back
           </Button>
-          <h1 className="text-xl font-bold tracking-tight text-gradient-brand">
+          <h1 className="text-xl font-extrabold tracking-tight text-gradient-brand">
             My Wheels
           </h1>
         </div>
@@ -189,7 +189,7 @@ export default function MyWheels() {
                   </p>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex flex-wrap gap-1 mb-3">
+                  <div className="flex flex-wrap gap-1 mb-2">
                     {wheel.segments.slice(0, 5).map((seg, idx) => (
                       <div
                         key={idx}

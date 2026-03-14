@@ -70,7 +70,7 @@ export function ProbabilityPanel({
 
   return (
     <>
-      <Card className="w-full max-w-sm border-border bg-card/80 backdrop-blur-sm">
+      <Card className="w-full max-w-sm border border-white/5 bg-card/80 backdrop-blur-xl shadow-xl shadow-black/20">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between gap-2">
             <div className="min-w-0 flex-1">
@@ -82,7 +82,7 @@ export function ProbabilityPanel({
                   <span className="text-xs text-amber-400 shrink-0">*</span>
                 )}
               </CardTitle>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs text-muted-foreground font-medium mt-1">
                 {segments.length}/{MAX_SEGMENTS} segments
               </p>
             </div>
@@ -156,8 +156,10 @@ export function ProbabilityPanel({
             </div>
           </div>
         </CardHeader>
-      <CardContent className="space-y-2">
-        <div className="max-h-[320px] overflow-y-auto space-y-2 pr-1">
+      <CardContent className="space-y-5">
+        <div>
+          <p className="font-semibold text-sm text-foreground tracking-wide uppercase mb-3">Segments</p>
+          <div className="max-h-[320px] overflow-y-auto space-y-2 pr-1">
           {segments.map((segment, index) => (
             <div
               key={segment.id}
@@ -204,20 +206,21 @@ export function ProbabilityPanel({
           ))}
         </div>
 
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onAdd}
-          disabled={!canAdd}
-          className="w-full mt-2 border-border"
-          data-testid="button-add-segment"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Add Segment
-        </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onAdd}
+            disabled={!canAdd}
+            className="w-full mt-3 border-border"
+            data-testid="button-add-segment"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add Segment
+          </Button>
+        </div>
 
-        <div className="pt-3 border-t border-border space-y-2">
-          <p className="text-xs text-muted-foreground">Color Themes</p>
+        <div className="pt-1 border-t border-border space-y-2">
+          <p className="font-semibold text-sm text-foreground tracking-wide uppercase">Color Themes</p>
           <div className="flex gap-2 overflow-x-auto pb-1">
             {COLOR_PALETTES.map((palette) => (
               <button
@@ -241,7 +244,7 @@ export function ProbabilityPanel({
           </div>
         </div>
 
-        <div className="pt-3 border-t border-border">
+        <div className="pt-1 border-t border-border">
           {isEqualOdds ? (
             <div className="flex items-center gap-2 text-sm">
               <Scale className="w-4 h-4 text-blue-400" />

@@ -11,11 +11,13 @@ interface SpinButtonProps {
 export function SpinButton({ onClick, disabled, isSpinning }: SpinButtonProps) {
   const [isPressed, setIsPressed] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  
+
+  const isIdle = !disabled && !isSpinning && !isPressed && !isHovered;
+
   const getScale = () => {
-    if (isPressed && !disabled) return "scale(0.97)";
+    if (isPressed && !disabled) return "scale(0.95)";
     if (isHovered && !disabled && !isSpinning) return "scale(1.03)";
-    return "scale(1)";
+    return undefined;
   };
 
   const getBoxShadow = () => {
@@ -40,11 +42,11 @@ export function SpinButton({ onClick, disabled, isSpinning }: SpinButtonProps) {
       onMouseUp={() => setIsPressed(false)}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => { setIsPressed(false); setIsHovered(false); }}
-      className={`relative min-w-[220px] min-h-[60px] text-lg font-bold tracking-wider text-white border-none shadow-2xl transition-all duration-200 ease-out disabled:opacity-60 disabled:cursor-not-allowed overflow-visible ${!disabled && !isSpinning ? 'animate-pulse-glow' : ''}`}
+      className={`relative min-w-[220px] min-h-[60px] text-lg font-bold tracking-wider text-white border-none shadow-2xl transition-all duration-200 ease-out disabled:opacity-70 disabled:cursor-not-allowed overflow-visible ${!disabled && !isSpinning ? 'animate-pulse-glow' : ''} ${isIdle ? 'animate-idle-breathe' : ''}`}
       style={{
         background: "linear-gradient(135deg, #A855F7 0%, #6366F1 50%, #0EA5E9 100%)",
         boxShadow: getBoxShadow(),
-        transform: getScale(),
+        ...(getScale() ? { transform: getScale() } : {}),
       }}
       data-testid="button-spin"
     >

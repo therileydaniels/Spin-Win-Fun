@@ -217,9 +217,9 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col relative overflow-hidden">
       <div
-        className="absolute inset-0 opacity-30 pointer-events-none"
+        className="absolute inset-0 opacity-20 pointer-events-none"
         style={{
-          background: "radial-gradient(ellipse at 50% 0%, rgba(139,92,246,0.15) 0%, transparent 50%), radial-gradient(ellipse at 80% 80%, rgba(236,72,153,0.1) 0%, transparent 40%)"
+          background: "radial-gradient(ellipse at 50% 0%, rgba(139,92,246,0.1) 0%, transparent 50%), radial-gradient(ellipse at 80% 80%, rgba(236,72,153,0.08) 0%, transparent 40%), radial-gradient(ellipse at 20% 50%, rgba(59,130,246,0.06) 0%, transparent 40%)"
         }}
       />
 
@@ -252,7 +252,7 @@ export default function Home() {
       )}
 
       <main className={`relative z-10 flex-1 flex flex-col ${presentationMode ? "" : settingsOpen ? "lg:flex-row" : ""} items-center justify-center gap-6 p-4 sm:p-6`}>
-        <div className="flex flex-col items-center gap-8">
+        <div className="flex flex-col items-center gap-6">
           <div className="w-full flex items-center justify-center">
             {isLoading ? (
               <div className={`aspect-square flex items-center justify-center transition-all duration-300 ${wheelSizeClass}`}>
@@ -290,7 +290,7 @@ export default function Home() {
         </div>
 
         {!presentationMode && settingsOpen && (
-          <div className="relative">
+          <div className="relative animate-slide-in-right">
             <Button
               variant="ghost"
               size="icon"

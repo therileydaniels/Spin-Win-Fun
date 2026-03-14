@@ -196,9 +196,9 @@ export function SpinWheel({ segments, rotation, isSpinning, spinDuration, size }
       style={{ width: size ? `${size}px` : '100%', maxWidth: size ? `${size}px` : '100%' }}
     >
       <div 
-        className="absolute inset-0 rounded-full opacity-60 blur-3xl pointer-events-none"
+        className="absolute inset-0 rounded-full opacity-40 blur-3xl pointer-events-none"
         style={{
-          background: "radial-gradient(circle, rgba(139,92,246,0.4) 0%, rgba(236,72,153,0.3) 50%, transparent 70%)"
+          background: "radial-gradient(circle, rgba(139,92,246,0.25) 0%, rgba(236,72,153,0.15) 50%, transparent 70%)"
         }}
       />
       
@@ -227,6 +227,7 @@ export function SpinWheel({ segments, rotation, isSpinning, spinDuration, size }
               y2="100%"
             >
               <stop offset="0%" stopColor={segment.color} />
+              <stop offset="10%" stopColor={adjustColor(segment.color, 10)} />
               <stop offset="100%" stopColor={adjustColor(segment.color, -30)} />
             </linearGradient>
           ))}
@@ -236,11 +237,11 @@ export function SpinWheel({ segments, rotation, isSpinning, spinDuration, size }
             <feComposite in="SourceGraphic" in2="offsetBlur" operator="over" />
           </filter>
           <linearGradient id="rimGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#E5E7EB" />
-            <stop offset="25%" stopColor="#9CA3AF" />
-            <stop offset="50%" stopColor="#F3F4F6" />
-            <stop offset="75%" stopColor="#9CA3AF" />
-            <stop offset="100%" stopColor="#D1D5DB" />
+            <stop offset="0%" stopColor="#374151" />
+            <stop offset="25%" stopColor="#1F2937" />
+            <stop offset="50%" stopColor="#4B5563" />
+            <stop offset="75%" stopColor="#1F2937" />
+            <stop offset="100%" stopColor="#374151" />
           </linearGradient>
           <filter id="rimShadow" x="-10%" y="-10%" width="120%" height="120%">
             <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="#000" floodOpacity="0.3" />
@@ -261,7 +262,7 @@ export function SpinWheel({ segments, rotation, isSpinning, spinDuration, size }
           cy={centerY}
           r={radius + 5}
           fill="none"
-          stroke="rgba(255,255,255,0.3)"
+          stroke="rgba(0,0,0,0.3)"
           strokeWidth="1"
         />
         <circle
@@ -269,7 +270,7 @@ export function SpinWheel({ segments, rotation, isSpinning, spinDuration, size }
           cy={centerY}
           r={radius + 2}
           fill="none"
-          stroke="rgba(0,0,0,0.15)"
+          stroke="rgba(0,0,0,0.25)"
           strokeWidth="1"
         />
 
@@ -301,7 +302,7 @@ export function SpinWheel({ segments, rotation, isSpinning, spinDuration, size }
               <path
                 d={path}
                 fill={`url(#segmentGradient-${segment.id})`}
-                stroke="rgba(255,255,255,0.15)"
+                stroke="rgba(0,0,0,0.3)"
                 strokeWidth="1"
               >
                 <title>{segment.label}</title>
@@ -341,12 +342,12 @@ export function SpinWheel({ segments, rotation, isSpinning, spinDuration, size }
         />
         <defs>
           <radialGradient id="centerGradient" cx="30%" cy="30%">
-            <stop offset="0%" stopColor="#374151" />
-            <stop offset="100%" stopColor="#1F2937" />
+            <stop offset="0%" stopColor="#1F2937" />
+            <stop offset="100%" stopColor="#111827" />
           </radialGradient>
         </defs>
         <circle cx={centerX} cy={centerY} r="10" fill="#111827" />
-        <circle cx={centerX} cy={centerY} r="4" fill="rgba(255,255,255,0.3)" />
+        <circle cx={centerX} cy={centerY} r="4" fill="rgba(255,255,255,0.15)" />
       </svg>
 
       <div
@@ -356,13 +357,12 @@ export function SpinWheel({ segments, rotation, isSpinning, spinDuration, size }
         <svg width="40" height="52" viewBox="0 0 40 52">
           <defs>
             <linearGradient id="pointerGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#FFFFFF" />
-              <stop offset="30%" stopColor="#F9FAFB" />
-              <stop offset="60%" stopColor="#E5E7EB" />
-              <stop offset="100%" stopColor="#9CA3AF" />
+              <stop offset="0%" stopColor="#374151" />
+              <stop offset="50%" stopColor="#1F2937" />
+              <stop offset="100%" stopColor="#111827" />
             </linearGradient>
             <filter id="pointerShadow" x="-50%" y="-50%" width="200%" height="200%">
-              <feDropShadow dx="0" dy="4" stdDeviation="4" floodColor="#000" floodOpacity="0.5" />
+              <feDropShadow dx="0" dy="4" stdDeviation="4" floodColor="#000" floodOpacity="0.35" />
             </filter>
             <filter id="pointerGlow" x="-100%" y="-100%" width="300%" height="300%">
               <feGaussianBlur in="SourceAlpha" stdDeviation="2" result="blur" />
@@ -377,7 +377,7 @@ export function SpinWheel({ segments, rotation, isSpinning, spinDuration, size }
           <polygon
             points="20,48 5,10 35,10"
             fill="url(#pointerGradient)"
-            stroke="rgba(255,255,255,0.8)"
+            stroke="rgba(255,255,255,0.2)"
             strokeWidth="1.5"
             filter="url(#pointerShadow)"
           />
