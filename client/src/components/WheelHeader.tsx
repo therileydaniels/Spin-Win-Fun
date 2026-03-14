@@ -5,7 +5,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { SoundToggle } from "@/components/SoundToggle";
 import { InstallPrompt } from "@/components/InstallPrompt";
-import { Monitor, Settings, FolderOpen, History, Trash2 } from "lucide-react";
+import { Monitor, Settings, FolderOpen, History, Trash2, LayoutGrid } from "lucide-react";
 
 interface WheelHeaderProps {
   settingsOpen: boolean;
@@ -82,6 +82,23 @@ export const WheelHeader = memo(function WheelHeader({
             </TooltipTrigger>
             <TooltipContent>
               <p>My Wheels</p>
+            </TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setLocation("/templates")}
+                className="text-muted-foreground h-8 w-8"
+                data-testid="button-templates"
+                aria-label="Templates"
+              >
+                <LayoutGrid className="w-4 h-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Templates</p>
             </TooltipContent>
           </Tooltip>
           <Tooltip>
