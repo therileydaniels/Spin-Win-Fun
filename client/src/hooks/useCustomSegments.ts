@@ -19,6 +19,7 @@ export interface UseCustomSegmentsReturn {
   removeSegment: (id: string) => void;
   renameSegment: (id: string, label: string) => void;
   recolorSegment: (id: string, color: string) => void;
+  applyColorPalette: (colors: string[]) => void;
   setProbability: (index: number, value: number) => void;
   resetProbabilities: () => void;
   resetToDefault: () => void;
@@ -179,6 +180,12 @@ export function useCustomSegments(): UseCustomSegmentsReturn {
     );
   }, []);
 
+  const applyColorPalette = useCallback((colors: string[]) => {
+    setSegments((prev) =>
+      prev.map((s, idx) => ({ ...s, color: colors[idx % colors.length] }))
+    );
+  }, []);
+
   const setProbability = useCallback((index: number, value: number) => {
     setProbabilities((prev) => {
       const next = [...prev];
@@ -249,6 +256,7 @@ export function useCustomSegments(): UseCustomSegmentsReturn {
     removeSegment,
     renameSegment,
     recolorSegment,
+    applyColorPalette,
     setProbability,
     resetProbabilities,
     resetToDefault,
