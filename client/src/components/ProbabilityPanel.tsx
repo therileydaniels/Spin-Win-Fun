@@ -13,7 +13,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Check, AlertTriangle, Scale, Percent, FilePlus2, Trash2, Plus, Save, X } from "lucide-react";
+import { Check, AlertTriangle, Scale, Percent, FilePlus2, Trash2, Plus, Save, X, Share2, Monitor } from "lucide-react";
 import { ColorPicker } from "./ColorPicker";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { COLOR_PALETTES } from "@/lib/colorPalettes";
@@ -30,6 +30,8 @@ interface ProbabilityPanelProps {
   onApplyColorPalette: (colors: string[]) => void;
   onNewWheel: () => void;
   onSaveWheel: () => void;
+  onShare: () => void;
+  onOBSEmbed: () => void;
   total: number;
   isValid: boolean;
   isEqualOdds: boolean;
@@ -52,6 +54,8 @@ export function ProbabilityPanel({
   onResetProbabilities,
   onNewWheel,
   onSaveWheel,
+  onShare,
+  onOBSEmbed,
   total,
   isValid,
   isEqualOdds,
@@ -101,6 +105,38 @@ export function ProbabilityPanel({
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>Save wheel</p>
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={onShare}
+                    className="text-muted-foreground"
+                    data-testid="button-share-wheel"
+                  >
+                    <Share2 className="w-4 h-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Copy share link</p>
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={onOBSEmbed}
+                    className="text-muted-foreground"
+                    data-testid="button-obs-embed"
+                  >
+                    <Monitor className="w-4 h-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Copy OBS embed link</p>
                 </TooltipContent>
               </Tooltip>
               {onClose && (
