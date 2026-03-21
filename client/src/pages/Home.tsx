@@ -15,7 +15,7 @@ import { fireWinConfetti, fireCenterBurst } from "@/lib/confetti";
 import { Footer } from "@/components/Footer";
 import { saveWheelToLocal, updateLocalWheel, decodeWheelFromUrl, encodeWheelToUrl } from "@/lib/localWheelStorage";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Settings, ChevronLeft } from "lucide-react";
+import { Settings, ChevronLeft, Mail } from "lucide-react";
 
 export default function Home() {
   const {
@@ -265,6 +265,23 @@ export default function Home() {
           isMuted={isMuted}
           onToggleMute={toggleMute}
         />
+      )}
+
+      {!presentationMode && (
+        <div className="relative z-10 px-4 pt-3">
+          <div className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-card/80 backdrop-blur-xl border border-white/5 text-xs text-muted-foreground">
+            <Mail className="w-3.5 h-3.5 shrink-0" />
+            <span>
+              Having an issue? Reach out to Riley, the creator, at{" "}
+              <a
+                href="mailto:BookRD@protonmail.com"
+                className="font-medium text-foreground hover:underline"
+              >
+                BookRD@protonmail.com
+              </a>
+            </span>
+          </div>
+        </div>
       )}
 
       {presentationMode && (
