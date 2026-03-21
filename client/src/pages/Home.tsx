@@ -178,7 +178,7 @@ export default function Home() {
       updatedAt: new Date().toISOString(),
     };
     const encoded = encodeWheelToUrl(wheel);
-    const url = `${window.location.origin}/embed?wheel=${encoded}&bg=dark`;
+    const url = `${window.location.origin}/embed?wheel=${encoded}`;
     navigator.clipboard.writeText(url);
     toast({ title: "OBS link copied!", description: "Paste as browser source in OBS" });
   }, [getWheelData, currentWheelName, toast]);
