@@ -1,20 +1,34 @@
-import { useEffect, useCallback, useMemo } from "react";
+import { useEffect, useCallback, useMemo, useState, useRef } from "react";
 import { SpinWheel } from "@/components/SpinWheel";
-import { useWheelSpin } from "@/hooks/useWheelSpin";
 import { useCustomSegments } from "@/hooks/useCustomSegments";
 import { fireWinConfetti, fireCenterBurst } from "@/lib/confetti";
 import { decodeWheelFromUrl } from "@/lib/localWheelStorage";
+import { calculateRotationForWinner } from "@/lib/wheelSegments";
+import { CustomSegment } from "@shared/schema";
+
+function selectWeightedWinner(probabilities: number[]): number {
+  const total = probabilities.reduce((a, b) => a + b, 0);
+  if (total === 0) {
+    return Math.floor(Math.random() * probabilities.length);
+  }
+  const random = Math.random() * total;
+  let cumulative = 0;
+  for (let i = 0; i < probabilities.length; i++) {
+    cumulative += probabilities[i];
+    if (random < cumulative) {
+      return i;
+    }
+  }
+  return probabilities.length - 1;
+}
 
 export default function Embed() {
-  const {
-    isSpinning,
-    rotation,
-    winner,
-    showResult,
-    spin,
-    closeResult,
-    spinDuration,
-  } = useWheelSpin();
+  const [isSpinning, setIsSpinning] = useState(false);
+  const [rotation, setRotation] = useState(0);
+  const [winner, setWinner] = useState<CustomSegment | null>(null);
+  const [showResult, setShowResult] = useState(false);
+  const [spinDuration, setSpinDuration] = useState(4.5);
+  const timeoutRef = useRef<number | null>(null);
 
   const {
     segments,
@@ -56,12 +70,49 @@ export default function Embed() {
     }
   }, []);
 
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current !== null) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
   const canSpin = isValid && !isSpinning;
 
   const handleSpin = useCallback(() => {
     if (!canSpin || segments.length < 2) return;
-    spin(probabilities, segments);
-  }, [canSpin, spin, probabilities, segments]);
+
+    setIsSpinning(true);
+    setWinner(null);
+    setShowResult(false);
+
+    const winnerIndex = selectWeightedWinner(probabilities);
+    const selectedWinner = segments[winnerIndex];
+
+    const duration = 4 + Math.random() * 1;
+    setSpinDuration(duration);
+
+    const newRotation = calculateRotationForWinner(
+      winnerIndex,
+      segments.length,
+      rotation
+    );
+
+    setRotation(newRotation);
+    setWinner(selectedWinner);
+
+    if (timeoutRef.current !== null) {
+      clearTimeout(timeoutRef.current);
+    }
+
+    timeoutRef.current = window.setTimeout(() => {
+      setIsSpinning(false);
+      setShowResult(true);
+      timeoutRef.current = null;
+    }, duration * 1000);
+  }, [canSpin, segments, probabilities, rotation]);
 
   // Spacebar and click to spin
   useEffect(() => {
@@ -80,14 +131,14 @@ export default function Embed() {
     if (showResult && winner) {
       fireCenterBurst();
       const cleanupConfetti = fireWinConfetti();
-      const dismissTimer = setTimeout(() => closeResult(), 3000);
+      const dismissTimer = setTimeout(() => setShowResult(false), 3000);
 
       return () => {
         cleanupConfetti();
         clearTimeout(dismissTimer);
       };
     }
-  }, [showResult, winner, closeResult]);
+  }, [showResult, winner]);
 
   return (
     <div
