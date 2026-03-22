@@ -1,12 +1,29 @@
-import { defineConfig } from "vite";
+import { defineConfig, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
+import fs from "fs";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 
+function copyStaticPages(): Plugin {
+  return {
+    name: "copy-static-pages",
+    closeBundle() {
+      const pages = ["landing.html", "terms.html", "privacy.html"];
+      for (const page of pages) {
+        const src = path.resolve(import.meta.dirname, "client", page);
+        const dest = path.resolve(import.meta.dirname, "dist/public", page);
+        fs.copyFileSync(src, dest);
+      }
+    },
+  };
+}
+
 export default defineConfig({
+  base: "/app/",
   plugins: [
     react(),
     runtimeErrorOverlay(),
+    copyStaticPages(),
     ...(process.env.NODE_ENV !== "production" &&
     process.env.REPL_ID !== undefined
       ? [

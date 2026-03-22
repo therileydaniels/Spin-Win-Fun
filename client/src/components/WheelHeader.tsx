@@ -34,9 +34,9 @@ export const WheelHeader = memo(function WheelHeader({
 
   return (
     <header className="relative z-10 flex items-center justify-between gap-4 px-4 py-3 border-b border-border">
-      <a href="/" className="flex items-center">
+      <a href="/app" className="flex items-center">
         <img
-          src="/logo.png"
+          src="/app/logo.png"
           alt="QuickWheel"
           className="h-8 sm:h-10 w-auto hidden sm:block"
           data-testid="img-logo"

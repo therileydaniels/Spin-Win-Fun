@@ -1,7 +1,7 @@
 const CACHE_NAME = 'quickwheel-v1';
 const STATIC_ASSETS = [
-  '/',
-  '/index.html',
+  '/app',
+  '/app/index.html',
 ];
 
 self.addEventListener('install', (event) => {

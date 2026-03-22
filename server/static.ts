@@ -10,10 +10,28 @@ export function serveStatic(app: Express) {
     );
   }
 
-  app.use(express.static(distPath));
+  // Landing page at root
+  const landingPath = path.resolve(distPath, "landing.html");
+  const termsPath = path.resolve(distPath, "terms.html");
+  const privacyPath = path.resolve(distPath, "privacy.html");
 
-  // fall through to index.html if the file doesn't exist
-  app.use("*", (_req, res) => {
+  app.get("/", (_req, res) => {
+    res.sendFile(landingPath);
+  });
+
+  app.get("/terms", (_req, res) => {
+    res.sendFile(termsPath);
+  });
+
+  app.get("/privacy", (_req, res) => {
+    res.sendFile(privacyPath);
+  });
+
+  // Serve React app static assets under /app
+  app.use("/app", express.static(distPath));
+
+  // SPA fallback for /app/* routes
+  app.get("/app/*", (_req, res) => {
     res.sendFile(path.resolve(distPath, "index.html"));
   });
 }

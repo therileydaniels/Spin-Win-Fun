@@ -67,7 +67,7 @@ export function InstallPrompt() {
           data-testid="button-install-app"
         >
           <img 
-            src="/favicon-32x32.png" 
+            src="/app/favicon-32x32.png"
             alt="Install QuickWheel" 
             className="h-5 w-5"
           />

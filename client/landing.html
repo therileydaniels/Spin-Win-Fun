@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QuickWheel - Free Spin Wheel for Streams, Giveaways & Live Events</title>
+  <meta name="description" content="The clean, free wheel spinner built for streamers, creators, and live events. Full control, zero friction." />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://quickwheel.co/" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="QuickWheel" />
+  <meta property="og:title" content="QuickWheel - Free Spin Wheel for Streams & Giveaways" />
+  <meta property="og:description" content="The clean, free wheel spinner built for streamers, creators, and live events. Full control, zero friction." />
+  <meta property="og:image" content="https://quickwheel.co/og-image.png" />
+  <meta property="og:url" content="https://quickwheel.co/" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="QuickWheel - Free Spin Wheel for Streams & Giveaways" />
+  <meta name="twitter:description" content="The clean, free wheel spinner built for streamers, creators, and live events." />
+  <meta name="twitter:image" content="https://quickwheel.co/og-image.png" />
+
+  <style>
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-dark: #0f172a;
+      --bg-footer: #0a0f1f;
+      --text-primary: #f1f5f9;
+      --text-secondary: #cbd5e1;
+      --text-muted: #94a3b8;
+      --text-subtle: #64748b;
+      --accent-blue: #0EA5E9;
+      --accent-blue-hover: #0284c7;
+      --border: #1e293b;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: Inter, 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-primary);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ---- SPLASH SCREEN ---- */
+    .splash {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--bg-dark);
+      z-index: 1000;
+      gap: 24px;
+    }
+
+    .splash-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.02em;
+    }
+
+    .splash-spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent-blue);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    .splash-text {
+      font-size: 15px;
+      color: var(--text-muted);
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ---- HERO ---- */
+    .hero {
+      min-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 80px 24px 60px;
+    }
+
+    .hero h1 {
+      font-size: 64px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      color: var(--text-primary);
+      margin-bottom: 24px;
+    }
+
+    .hero .subheadline {
+      font-size: 20px;
+      font-weight: 400;
+      color: var(--text-secondary);
+      max-width: 560px;
+      margin: 0 auto 48px;
+      line-height: 1.6;
+    }
+
+    .cta-button {
+      display: inline-block;
+      padding: 16px 40px;
+      font-size: 17px;
+      font-weight: 600;
+      color: #fff;
+      background-color: var(--accent-blue);
+      border: none;
+      border-radius: 8px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      min-height: 48px;
+    }
+
+    .cta-button:hover {
+      background-color: var(--accent-blue-hover);
+    }
+
+    .support-text {
+      margin-top: 20px;
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    /* ---- FEATURES ---- */
+    .features {
+      padding: 120px 24px;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 56px;
+    }
+
+    .feature-card {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .feature-icon {
+      width: 32px;
+      height: 32px;
+      color: var(--accent-blue);
+      margin-bottom: 16px;
+      stroke-width: 2;
+    }
+
+    .feature-card h3 {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 10px;
+    }
+
+    .feature-card p {
+      font-size: 16px;
+      font-weight: 400;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* ---- FINAL CTA ---- */
+    .final-cta {
+      padding: 120px 24px 140px;
+      text-align: center;
+    }
+
+    .final-cta h2 {
+      font-size: 42px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+    }
+
+    .final-cta .cta-description {
+      font-size: 18px;
+      color: var(--text-secondary);
+      margin-bottom: 40px;
+    }
+
+    /* ---- FOOTER ---- */
+    .footer {
+      padding: 48px 24px;
+      border-top: 1px solid var(--border);
+      background-color: var(--bg-footer);
+    }
+
+    .footer-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .footer-left {
+      font-size: 14px;
+      color: var(--text-subtle);
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 24px;
+    }
+
+    .footer-links a {
+      font-size: 14px;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    .footer-links a:hover {
+      color: var(--text-primary);
+    }
+
+    /* ---- MOBILE ---- */
+    @media (max-width: 768px) {
+      .hero h1 {
+        font-size: 42px;
+      }
+
+      .hero .subheadline {
+        font-size: 18px;
+      }
+
+      .features {
+        padding: 80px 24px;
+      }
+
+      .features-grid {
+        gap: 40px;
+      }
+
+      .final-cta {
+        padding: 80px 24px 100px;
+      }
+
+      .final-cta h2 {
+        font-size: 32px;
+      }
+
+      .footer-inner {
+        flex-direction: column;
+        text-align: center;
+        gap: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Landing page content (hidden initially for redirect check) -->
+  <div id="landing" style="display:none;">
+
+    <!-- Hero -->
+    <section class="hero">
+      <div class="container">
+        <h1>Spin the Wheel. Your Way.</h1>
+        <p class="subheadline">The clean, free wheel spinner built for streamers, creators, and live events. Full control, zero friction.</p>
+        <a href="/app" class="cta-button" id="hero-cta">Launch QuickWheel</a>
+        <p class="support-text">No signup required &bull; Always free &bull; Start in seconds</p>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features">
+      <div class="container">
+        <div class="features-grid">
+
+          <div class="feature-card">
+            <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+              <line x1="8" y1="21" x2="16" y2="21"></line>
+              <line x1="12" y1="17" x2="12" y2="21"></line>
+            </svg>
+            <h3>Presentation Mode</h3>
+            <p>Hide all controls for a clean display. Perfect for streaming and live events.</p>
+          </div>
+
+          <div class="feature-card">
+            <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+              <polyline points="9 12 11 14 15 10"></polyline>
+            </svg>
+            <h3>Ad-Free Forever</h3>
+            <p>No popups, no tracking, no distractions. Just your wheel, nothing else.</p>
+          </div>
+
+          <div class="feature-card">
+            <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="4" y1="21" x2="4" y2="14"></line>
+              <line x1="4" y1="10" x2="4" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12" y2="3"></line>
+              <line x1="20" y1="21" x2="20" y2="16"></line>
+              <line x1="20" y1="12" x2="20" y2="3"></line>
+              <line x1="1" y1="14" x2="7" y2="14"></line>
+              <line x1="9" y1="8" x2="15" y2="8"></line>
+              <line x1="17" y1="16" x2="23" y2="16"></line>
+            </svg>
+            <h3>Flexible Control</h3>
+            <p>Adjust outcomes to match your goals. You decide what happens.</p>
+          </div>
+
+          <div class="feature-card">
+            <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            </svg>
+            <h3>No Signup Required</h3>
+            <p>Start spinning immediately. Save wheels locally. That simple.</p>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section class="final-cta">
+      <div class="container">
+        <h2>Ready to spin?</h2>
+        <p class="cta-description">Free to use. No catch. Just a better wheel spinner.</p>
+        <a href="/app" class="cta-button">Launch QuickWheel</a>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-inner">
+          <div class="footer-left">QuickWheel &copy; 2026 &bull; For entertainment and private use</div>
+          <nav class="footer-links">
+            <a href="/terms">Terms</a>
+            <a href="/privacy">Privacy</a>
+            <a href="mailto:contact@quickwheel.co">Contact</a>
+          </nav>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <script>
+    (function() {
+      var lastVisit = localStorage.getItem('quickwheel_last_visit');
+      var now = Date.now();
+      var thirtyDays = 30 * 24 * 60 * 60 * 1000;
+
+      if (lastVisit && (now - parseInt(lastVisit, 10)) < thirtyDays) {
+        // Returning user within 30 days — show splash and redirect
+        var splash = document.createElement('div');
+        splash.className = 'splash';
+        splash.innerHTML = '<div class="splash-title">QuickWheel</div><div class="splash-spinner"></div><div class="splash-text">Loading QuickWheel...</div>';
+        document.body.appendChild(splash);
+        setTimeout(function() { window.location.href = '/app'; }, 3000);
+      } else {
+        // First visit or 30+ days — show landing page and store timestamp
+        localStorage.setItem('quickwheel_last_visit', now.toString());
+        document.getElementById('landing').style.display = 'block';
+      }
+
+      // Update timestamp on CTA click so the 30-day window resets
+      document.addEventListener('click', function(e) {
+        if (e.target && e.target.closest && e.target.closest('.cta-button')) {
+          localStorage.setItem('quickwheel_last_visit', Date.now().toString());
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
