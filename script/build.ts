@@ -1,6 +1,7 @@
 import { build as esbuild } from "esbuild";
 import { build as viteBuild } from "vite";
-import { rm, readFile } from "fs/promises";
+import { rm, readFile, copyFile } from "fs/promises";
+import path from "path";
 
 // server deps to bundle to reduce openat(2) syscalls
 // which helps cold start times
@@ -21,6 +22,13 @@ async function buildAll() {
 
   console.log("building client...");
   await viteBuild();
+
+  // Copy static pages to dist (Vite plugin may not reliably do this in programmatic builds)
+  const staticPages = ["landing.html", "terms.html", "privacy.html"];
+  for (const page of staticPages) {
+    await copyFile(path.resolve("client", page), path.resolve("dist/public", page));
+  }
+  console.log("copied static pages:", staticPages.join(", "));
 
   console.log("building server...");
   const pkg = JSON.parse(await readFile("package.json", "utf-8"));
