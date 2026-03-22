@@ -23,11 +23,11 @@ if (process.env.NODE_ENV === "production") {
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "https://www.googletagmanager.com"],
         styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
         fontSrc: ["'self'", "https://fonts.gstatic.com"],
-        imgSrc: ["'self'", "data:", "blob:"],
-        connectSrc: ["'self'"],
+        imgSrc: ["'self'", "data:", "blob:", "https://www.google-analytics.com"],
+        connectSrc: ["'self'", "https://www.google-analytics.com", "https://*.google-analytics.com", "https://*.analytics.google.com"],
         mediaSrc: ["'self'"],
       },
     },
