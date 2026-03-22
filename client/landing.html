@@ -153,6 +153,46 @@
       color: var(--text-muted);
     }
 
+    /* ---- PREVIEW ---- */
+    .preview {
+      padding: 0 24px 80px;
+    }
+
+    .preview-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .preview-img {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+
+    .preview-img.main {
+      grid-column: 1 / -1;
+    }
+
+    .preview-caption {
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-subtle);
+      margin-top: 10px;
+    }
+
+    .preview-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    @media (max-width: 768px) {
+      .preview-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
     /* ---- FEATURES ---- */
     .features {
       padding: 120px 24px;
@@ -291,6 +331,25 @@
         <p class="subheadline">The clean, free wheel spinner built for streamers, creators, and live events. Full control, zero friction.</p>
         <a href="/app" class="cta-button" id="hero-cta">Launch QuickWheel</a>
         <p class="support-text">No signup required &bull; Always free &bull; Start in seconds</p>
+      </div>
+    </section>
+
+    <!-- Preview -->
+    <section class="preview">
+      <div class="container">
+        <div class="preview-grid">
+          <div class="preview-item" style="grid-column: 1 / -1;">
+            <img src="/app/screenshots/app-desktop.png" alt="QuickWheel wheel spinner app" class="preview-img" />
+          </div>
+          <div class="preview-item">
+            <img src="/app/screenshots/app-presentation.png" alt="QuickWheel in presentation mode" class="preview-img" />
+            <p class="preview-caption">Presentation Mode</p>
+          </div>
+          <div class="preview-item">
+            <img src="/app/screenshots/app-settings.png" alt="QuickWheel settings and customization" class="preview-img" />
+            <p class="preview-caption">Full Customization</p>
+          </div>
+        </div>
       </div>
     </section>
 
