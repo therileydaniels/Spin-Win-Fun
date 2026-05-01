@@ -13,6 +13,8 @@ import { useCustomSegments } from "@/hooks/useCustomSegments";
 import { useToast } from "@/hooks/use-toast";
 import { fireWinConfetti, fireCenterBurst } from "@/lib/confetti";
 import { Footer } from "@/components/Footer";
+import { ChangelogCard } from "@/components/ChangelogCard";
+import { CHANGELOG_VERSION } from "@/lib/changelog";
 import { saveWheelToLocal, updateLocalWheel, decodeWheelFromUrl, encodeWheelToUrl } from "@/lib/localWheelStorage";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Settings, ChevronLeft, Mail } from "lucide-react";
@@ -67,6 +69,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [noRepeatEnabled, setNoRepeatEnabled] = useState(false);
   const [claimedIds, setClaimedIds] = useState<string[]>([]);
+  const [showChangelog, setShowChangelog] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -88,6 +91,11 @@ export default function Home() {
       }
     }
     setIsLoading(false);
+
+    const seenVersion = localStorage.getItem("quickwheel-seen-version");
+    if (seenVersion !== CHANGELOG_VERSION) {
+      setShowChangelog(true);
+    }
   }, []);
 
   const handleSaveWheel = () => {
@@ -406,6 +414,14 @@ export default function Home() {
       )}
 
       {!presentationMode && <Footer />}
+
+      <ChangelogCard
+        open={showChangelog}
+        onClose={() => {
+          localStorage.setItem("quickwheel-seen-version", CHANGELOG_VERSION);
+          setShowChangelog(false);
+        }}
+      />
 
       <WinnerModal
         isOpen={showResult}
