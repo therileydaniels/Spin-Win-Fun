@@ -6,5 +6,5 @@ export const CHANGELOG_ENTRIES: string[] = [
   "Wheel text now runs down each slice for a cleaner look",
   "No-repeat mode: each prize can only be won once per session — toggle it in Customize",
   "Quick Add: paste a list of prizes (one per line) to fill the wheel instantly",
-  "7 new color palettes: Holographic, Mono Pink, Mono Purple, Mono Red, Mono Teal, Mono Blue, Mono Gold",
+  "80+ color palettes across 10 categories: Warm, Purple & Pink, Pastel, Neon, Dark & Moody, Ocean, Nature, Aesthetic, Metallic, and Monochromatic",
 ];
