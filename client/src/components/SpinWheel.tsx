@@ -64,10 +64,11 @@ function getRadialColumns(
   segmentCount: number,
   radius: number
 ): { columns: string[]; fontSize: number } {
-  // Text anchor sits at the rim; characters extend toward the center hub.
-  const rimStart = radius * 0.90;   // distance from wheel center to text start (near rim)
+  // Text starts 4 px inside the slice's outer path edge and runs toward the hub.
+  // Using a fixed pixel offset (not a fraction) so small fonts still start at the rim.
+  const rimStart = radius - 4;      // distance from wheel center to text start
   const hubEdge  = radius * 0.16;   // distance from wheel center to stop (just outside hub)
-  const availableRadial = rimStart - hubEdge; // ~148 px for radius=200
+  const availableRadial = rimStart - hubEdge; // ~164 px for radius=200
 
   // Use the midpoint of the text span for arc-width calculation.
   const textMidRadius = (rimStart + hubEdge) / 2;
@@ -205,10 +206,10 @@ export function SpinWheel({ segments, rotation, isSpinning, spinDuration, size, 
           const textColor = getContrastColor(segment.color);
           const isLightText = textColor === '#FFFFFF';
           const colStep = fontSize * 1.3;
-          // Anchor point: near the rim in the local (rotated) frame.
-          // After rotate(90) + textAnchor="start", the first character sits here
-          // and the string extends toward the center hub.
-          const rimAnchorY = centerY - radius * 0.90;
+          // Anchor point: 4 px inside the slice's outer path edge.
+          // Fixed pixel offset so the text always visually starts at the rim
+          // regardless of font size.
+          const rimAnchorY = centerY - (radius - 4);
 
           return (
             <g key={segment.id} opacity={isClaimed ? 0.35 : 1}>
