@@ -19,7 +19,7 @@ if (process.env.NODE_ENV === "production") {
   });
 
   // Security headers (production only - Vite dev server needs unrestricted access)
-  app.use(helmet({
+  const helmetMiddleware = helmet({
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
@@ -31,7 +31,15 @@ if (process.env.NODE_ENV === "production") {
         mediaSrc: ["'self'"],
       },
     },
-  }));
+  });
+
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    // Skip restrictive headers on embed route so OBS Browser Source can load it
+    if (req.path.startsWith("/app/embed")) {
+      return next();
+    }
+    helmetMiddleware(req, res, next);
+  });
 }
 const httpServer = createServer(app);
 

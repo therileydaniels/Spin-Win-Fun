@@ -2,7 +2,10 @@ import { defineConfig, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
 import fs from "fs";
+import { fileURLToPath } from "url";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 function copyStaticPages(): Plugin {
   return {
@@ -10,7 +13,7 @@ function copyStaticPages(): Plugin {
     closeBundle() {
       const pages = ["landing.html", "terms.html", "privacy.html"];
       for (const page of pages) {
-        const src = path.resolve(import.meta.dirname, "client", page);
+        const src = path.resolve(__dirname, "client", page);
         const dest = path.resolve(import.meta.dirname, "dist/public", page);
         fs.copyFileSync(src, dest);
       }
@@ -38,14 +41,14 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      "@": path.resolve(import.meta.dirname, "client", "src"),
-      "@shared": path.resolve(import.meta.dirname, "shared"),
-      "@assets": path.resolve(import.meta.dirname, "attached_assets"),
+      "@": path.resolve(__dirname, "client", "src"),
+      "@shared": path.resolve(__dirname, "shared"),
+      "@assets": path.resolve(__dirname, "attached_assets"),
     },
   },
-  root: path.resolve(import.meta.dirname, "client"),
+  root: path.resolve(__dirname, "client"),
   build: {
-    outDir: path.resolve(import.meta.dirname, "dist/public"),
+    outDir: path.resolve(__dirname, "dist/public"),
     emptyOutDir: true,
     rollupOptions: {
       output: {

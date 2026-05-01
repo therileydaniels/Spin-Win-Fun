@@ -4,7 +4,10 @@ import { type Server } from "http";
 import viteConfig from "../vite.config";
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
 import { nanoid } from "nanoid";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const viteLogger = createLogger();
 
@@ -35,7 +38,7 @@ export async function setupVite(server: Server, app: Express) {
   app.get("/", async (_req, res, next) => {
     try {
       const landingPath = path.resolve(
-        import.meta.dirname,
+        __dirname,
         "..",
         "client",
         "landing.html",
@@ -53,7 +56,7 @@ export async function setupVite(server: Server, app: Express) {
   app.get("/terms", async (_req, res, next) => {
     try {
       const termsPath = path.resolve(
-        import.meta.dirname,
+        __dirname,
         "..",
         "client",
         "terms.html",
@@ -70,7 +73,7 @@ export async function setupVite(server: Server, app: Express) {
   app.get("/privacy", async (_req, res, next) => {
     try {
       const privacyPath = path.resolve(
-        import.meta.dirname,
+        __dirname,
         "..",
         "client",
         "privacy.html",
@@ -90,7 +93,7 @@ export async function setupVite(server: Server, app: Express) {
 
     try {
       const clientTemplate = path.resolve(
-        import.meta.dirname,
+        __dirname,
         "..",
         "client",
         "index.html",
@@ -116,7 +119,7 @@ export async function setupVite(server: Server, app: Express) {
 
     try {
       const clientTemplate = path.resolve(
-        import.meta.dirname,
+        __dirname,
         "..",
         "client",
         "index.html",
