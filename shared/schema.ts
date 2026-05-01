@@ -21,6 +21,7 @@ export type Wheel = typeof wheels.$inferSelect;
 
 export const spinRequestSchema = z.object({
   probabilities: z.array(z.number().int().min(0).max(100)).min(2).max(20),
+  excludedIndices: z.array(z.number().int().min(0)).optional(),
 });
 
 export type SpinRequest = z.infer<typeof spinRequestSchema>;

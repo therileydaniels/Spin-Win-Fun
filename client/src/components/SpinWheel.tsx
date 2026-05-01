@@ -7,6 +7,7 @@ interface SpinWheelProps {
   isSpinning: boolean;
   spinDuration: number;
   size?: number;
+  claimedIds?: string[];
 }
 
 function getContrastColor(hexColor: string): string {
@@ -62,15 +63,16 @@ function getRadialColumns(
   label: string,
   segmentCount: number,
   radius: number
-): { columns: string[]; fontSize: number; textRadius: number } {
-  // Center each column at 54 % of radius — balanced between hub (~28 px) and rim (200 px).
-  const textRadius = radius * 0.54;
+): { columns: string[]; fontSize: number } {
+  // Text anchor sits at the rim; characters extend toward the center hub.
+  const rimStart = radius * 0.90;   // distance from wheel center to text start (near rim)
+  const hubEdge  = radius * 0.16;   // distance from wheel center to stop (just outside hub)
+  const availableRadial = rimStart - hubEdge; // ~148 px for radius=200
+
+  // Use the midpoint of the text span for arc-width calculation.
+  const textMidRadius = (rimStart + hubEdge) / 2;
   const segmentAngle = (2 * Math.PI) / segmentCount;
-  // Usable arc width at textRadius (leave 20 % margin on each side of the slice).
-  const arcWidth = 2 * textRadius * Math.sin(segmentAngle / 2) * 0.80;
-  // Max radial span (character string length after rotation).
-  // Text can safely extend ±58 px from textRadius before hitting rim or hub.
-  const availableRadial = Math.min(radius * 0.70, 2 * (radius * 0.92 - textRadius));
+  const arcWidth = 2 * textMidRadius * Math.sin(segmentAngle / 2) * 0.80;
 
   const charWidthFactor = 0.60;
   const minFont = 9;
@@ -78,9 +80,9 @@ function getRadialColumns(
 
   const words = label.split(' ');
 
-  // Candidate column groupings — fewest columns tried first so we prefer bigger text.
+  // Candidate column groupings — fewest columns first (prefer bigger font).
   const candidates: string[][] = [
-    [label], // one column — all text in one rotated string
+    [label],
   ];
   if (words.length >= 2) {
     const mid = Math.ceil(words.length / 2);
@@ -93,28 +95,26 @@ function getRadialColumns(
   }
 
   for (let fs = maxFont; fs >= minFont; fs--) {
-    // After rotation, one column occupies `fs` px in the across-slice direction.
-    const colStep = fs * 1.3; // center-to-center distance between columns
+    const colStep = fs * 1.3;
     const maxCharsPerCol = Math.floor(availableRadial / (fs * charWidthFactor));
 
     for (const columns of candidates) {
       const longestCol = Math.max(...columns.map(c => c.length));
       if (longestCol > maxCharsPerCol) continue;
 
-      // Total across-slice width: N columns each fs wide, gaps between them.
       const totalWidth = (columns.length - 1) * colStep + fs;
       if (totalWidth <= arcWidth) {
-        return { columns, fontSize: fs, textRadius };
+        return { columns, fontSize: fs };
       }
     }
   }
 
   // Fallback: one truncated column at minimum font.
   const maxChars = Math.max(3, Math.floor(availableRadial / (minFont * charWidthFactor)));
-  return { columns: [label.slice(0, maxChars)], fontSize: minFont, textRadius };
+  return { columns: [label.slice(0, maxChars)], fontSize: minFont };
 }
 
-export function SpinWheel({ segments, rotation, isSpinning, spinDuration, size }: SpinWheelProps) {
+export function SpinWheel({ segments, rotation, isSpinning, spinDuration, size, claimedIds = [] }: SpinWheelProps) {
   const segmentAngle = 360 / segments.length;
   const viewBoxSize = 500;
   const radius = 200;
@@ -199,37 +199,41 @@ export function SpinWheel({ segments, rotation, isSpinning, spinDuration, size }
           const midAngle = startAngle + segmentAngle / 2;
           const path = describeArc(centerX, centerY, radius, startAngle, endAngle);
 
+          const isClaimed = claimedIds.includes(segment.id);
           const displayLabel = truncateLabel(segment.label);
-          const { columns, fontSize, textRadius } = getRadialColumns(displayLabel, segments.length, radius);
+          const { columns, fontSize } = getRadialColumns(displayLabel, segments.length, radius);
           const textColor = getContrastColor(segment.color);
           const isLightText = textColor === '#FFFFFF';
           const colStep = fontSize * 1.3;
+          // Anchor point: near the rim in the local (rotated) frame.
+          // After rotate(90) + textAnchor="start", the first character sits here
+          // and the string extends toward the center hub.
+          const rimAnchorY = centerY - radius * 0.90;
 
           return (
-            <g key={segment.id}>
+            <g key={segment.id} opacity={isClaimed ? 0.35 : 1}>
               <path d={path} fill={`url(#segmentGradient-${segment.id})`} stroke="rgba(0,0,0,0.3)" strokeWidth="1">
                 <title>{segment.label}</title>
               </path>
 
               {/*
-                Outer group: aligns the slice's bisector with the -Y axis in local space.
-                Each column is then rotated 90° CW so its characters run along the radius
-                (first char toward rim, last char toward center).
-                When the wheel counter-rotates to bring this slice to the top pointer,
-                the net outer-group rotation is 0 — text reads straight down the slice.
+                Outer group: rotates the local frame so this slice's bisector
+                points straight up (-Y). Inner rotate(90) on each text element
+                then tips the characters 90° CW so they run rim→center.
+                textAnchor="start" anchors the first character at rimAnchorY.
               */}
               <g transform={`rotate(${midAngle}, ${centerX}, ${centerY})`}>
                 {columns.map((col, colIndex) => {
                   const xOffset = (colIndex - (columns.length - 1) / 2) * colStep;
                   const tx = centerX + xOffset;
-                  const ty = centerY - textRadius;
+                  const ty = rimAnchorY;
                   return (
                     <text
                       key={colIndex}
                       x={tx}
                       y={ty}
                       transform={`rotate(90, ${tx}, ${ty})`}
-                      textAnchor="middle"
+                      textAnchor="start"
                       dominantBaseline="middle"
                       fontSize={fontSize}
                       fontWeight="700"

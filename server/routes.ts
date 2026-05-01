@@ -11,24 +11,27 @@ const spinLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-function selectWeightedWinner(probabilities: number[]): number {
-  const total = probabilities.reduce((a, b) => a + b, 0);
+function selectWeightedWinner(probabilities: number[], excludedIndices: number[] = []): number {
+  const available = probabilities
+    .map((prob, i) => ({ prob, i }))
+    .filter(({ i }) => !excludedIndices.includes(i));
+
+  if (available.length === 0) return 0;
+
+  const total = available.reduce((sum, { prob }) => sum + prob, 0);
 
   if (total === 0) {
-    return Math.floor(Math.random() * probabilities.length);
+    return available[Math.floor(Math.random() * available.length)].i;
   }
 
   const random = Math.random() * total;
-
   let cumulative = 0;
-  for (let i = 0; i < probabilities.length; i++) {
-    cumulative += probabilities[i];
-    if (random < cumulative) {
-      return i;
-    }
+  for (const { prob, i } of available) {
+    cumulative += prob;
+    if (random < cumulative) return i;
   }
 
-  return probabilities.length - 1;
+  return available[available.length - 1].i;
 }
 
 export async function registerRoutes(
@@ -42,14 +45,14 @@ export async function registerRoutes(
       return res.status(400).json({ error: "Invalid probabilities" });
     }
 
-    const { probabilities } = parsed.data;
+    const { probabilities, excludedIndices = [] } = parsed.data;
     const total = probabilities.reduce((a, b) => a + b, 0);
 
     if (total !== 0 && total !== 100) {
       return res.status(400).json({ error: "Probabilities must total 100% or all be 0" });
     }
 
-    const winnerIndex = selectWeightedWinner(probabilities);
+    const winnerIndex = selectWeightedWinner(probabilities, excludedIndices);
 
     return res.json({ winnerIndex });
   });

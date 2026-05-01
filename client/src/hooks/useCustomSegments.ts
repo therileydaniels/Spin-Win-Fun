@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { CustomSegment, MIN_SEGMENTS, MAX_SEGMENTS, MAX_LABEL_LENGTH } from "@shared/schema";
-import { DEFAULT_SEGMENTS, getNextColor } from "@/lib/wheelSegments";
+import { DEFAULT_SEGMENTS, getNextColor, PRESET_COLORS } from "@/lib/wheelSegments";
 
 const SEGMENTS_STORAGE_KEY = "wheel-segments";
 const PROBABILITIES_STORAGE_KEY = "wheel-probabilities";
@@ -35,6 +35,7 @@ export interface UseCustomSegmentsReturn {
   clearCurrentWheel: () => void;
   markSaved: (id: string, name: string) => void;
   getWheelData: () => SavedWheelData;
+  quickFill: (labels: string[]) => void;
 }
 
 function generateId(): string {
@@ -243,6 +244,21 @@ export function useCustomSegments(): UseCustomSegmentsReturn {
     return { segments, probabilities };
   }, [segments, probabilities]);
 
+  const quickFill = useCallback((labels: string[]) => {
+    const capped = labels.slice(0, MAX_SEGMENTS);
+    const newSegments: CustomSegment[] = capped.map((label, i) => ({
+      id: generateId(),
+      label: label.slice(0, MAX_LABEL_LENGTH),
+      color: PRESET_COLORS[i % PRESET_COLORS.length],
+    }));
+    setSegments(newSegments);
+    setProbabilities(newSegments.map(() => 0));
+    setCurrentWheelId(null);
+    setCurrentWheelName(null);
+    setLastSavedState(null);
+    setHasUnsavedChanges(false);
+  }, []);
+
   const canAdd = segments.length < MAX_SEGMENTS;
   const canRemove = segments.length > MIN_SEGMENTS;
   const total = probabilities.reduce((a, b) => a + b, 0);
@@ -272,5 +288,6 @@ export function useCustomSegments(): UseCustomSegmentsReturn {
     clearCurrentWheel,
     markSaved,
     getWheelData,
+    quickFill,
   };
 }

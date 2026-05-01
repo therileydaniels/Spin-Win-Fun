@@ -52,6 +52,7 @@ export default function Home() {
     getWheelData,
     markSaved,
     loadWheel,
+    quickFill,
   } = useCustomSegments();
 
   const { toast } = useToast();
@@ -64,6 +65,8 @@ export default function Home() {
   const [showHistory, setShowHistory] = useState(false);
   const [removeWinnerMode, setRemoveWinnerMode] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [noRepeatEnabled, setNoRepeatEnabled] = useState(false);
+  const [claimedIds, setClaimedIds] = useState<string[]>([]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -194,19 +197,36 @@ export default function Home() {
         ...prev.slice(0, 9)
       ]);
 
+      if (noRepeatEnabled) {
+        setClaimedIds(prev => {
+          const updated = [...prev, winner.id];
+          if (updated.length >= segments.length) {
+            toast({ title: "All prizes claimed!", description: "Reset prizes in the customize panel to spin again." });
+          }
+          return updated;
+        });
+      }
+
       if (removeWinnerMode && segments.length > 2) {
         removeSegment(winner.id);
       }
 
       return cleanupConfetti;
     }
-  }, [showResult, winner, playWinSound, removeWinnerMode, segments.length, removeSegment]);
+  }, [showResult, winner, playWinSound, noRepeatEnabled, removeWinnerMode, segments.length, removeSegment]);
 
   const handleSpin = useCallback(() => {
-    spin(probabilities, segments);
-  }, [spin, probabilities, segments]);
+    const excludedIndices = noRepeatEnabled
+      ? segments.reduce<number[]>((acc, seg, i) => {
+          if (claimedIds.includes(seg.id)) acc.push(i);
+          return acc;
+        }, [])
+      : [];
+    spin(probabilities, segments, excludedIndices);
+  }, [spin, probabilities, segments, noRepeatEnabled, claimedIds]);
 
-  const canSpin = isValid && !isSpinning;
+  const allClaimed = noRepeatEnabled && claimedIds.length >= segments.length;
+  const canSpin = isValid && !isSpinning && !allClaimed;
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -312,6 +332,7 @@ export default function Home() {
                   rotation={rotation}
                   isSpinning={isSpinning}
                   spinDuration={spinDuration}
+                  claimedIds={noRepeatEnabled ? claimedIds : []}
                 />
               </div>
             )}
@@ -370,6 +391,11 @@ export default function Home() {
               currentWheelName={currentWheelName}
               hasUnsavedChanges={hasUnsavedChanges}
               onClose={() => setSettingsOpen(false)}
+              noRepeatEnabled={noRepeatEnabled}
+              onNoRepeatToggle={() => setNoRepeatEnabled(v => !v)}
+              claimedIds={claimedIds}
+              onResetClaimed={() => setClaimedIds([])}
+              onQuickFill={(labels) => { quickFill(labels); setClaimedIds([]); }}
             />
           </div>
         )}

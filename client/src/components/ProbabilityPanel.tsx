@@ -13,9 +13,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Check, AlertTriangle, Scale, Percent, FilePlus2, Trash2, Plus, Save, X, Share2, Monitor } from "lucide-react";
+import { Check, AlertTriangle, Scale, Percent, FilePlus2, Trash2, Plus, Save, X, Share2, Monitor, RotateCcw, CheckCircle2, ListPlus } from "lucide-react";
 import { ColorPicker } from "./ColorPicker";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Switch } from "@/components/ui/switch";
+import { QuickAddDialog } from "./QuickAddDialog";
 import { COLOR_PALETTES } from "@/lib/colorPalettes";
 
 interface ProbabilityPanelProps {
@@ -40,6 +42,11 @@ interface ProbabilityPanelProps {
   currentWheelName: string | null;
   hasUnsavedChanges: boolean;
   onClose?: () => void;
+  noRepeatEnabled: boolean;
+  onNoRepeatToggle: () => void;
+  claimedIds: string[];
+  onResetClaimed: () => void;
+  onQuickFill: (labels: string[]) => void;
 }
 
 export function ProbabilityPanel({
@@ -64,8 +71,14 @@ export function ProbabilityPanel({
   currentWheelName,
   hasUnsavedChanges,
   onClose,
+  noRepeatEnabled,
+  onNoRepeatToggle,
+  claimedIds,
+  onResetClaimed,
+  onQuickFill,
 }: ProbabilityPanelProps) {
   const [showNewWheelDialog, setShowNewWheelDialog] = useState(false);
+  const [showQuickAdd, setShowQuickAdd] = useState(false);
 
   const handleNewWheelConfirm = () => {
     onNewWheel();
@@ -176,6 +189,22 @@ export function ProbabilityPanel({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setShowQuickAdd(true)}
+                    className="text-muted-foreground"
+                    data-testid="button-quick-add"
+                  >
+                    <ListPlus className="w-4 h-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Quick add prizes</p>
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
                     variant="outline"
                     size="icon"
                     onClick={() => setShowNewWheelDialog(true)}
@@ -196,12 +225,19 @@ export function ProbabilityPanel({
         <div>
           <p className="font-semibold text-sm text-foreground tracking-wide uppercase mb-3">Segments</p>
           <div className="max-h-[320px] overflow-y-auto space-y-2 pr-1">
-          {segments.map((segment, index) => (
+          {segments.map((segment, index) => {
+            const isClaimed = claimedIds.includes(segment.id);
+            return (
             <div
               key={segment.id}
-              className="flex items-center gap-2 py-0.5"
+              className={`flex items-center gap-2 py-0.5 transition-opacity ${isClaimed ? "opacity-50" : ""}`}
               data-testid={`segment-row-${index}`}
             >
+              {noRepeatEnabled && (
+                <CheckCircle2
+                  className={`w-3.5 h-3.5 shrink-0 ${isClaimed ? "text-emerald-400" : "text-muted-foreground/30"}`}
+                />
+              )}
               <ColorPicker
                 color={segment.color}
                 onChange={(color) => onRecolor(segment.id, color)}
@@ -211,7 +247,7 @@ export function ProbabilityPanel({
                 value={segment.label}
                 onChange={(e) => onRename(segment.id, e.target.value)}
                 maxLength={MAX_LABEL_LENGTH}
-                className="flex-1 h-8 text-sm bg-background/50 border-border"
+                className={`flex-1 h-8 text-sm bg-background/50 border-border ${isClaimed ? "line-through text-muted-foreground" : ""}`}
                 data-testid={`input-segment-name-${index}`}
               />
               <div className="flex items-center gap-1">
@@ -239,7 +275,8 @@ export function ProbabilityPanel({
                 <Trash2 className="w-3.5 h-3.5" />
               </Button>
             </div>
-          ))}
+            );
+          })}
         </div>
 
           <Button
@@ -280,6 +317,41 @@ export function ProbabilityPanel({
           </div>
         </div>
 
+        <div className="pt-1 border-t border-border space-y-3">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-medium text-foreground">No repeat</p>
+              <p className="text-xs text-muted-foreground">Each prize can only be won once</p>
+            </div>
+            <Switch
+              checked={noRepeatEnabled}
+              onCheckedChange={onNoRepeatToggle}
+              aria-label="Toggle no repeat mode"
+            />
+          </div>
+          {noRepeatEnabled && (
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-xs text-muted-foreground">
+                {claimedIds.length === 0
+                  ? "No prizes claimed yet"
+                  : claimedIds.length === segments.length
+                    ? "All prizes claimed!"
+                    : `${claimedIds.length} of ${segments.length} claimed`}
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onResetClaimed}
+                disabled={claimedIds.length === 0}
+                className="h-7 px-2 text-xs border-border gap-1.5"
+              >
+                <RotateCcw className="w-3 h-3" />
+                Reset
+              </Button>
+            </div>
+          )}
+        </div>
+
         <div className="pt-1 border-t border-border">
           {isEqualOdds ? (
             <div className="flex items-center gap-2 text-sm">
@@ -308,6 +380,12 @@ export function ProbabilityPanel({
         </div>
       </CardContent>
       </Card>
+
+      <QuickAddDialog
+        open={showQuickAdd}
+        onOpenChange={setShowQuickAdd}
+        onSubmit={onQuickFill}
+      />
 
       <AlertDialog open={showNewWheelDialog} onOpenChange={setShowNewWheelDialog}>
         <AlertDialogContent>
