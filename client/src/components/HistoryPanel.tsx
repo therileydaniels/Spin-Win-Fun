@@ -14,7 +14,8 @@ interface HistoryPanelProps {
 
 export const HistoryPanel = memo(function HistoryPanel({ entries, onClose }: HistoryPanelProps) {
   return (
-    <div className="fixed right-4 top-20 z-40 w-48 sm:w-64 max-h-[60vh] overflow-y-auto rounded-lg border border-border bg-card/95 backdrop-blur-xl shadow-xl p-4">
+    <div className="fixed bottom-0 left-0 right-0 sm:bottom-auto sm:left-auto sm:right-4 sm:top-20 z-40 w-full sm:w-64 max-h-[55vh] sm:max-h-[60vh] overflow-y-auto rounded-t-2xl sm:rounded-lg border border-border bg-card/95 backdrop-blur-xl shadow-xl p-4">
+      <div className="sm:hidden w-10 h-1 bg-muted-foreground/30 rounded-full mx-auto mb-3" />
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-sm font-semibold">Spin History</h3>
         <Button

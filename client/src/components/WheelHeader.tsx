@@ -1,11 +1,16 @@
-import { memo } from "react";
+import { memo, useState } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { SoundToggle } from "@/components/SoundToggle";
 import { InstallPrompt } from "@/components/InstallPrompt";
-import { Monitor, Settings, FolderOpen, History, Trash2, LayoutGrid } from "lucide-react";
+import { Menu, Monitor, Settings, FolderOpen, History, Trash2, LayoutGrid, LogIn, LogOut, Volume2, VolumeX, Sun, Moon } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { AuthModal } from "@/components/AuthModal";
+import { UserMenu } from "@/components/UserMenu";
+import { useToast } from "@/hooks/use-toast";
 
 interface WheelHeaderProps {
   settingsOpen: boolean;
@@ -31,6 +36,17 @@ export const WheelHeader = memo(function WheelHeader({
   onToggleMute,
 }: WheelHeaderProps) {
   const [, setLocation] = useLocation();
+  const { user, loading, signOut } = useAuth();
+  const { toast } = useToast();
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [isDark, setIsDark] = useState(() => document.documentElement.classList.contains('dark'));
+
+  const toggleTheme = () => {
+    const newDark = !isDark;
+    setIsDark(newDark);
+    document.documentElement.classList.toggle('dark', newDark);
+    localStorage.setItem('theme', newDark ? 'dark' : 'light');
+  };
 
   return (
     <header className="relative z-10 flex items-center justify-between gap-4 px-4 py-3 border-b border-border">
@@ -42,7 +58,7 @@ export const WheelHeader = memo(function WheelHeader({
           data-testid="img-logo"
         />
         <span
-          className="sm:hidden text-xl font-extrabold tracking-tight bg-gradient-brand bg-clip-text text-transparent"
+          className="sm:hidden text-xl font-extrabold tracking-tight text-gradient-brand"
         >
           QuickWheel
         </span>
@@ -65,6 +81,63 @@ export const WheelHeader = memo(function WheelHeader({
             <p>{settingsOpen ? "Close settings" : "Open settings"}</p>
           </TooltipContent>
         </Tooltip>
+
+        {/* Mobile more menu — exposes nav actions hidden on small screens */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="sm:hidden h-9 w-9" aria-label="More options">
+              <Menu className="w-5 h-5" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-52">
+            <DropdownMenuItem onClick={() => setLocation("/my-wheels")}>
+              <FolderOpen className="w-4 h-4 mr-2" />My Wheels
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setLocation("/templates")}>
+              <LayoutGrid className="w-4 h-4 mr-2" />Templates
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={onToggleHistory}>
+              <History className="w-4 h-4 mr-2" />
+              {showHistory ? "Hide history" : "Show history"}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={onToggleRemoveWinner}>
+              <Trash2 className="w-4 h-4 mr-2" />
+              {removeWinnerMode ? "Remove winner: ON" : "Remove winner: OFF"}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={onEnterPresentation}>
+              <Monitor className="w-4 h-4 mr-2" />Presentation mode
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={onToggleMute}>
+              {isMuted ? <Volume2 className="w-4 h-4 mr-2" /> : <VolumeX className="w-4 h-4 mr-2" />}
+              {isMuted ? "Sound: off" : "Sound: on"}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={toggleTheme}>
+              {isDark ? <Sun className="w-4 h-4 mr-2" /> : <Moon className="w-4 h-4 mr-2" />}
+              {isDark ? "Light mode" : "Dark mode"}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            {!loading && (user ? (
+              <>
+                <DropdownMenuLabel className="font-normal text-xs text-muted-foreground truncate">
+                  {user.email}
+                </DropdownMenuLabel>
+                <DropdownMenuItem onClick={async () => {
+                  const { error } = await signOut();
+                  if (error) toast({ title: "Sign out failed", variant: "destructive" });
+                }}>
+                  <LogOut className="w-4 h-4 mr-2" />Sign out
+                </DropdownMenuItem>
+              </>
+            ) : (
+              <DropdownMenuItem onClick={() => setAuthModalOpen(true)}>
+                <LogIn className="w-4 h-4 mr-2" />Sign in
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         <div className="hidden sm:flex items-center gap-1 px-1 py-1 rounded-lg bg-muted/50">
           <Tooltip>
@@ -154,12 +227,33 @@ export const WheelHeader = memo(function WheelHeader({
           </Tooltip>
         </div>
 
-        <div className="flex items-center gap-1">
+        <div className="hidden sm:flex items-center gap-1">
+          {!loading && (user ? (
+            <UserMenu />
+          ) : (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setAuthModalOpen(true)}
+                  className="h-9 w-9"
+                  aria-label="Sign in"
+                >
+                  <LogIn className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Sign in</p>
+              </TooltipContent>
+            </Tooltip>
+          ))}
           <SoundToggle isMuted={isMuted} onToggle={onToggleMute} />
           <ThemeToggle />
           <InstallPrompt />
         </div>
       </div>
+      <AuthModal open={authModalOpen} onOpenChange={setAuthModalOpen} />
     </header>
   );
 });

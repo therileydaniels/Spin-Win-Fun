@@ -299,15 +299,15 @@ export default function Home() {
         <div className="relative z-10 px-4 pt-3">
           <div className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-card/80 backdrop-blur-xl border border-white/5 text-xs text-muted-foreground">
             <Mail className="w-3.5 h-3.5 shrink-0" />
-            <span>
+            <span className="hidden sm:inline">
               Having an issue? Reach out to Riley, the creator, at{" "}
-              <a
-                href="mailto:BookRD@protonmail.com"
-                className="font-medium text-foreground hover:underline"
-              >
+              <a href="mailto:BookRD@protonmail.com" className="font-medium text-foreground hover:underline">
                 BookRD@protonmail.com
               </a>
             </span>
+            <a href="mailto:BookRD@protonmail.com" className="sm:hidden font-medium text-foreground hover:underline">
+              Contact Riley
+            </a>
           </div>
         </div>
       )}
@@ -326,8 +326,8 @@ export default function Home() {
         </Button>
       )}
 
-      <main className={`relative z-10 flex-1 flex flex-col ${presentationMode ? "" : settingsOpen ? "lg:flex-row" : ""} items-center justify-center gap-6 p-4 sm:p-6`}>
-        <div className="flex flex-col items-center gap-6">
+      <main className={`relative z-10 flex-1 flex flex-col ${presentationMode ? "" : settingsOpen ? "md:flex-row" : ""} items-center justify-center gap-6 p-4 sm:p-6`}>
+        <div className={`flex flex-col items-center gap-6 ${settingsOpen ? "hidden md:flex" : ""}`}>
           <div className="w-full flex items-center justify-center">
             {isLoading ? (
               <div className={`aspect-square flex items-center justify-center transition-all duration-300 ${wheelSizeClass}`}>
@@ -366,12 +366,12 @@ export default function Home() {
         </div>
 
         {!presentationMode && settingsOpen && (
-          <div className="relative animate-slide-in-right">
+          <div className="relative animate-slide-in-right w-full md:w-auto">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setSettingsOpen(false)}
-              className="absolute -left-2 top-2 z-10 text-muted-foreground hover:text-foreground lg:block hidden"
+              className="absolute -left-2 top-2 z-10 text-muted-foreground hover:text-foreground md:block hidden"
               data-testid="button-collapse-settings"
               aria-label="Collapse settings"
             >
