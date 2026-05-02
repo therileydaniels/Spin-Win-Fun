@@ -295,7 +295,7 @@ export default function Home() {
         />
       )}
 
-      {!presentationMode && (
+      {!presentationMode && settingsOpen && (
         <div className="relative z-10 px-4 pt-3">
           <div className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-card/80 backdrop-blur-xl border border-white/5 text-xs text-muted-foreground">
             <Mail className="w-3.5 h-3.5 shrink-0" />
