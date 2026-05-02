@@ -13,9 +13,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Check, AlertTriangle, Scale, Percent, FilePlus2, Trash2, Plus, Save, X, Share2, Monitor, RotateCcw, CheckCircle2, ListPlus } from "lucide-react";
+import { Check, AlertTriangle, Scale, Percent, FilePlus2, Trash2, Plus, Save, X, Share2, Monitor, RotateCcw, CheckCircle2, ListPlus, MoreHorizontal } from "lucide-react";
 import { ColorPicker } from "./ColorPicker";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Switch } from "@/components/ui/switch";
 import { QuickAddDialog } from "./QuickAddDialog";
 import { COLOR_PALETTES } from "@/lib/colorPalettes";
@@ -87,7 +88,7 @@ export function ProbabilityPanel({
 
   return (
     <>
-      <Card className="w-full max-w-sm border border-white/5 bg-card/80 backdrop-blur-xl shadow-xl shadow-black/20">
+      <Card className="w-full sm:max-w-sm border border-white/5 bg-card/80 backdrop-blur-xl shadow-xl shadow-black/20">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between gap-2">
             <div className="min-w-0 flex-1">
@@ -103,120 +104,93 @@ export function ProbabilityPanel({
                 {segments.length}/{MAX_SEGMENTS} segments
               </p>
             </div>
-            <div className="flex items-center gap-1 shrink-0">
+            {/* Mobile header: Save + overflow menu + Close */}
+            <div className="flex sm:hidden items-center gap-1 shrink-0">
+              <Button variant="ghost" size="icon" onClick={onSaveWheel} className="text-muted-foreground" data-testid="button-save-wheel" aria-label="Save wheel">
+                <Save className="w-4 h-4" />
+              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="text-muted-foreground" aria-label="More options">
+                    <MoreHorizontal className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-52">
+                  <DropdownMenuItem onClick={onShare} data-testid="button-share-wheel">
+                    <Share2 className="w-4 h-4 mr-2" />Copy share link
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={onOBSEmbed} data-testid="button-obs-embed">
+                    <Monitor className="w-4 h-4 mr-2" />Copy OBS link
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={onResetProbabilities} data-testid="button-reset-probability">
+                    <Percent className="w-4 h-4 mr-2" />Reset probabilities
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setShowQuickAdd(true)} data-testid="button-quick-add">
+                    <ListPlus className="w-4 h-4 mr-2" />Quick add prizes
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => setShowNewWheelDialog(true)} data-testid="button-new-wheel">
+                    <FilePlus2 className="w-4 h-4 mr-2" />New wheel
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              {onClose && (
+                <Button variant="ghost" size="icon" onClick={onClose} className="text-muted-foreground" data-testid="button-close-settings-mobile" aria-label="Close settings">
+                  <X className="w-4 h-4" />
+                </Button>
+              )}
+            </div>
+
+            {/* Desktop header: full button row */}
+            <div className="hidden sm:flex items-center gap-1 shrink-0">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={onSaveWheel}
-                    className="text-muted-foreground"
-                    data-testid="button-save-wheel"
-                  >
+                  <Button variant="ghost" size="icon" onClick={onSaveWheel} className="text-muted-foreground" data-testid="button-save-wheel">
                     <Save className="w-4 h-4" />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>
-                  <p>Save wheel</p>
-                </TooltipContent>
+                <TooltipContent><p>Save wheel</p></TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={onShare}
-                    className="text-muted-foreground"
-                    data-testid="button-share-wheel"
-                  >
+                  <Button variant="ghost" size="icon" onClick={onShare} className="text-muted-foreground" data-testid="button-share-wheel">
                     <Share2 className="w-4 h-4" />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>
-                  <p>Copy share link</p>
-                </TooltipContent>
+                <TooltipContent><p>Copy share link</p></TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={onOBSEmbed}
-                    className="text-muted-foreground"
-                    data-testid="button-obs-embed"
-                  >
+                  <Button variant="ghost" size="icon" onClick={onOBSEmbed} className="text-muted-foreground" data-testid="button-obs-embed">
                     <Monitor className="w-4 h-4" />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>
-                  <p>Copy OBS embed link</p>
-                </TooltipContent>
+                <TooltipContent><p>Copy OBS embed link</p></TooltipContent>
               </Tooltip>
-              {onClose && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={onClose}
-                      className="text-muted-foreground lg:hidden"
-                      data-testid="button-close-settings-mobile"
-                    >
-                      <X className="w-4 h-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Close settings</p>
-                  </TooltipContent>
-                </Tooltip>
-              )}
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={onResetProbabilities}
-                    className="text-muted-foreground"
-                    data-testid="button-reset-probability"
-                  >
+                  <Button variant="ghost" size="icon" onClick={onResetProbabilities} className="text-muted-foreground" data-testid="button-reset-probability">
                     <Percent className="w-4 h-4" />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>
-                  <p>Reset probabilities to equal odds</p>
-                </TooltipContent>
+                <TooltipContent><p>Reset probabilities to equal odds</p></TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setShowQuickAdd(true)}
-                    className="text-muted-foreground"
-                    data-testid="button-quick-add"
-                  >
+                  <Button variant="ghost" size="icon" onClick={() => setShowQuickAdd(true)} className="text-muted-foreground" data-testid="button-quick-add">
                     <ListPlus className="w-4 h-4" />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>
-                  <p>Quick add prizes</p>
-                </TooltipContent>
+                <TooltipContent><p>Quick add prizes</p></TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => setShowNewWheelDialog(true)}
-                    className="border-border"
-                    data-testid="button-new-wheel"
-                  >
+                  <Button variant="outline" size="icon" onClick={() => setShowNewWheelDialog(true)} className="border-border" data-testid="button-new-wheel">
                     <FilePlus2 className="w-4 h-4" />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>
-                  <p>Start a new wheel</p>
-                </TooltipContent>
+                <TooltipContent><p>Start a new wheel</p></TooltipContent>
               </Tooltip>
             </div>
           </div>
@@ -224,7 +198,7 @@ export function ProbabilityPanel({
       <CardContent className="space-y-5">
         <div>
           <p className="font-semibold text-sm text-foreground tracking-wide uppercase mb-3">Segments</p>
-          <div className="max-h-[320px] overflow-y-auto space-y-2 pr-1">
+          <div className="max-h-[45vh] sm:max-h-[320px] overflow-y-auto space-y-2 pr-1">
           {segments.map((segment, index) => {
             const isClaimed = claimedIds.includes(segment.id);
             return (
