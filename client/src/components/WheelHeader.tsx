@@ -34,7 +34,7 @@ export const WheelHeader = memo(function WheelHeader({
   onToggleMute,
 }: WheelHeaderProps) {
   const [, setLocation] = useLocation();
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const [authModalOpen, setAuthModalOpen] = useState(false);
 
   return (
@@ -160,7 +160,7 @@ export const WheelHeader = memo(function WheelHeader({
         </div>
 
         <div className="flex items-center gap-1">
-          {user ? (
+          {!loading && (user ? (
             <UserMenu />
           ) : (
             <Tooltip>
@@ -179,7 +179,7 @@ export const WheelHeader = memo(function WheelHeader({
                 <p>Sign in</p>
               </TooltipContent>
             </Tooltip>
-          )}
+          ))}
           <SoundToggle isMuted={isMuted} onToggle={onToggleMute} />
           <ThemeToggle />
           <InstallPrompt />
