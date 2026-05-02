@@ -1,11 +1,14 @@
-import { memo } from "react";
+import { memo, useState } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { SoundToggle } from "@/components/SoundToggle";
 import { InstallPrompt } from "@/components/InstallPrompt";
-import { Monitor, Settings, FolderOpen, History, Trash2, LayoutGrid } from "lucide-react";
+import { Monitor, Settings, FolderOpen, History, Trash2, LayoutGrid, LogIn } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { AuthModal } from "@/components/AuthModal";
+import { UserMenu } from "@/components/UserMenu";
 
 interface WheelHeaderProps {
   settingsOpen: boolean;
@@ -31,6 +34,8 @@ export const WheelHeader = memo(function WheelHeader({
   onToggleMute,
 }: WheelHeaderProps) {
   const [, setLocation] = useLocation();
+  const { user } = useAuth();
+  const [authModalOpen, setAuthModalOpen] = useState(false);
 
   return (
     <header className="relative z-10 flex items-center justify-between gap-4 px-4 py-3 border-b border-border">
@@ -155,11 +160,32 @@ export const WheelHeader = memo(function WheelHeader({
         </div>
 
         <div className="flex items-center gap-1">
+          {user ? (
+            <UserMenu />
+          ) : (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setAuthModalOpen(true)}
+                  className="h-9 w-9"
+                  aria-label="Sign in"
+                >
+                  <LogIn className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Sign in</p>
+              </TooltipContent>
+            </Tooltip>
+          )}
           <SoundToggle isMuted={isMuted} onToggle={onToggleMute} />
           <ThemeToggle />
           <InstallPrompt />
         </div>
       </div>
+      <AuthModal open={authModalOpen} onOpenChange={setAuthModalOpen} />
     </header>
   );
 });
