@@ -3,6 +3,7 @@
 export const CHANGELOG_VERSION = "2";
 
 export const CHANGELOG_ENTRIES: string[] = [
+  "Prize tracker: a live counter appears below the spin button after your first spin — tap it to see all prizes won this session, with a Clear button to reset",
   "Mobile revamp: cleaner header, full-screen Customize panel, and bottom-drawer history on phones",
   "Wheel text now runs down each slice for a cleaner look",
   "No-repeat mode: each prize can only be won once per session — toggle it in Customize",
