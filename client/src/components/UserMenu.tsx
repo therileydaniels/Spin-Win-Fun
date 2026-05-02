@@ -9,9 +9,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useAuth } from "@/context/AuthContext"
+import { useToast } from "@/hooks/use-toast"
 
 export function UserMenu() {
   const { user, signOut } = useAuth()
+  const { toast } = useToast()
 
   if (!user) return null
 
@@ -27,7 +29,13 @@ export function UserMenu() {
           {user.email}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => signOut()} className="cursor-pointer">
+        <DropdownMenuItem
+          onClick={async () => {
+            const { error } = await signOut()
+            if (error) toast({ title: "Sign out failed", variant: "destructive" })
+          }}
+          className="cursor-pointer"
+        >
           Sign Out
         </DropdownMenuItem>
       </DropdownMenuContent>
