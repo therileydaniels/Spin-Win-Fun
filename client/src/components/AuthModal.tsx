@@ -2,7 +2,7 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
@@ -100,8 +100,9 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Welcome to QuickWheel</DialogTitle>
+          <DialogDescription className="sr-only">Sign in or create a new account</DialogDescription>
         </DialogHeader>
-        <Tabs defaultValue="signin">
+        <Tabs key={open ? "open" : "closed"} defaultValue="signin">
           <TabsList className="w-full">
             <TabsTrigger value="signin" className="flex-1">Sign In</TabsTrigger>
             <TabsTrigger value="signup" className="flex-1">Sign Up</TabsTrigger>
