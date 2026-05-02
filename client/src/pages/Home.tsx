@@ -352,6 +352,17 @@ export default function Home() {
             isSpinning={isSpinning}
           />
 
+          {!presentationMode && spinHistory.length > 0 && (
+            <button
+              onClick={() => setShowHistory(v => !v)}
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-card/80 backdrop-blur-xl border border-white/10 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="Toggle prize history"
+            >
+              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+              {spinHistory.length} prize{spinHistory.length !== 1 ? "s" : ""} won
+            </button>
+          )}
+
           {winner && (
             <p
               className={`text-muted-foreground transition-opacity duration-300 ${
@@ -410,7 +421,7 @@ export default function Home() {
       </main>
 
       {!presentationMode && showHistory && (
-        <HistoryPanel entries={spinHistory} onClose={() => setShowHistory(false)} />
+        <HistoryPanel entries={spinHistory} onClose={() => setShowHistory(false)} onClear={() => setSpinHistory([])} />
       )}
 
       {!presentationMode && <Footer />}
