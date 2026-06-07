@@ -3,7 +3,7 @@
 export const CHANGELOG_VERSION = "3";
 
 export const CHANGELOG_ENTRIES: string[] = [
-  "Save as PNG: download your wheel as a transparent-background image — perfect for flyers and promo materials",
+  "Save as SVG: download your wheel as a transparent vector image — drag it straight into Canva, Word, or any design tool",
   "Prize tracker: a live counter appears below the spin button after your first spin — tap it to see all prizes won this session, with a Clear button to reset",
   "Mobile revamp: cleaner header, full-screen Customize panel, and bottom-drawer history on phones",
   "Wheel text now runs down each slice for a cleaner look",
