@@ -1,6 +1,6 @@
 // Bump CHANGELOG_VERSION each time you push an update that needs a new popup.
 // Users who have already seen the current version won't see it again.
-export const CHANGELOG_VERSION = "3";
+export const CHANGELOG_VERSION = "4";
 
 export const CHANGELOG_ENTRIES: string[] = [
   "Save as SVG: download your wheel as a transparent vector image — drag it straight into Canva, Word, or any design tool",
