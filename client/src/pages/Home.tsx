@@ -244,17 +244,10 @@ export default function Home() {
       ctx.drawImage(pointerImg, Math.round((pointerRect.left - minX) * SCALE), Math.round((pointerRect.top - minY) * SCALE), Math.round(pointerRect.width * SCALE), Math.round(pointerRect.height * SCALE));
       canvas.toBlob((blob) => {
         if (!blob) return;
-        const filename = `${currentWheelName || "wheel"}.png`;
-        const file = new File([blob], filename, { type: "image/png" });
-        // Use Web Share API on mobile — a.click() opens in Safari which strips transparency
-        if (navigator.canShare?.({ files: [file] })) {
-          navigator.share({ files: [file], title: filename }).catch(() => {});
-          return;
-        }
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = filename;
+        a.download = `${currentWheelName || "wheel"}.png`;
         a.click();
         URL.revokeObjectURL(url);
       }, "image/png");
