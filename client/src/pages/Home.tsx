@@ -17,7 +17,7 @@ import { ChangelogCard } from "@/components/ChangelogCard";
 import { CHANGELOG_VERSION } from "@/lib/changelog";
 import { saveWheelToLocal, updateLocalWheel, decodeWheelFromUrl, encodeWheelToUrl } from "@/lib/localWheelStorage";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Settings, ChevronLeft, Mail } from "lucide-react";
+import { Settings, ChevronLeft, Mail, Download } from "lucide-react";
 
 export default function Home() {
   const {
@@ -194,6 +194,71 @@ export default function Home() {
     toast({ title: "OBS link copied!", description: "Paste as browser source in OBS" });
   }, [getWheelData, currentWheelName, toast]);
 
+  const handleDownloadPng = useCallback(() => {
+    const wheelSvgEl = document.querySelector<SVGSVGElement>('[data-testid="wheel-svg"]');
+    const pointerEl = document.querySelector<HTMLElement>('[data-testid="wheel-pointer"]');
+    if (!wheelSvgEl || !pointerEl) return;
+
+    const pointerSvgEl = pointerEl.querySelector<SVGSVGElement>("svg");
+    if (!pointerSvgEl) return;
+
+    const SCALE = 2.5;
+    const wheelRect = wheelSvgEl.getBoundingClientRect();
+    const pointerRect = pointerEl.getBoundingClientRect();
+
+    const minX = Math.min(wheelRect.left, pointerRect.left);
+    const minY = Math.min(wheelRect.top, pointerRect.top);
+    const maxX = Math.max(wheelRect.right, pointerRect.right);
+    const maxY = Math.max(wheelRect.bottom, pointerRect.bottom);
+
+    const canvasW = Math.round((maxX - minX) * SCALE);
+    const canvasH = Math.round((maxY - minY) * SCALE);
+
+    function toDataUrl(el: SVGSVGElement, w: number, h: number): string {
+      const clone = el.cloneNode(true) as SVGSVGElement;
+      clone.setAttribute("width", String(w));
+      clone.setAttribute("height", String(h));
+      clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+      clone.style.transition = "none";
+      clone.style.transform = "";
+      const str = new XMLSerializer().serializeToString(clone);
+      return "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(str)));
+    }
+
+    const wheelDataUrl = toDataUrl(wheelSvgEl, Math.round(wheelRect.width * SCALE), Math.round(wheelRect.height * SCALE));
+    const pointerDataUrl = toDataUrl(pointerSvgEl, Math.round(pointerRect.width * SCALE), Math.round(pointerRect.height * SCALE));
+
+    const canvas = document.createElement("canvas");
+    canvas.width = canvasW;
+    canvas.height = canvasH;
+    const ctx = canvas.getContext("2d")!;
+
+    let loaded = 0;
+    const wheelImg = new Image();
+    const pointerImg = new Image();
+
+    const onLoad = () => {
+      loaded++;
+      if (loaded < 2) return;
+      ctx.drawImage(wheelImg, Math.round((wheelRect.left - minX) * SCALE), Math.round((wheelRect.top - minY) * SCALE), Math.round(wheelRect.width * SCALE), Math.round(wheelRect.height * SCALE));
+      ctx.drawImage(pointerImg, Math.round((pointerRect.left - minX) * SCALE), Math.round((pointerRect.top - minY) * SCALE), Math.round(pointerRect.width * SCALE), Math.round(pointerRect.height * SCALE));
+      canvas.toBlob((blob) => {
+        if (!blob) return;
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${currentWheelName || "wheel"}.png`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }, "image/png");
+    };
+
+    wheelImg.onload = onLoad;
+    pointerImg.onload = onLoad;
+    wheelImg.src = wheelDataUrl;
+    pointerImg.src = pointerDataUrl;
+  }, [currentWheelName]);
+
   useEffect(() => {
     if (showResult && winner) {
       fireCenterBurst();
@@ -351,6 +416,19 @@ export default function Home() {
             disabled={!canSpin || isLoading}
             isSpinning={isSpinning}
           />
+
+          {!presentationMode && !isLoading && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleDownloadPng}
+              className="text-muted-foreground hover:text-foreground gap-1.5 text-xs"
+              title="Download wheel as PNG"
+            >
+              <Download className="w-3.5 h-3.5" />
+              Save as PNG
+            </Button>
+          )}
 
           {!presentationMode && spinHistory.length > 0 && (
             <button
