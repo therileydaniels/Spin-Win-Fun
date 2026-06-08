@@ -17,7 +17,7 @@ This is deliberately phase 1. Any future work that hangs off identity (cloud-sav
 | SDK | `@clerk/react@latest` | Current Clerk React package (renamed from `@clerk/clerk-react`). |
 | Env var | `VITE_CLERK_PUBLISHABLE_KEY` in `.env.local` | Vite default prefix; `.env.local` already gitignored via `.env.*`. |
 | Provider location | `client/src/main.tsx`, wrapping `<App />` | Outside Router/QueryClient/Tooltip stack. ClerkProvider is router-agnostic in modal flow. |
-| `publishableKey` prop | Not passed manually | Clerk auto-reads `VITE_CLERK_PUBLISHABLE_KEY`. |
+| `publishableKey` prop | Passed explicitly: `publishableKey={import.meta.env.VITE_CLERK_PUBLISHABLE_KEY}` | Clerk's quickstart docs claim auto-read, but `@clerk/react@6.7.3` TypeScript types declare the prop as required. Passing the env value explicitly is the standard real-world pattern and is functionally identical to auto-read. |
 | Sign-in flow | Modal overlay (`<SignInButton mode="modal">`) | No new routes; matches the prior AuthModal pattern. |
 | `afterSignOutUrl` | `/app` | Keep users in the wheel app after sign-out instead of bouncing to landing. |
 | Auth-state components | `<Show when="signed-in">` / `<Show when="signed-out">` | Current Clerk API. `<SignedIn>` / `<SignedOut>` are deprecated. |
@@ -31,13 +31,16 @@ This is deliberately phase 1. Any future work that hangs off identity (cloud-sav
 
 ### Modified
 
-**`client/src/main.tsx`** — wrap `<App />` in `<ClerkProvider afterSignOutUrl="/app">`. Service-worker registration stays as-is, outside the provider.
+**`client/src/main.tsx`** — wrap `<App />` in `<ClerkProvider>` with both `publishableKey` (from env) and `afterSignOutUrl`. Service-worker registration stays as-is, outside the provider.
 
 ```tsx
 import { ClerkProvider } from "@clerk/react";
 
 createRoot(document.getElementById("root")!).render(
-  <ClerkProvider afterSignOutUrl="/app">
+  <ClerkProvider
+    publishableKey={import.meta.env.VITE_CLERK_PUBLISHABLE_KEY}
+    afterSignOutUrl="/app"
+  >
     <App />
   </ClerkProvider>
 );

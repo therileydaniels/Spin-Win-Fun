@@ -150,7 +150,10 @@ import App from "./App";
 import "./index.css";
 
 createRoot(document.getElementById("root")!).render(
-  <ClerkProvider afterSignOutUrl="/app">
+  <ClerkProvider
+    publishableKey={import.meta.env.VITE_CLERK_PUBLISHABLE_KEY}
+    afterSignOutUrl="/app"
+  >
     <App />
   </ClerkProvider>
 );
@@ -163,8 +166,8 @@ if ('serviceWorker' in navigator) {
 ```
 
 Notes:
+- `publishableKey={import.meta.env.VITE_CLERK_PUBLISHABLE_KEY}` is required. Clerk's quickstart docs suggest auto-read, but `@clerk/react@6.7.3` TypeScript types declare the prop as required. Passing the env value explicitly is the standard pattern in real Vite+Clerk projects and is functionally identical to auto-read at runtime.
 - `afterSignOutUrl="/app"` is a literal URL Clerk navigates to via `window.location` after sign-out — not a Wouter path. `/app` keeps users in the wheel app.
-- No `publishableKey` prop. Clerk auto-reads `VITE_CLERK_PUBLISHABLE_KEY` from `import.meta.env`.
 - Service-worker registration stays outside the provider (it doesn't depend on auth).
 
 - [ ] **Step 2: Type check**
