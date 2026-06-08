@@ -4,7 +4,6 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AuthProvider } from "@/context/AuthContext";
 import Home from "@/pages/Home";
 
 const MyWheels = lazy(() => import("@/pages/MyWheels"));
@@ -34,12 +33,10 @@ function App() {
   return (
     <Router base="/app">
       <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <TooltipProvider>
-            <Toaster />
-            <AppRouter />
-          </TooltipProvider>
-        </AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <AppRouter />
+        </TooltipProvider>
       </QueryClientProvider>
     </Router>
   );

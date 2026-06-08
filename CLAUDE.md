@@ -1,13 +1,12 @@
 # QuickWheel — CLAUDE.md
 
 ## App Purpose
-A prize wheel spinner PWA. Users customize wheel segments, spin to pick a winner, save/load wheels, and share them via URL. Supports Supabase auth for cloud-saved wheels.
+A prize wheel spinner PWA. Users customize wheel segments, spin to pick a winner, save/load wheels, and share them via URL.
 
 ## Stack
 - **Frontend:** React 18 + TypeScript, Vite, Tailwind CSS v3, shadcn/ui (Radix), Wouter routing, Framer Motion
 - **Backend:** Express (TypeScript via tsx), port **5000**
-- **Auth:** Supabase (`@supabase/supabase-js`) — email/password + magic link
-- **Storage:** Supabase for authenticated users; `localStorage` for unauthenticated local wheels
+- **Storage:** `localStorage` (auth/login system is being redone)
 - **PWA:** Vite PWA plugin, manifest + service worker in `public/`
 
 ## Key Routes
@@ -30,15 +29,12 @@ Probabilities are normalized weights (not percentages). Equal odds = all 1.0.
 - `SpinWheel.tsx` — pure SVG wheel renderer; `data-testid="wheel-svg"` on the main SVG, `data-testid="wheel-pointer"` on the pointer overlay div
 - `SpinButton.tsx` — animated spin trigger
 - `ProbabilityPanel.tsx` — settings sidebar (add/remove/rename/recolor segments, save, share, OBS embed)
-- `WheelHeader.tsx` — top nav with auth slot, history toggle, settings toggle
-- `AuthModal.tsx` — sign-in / sign-up modal
-- `UserMenu.tsx` — logged-in user dropdown
+- `WheelHeader.tsx` — top nav with history toggle, settings toggle
 
 ## Key Hooks
 - `useWheelSpin` — manages rotation state and spin physics
 - `useCustomSegments` — segment CRUD, probability management, save/load
 - `useSound` — win sound toggle
-- `AuthContext` — Supabase session provider
 
 ## PNG Export
 `handleDownloadPng` in `Home.tsx` composites the wheel SVG (`data-testid="wheel-svg"`) and pointer SVG (`data-testid="wheel-pointer" > svg`) onto a canvas using `getBoundingClientRect` for positioning, then downloads as a transparent-background PNG at 2.5× screen resolution. The "Save as PNG" button appears below the Spin button when not in presentation mode.
