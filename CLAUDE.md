@@ -6,7 +6,8 @@ A prize wheel spinner PWA. Users customize wheel segments, spin to pick a winner
 ## Stack
 - **Frontend:** React 18 + TypeScript, Vite, Tailwind CSS v3, shadcn/ui (Radix), Wouter routing, Framer Motion
 - **Backend:** Express (TypeScript via tsx), port **5000**
-- **Storage:** `localStorage` (auth/login system is being redone)
+- **Auth:** Clerk (`@clerk/react`) — modal sign-in/sign-up, client-side only, no backend verification
+- **Storage:** `localStorage` (not tied to auth — auth and storage are deliberately decoupled)
 - **PWA:** Vite PWA plugin, manifest + service worker in `public/`
 
 ## Key Routes
