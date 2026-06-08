@@ -1,17 +1,32 @@
-import { pgTable, text, varchar, timestamp, serial, integer, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, timestamp, jsonb, uuid, index } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-export const wheels = pgTable("wheels", {
-  id: serial("id").primaryKey(),
-  name: varchar("name", { length: 255 }).notNull(),
-  segments: jsonb("segments").notNull(),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
+export type WheelSegment = {
+  id: string;
+  label: string;
+  color: string;
+  probability: number;
+};
+
+export const wheels = pgTable(
+  "wheels",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: text("user_id").notNull(),
+    name: varchar("name", { length: 255 }).notNull(),
+    segments: jsonb("segments").$type<WheelSegment[]>().notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (table) => ({
+    userIdIdx: index("wheels_user_id_idx").on(table.userId),
+  })
+);
 
 export const insertWheelSchema = createInsertSchema(wheels).omit({
   id: true,
+  userId: true,
   createdAt: true,
   updatedAt: true,
 });
@@ -43,3 +58,4 @@ export type CustomSegment = z.infer<typeof customSegmentSchema>;
 export const MIN_SEGMENTS = 2;
 export const MAX_SEGMENTS = 20;
 export const MAX_LABEL_LENGTH = 25;
+export const MAX_CLOUD_WHEELS = 50;
