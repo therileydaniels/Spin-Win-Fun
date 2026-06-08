@@ -7,6 +7,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { SoundToggle } from "@/components/SoundToggle";
 import { InstallPrompt } from "@/components/InstallPrompt";
 import { Menu, Monitor, Settings, FolderOpen, History, Trash2, LayoutGrid, Volume2, VolumeX, Sun, Moon } from "lucide-react";
+import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/react";
 
 interface WheelHeaderProps {
   settingsOpen: boolean;
@@ -203,6 +204,13 @@ export const WheelHeader = memo(function WheelHeader({
         </div>
 
         <div className="hidden sm:flex items-center gap-1">
+          <Show when="signed-out">
+            <SignInButton mode="modal" />
+            <SignUpButton mode="modal" />
+          </Show>
+          <Show when="signed-in">
+            <UserButton />
+          </Show>
           <SoundToggle isMuted={isMuted} onToggle={onToggleMute} />
           <ThemeToggle />
           <InstallPrompt />
