@@ -2,12 +2,12 @@ import { memo, useState } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { SoundToggle } from "@/components/SoundToggle";
 import { InstallPrompt } from "@/components/InstallPrompt";
-import { Menu, Monitor, Settings, FolderOpen, History, Trash2, LayoutGrid, Volume2, VolumeX, Sun, Moon } from "lucide-react";
-import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/react";
+import { Menu, Monitor, Settings, FolderOpen, History, Trash2, LayoutGrid, Volume2, VolumeX, Sun, Moon, LogIn, LogOut } from "lucide-react";
+import { Show, SignInButton, SignUpButton, UserButton, useClerk, useUser } from "@clerk/react";
 
 interface WheelHeaderProps {
   settingsOpen: boolean;
@@ -33,6 +33,8 @@ export const WheelHeader = memo(function WheelHeader({
   onToggleMute,
 }: WheelHeaderProps) {
   const [, setLocation] = useLocation();
+  const { openSignIn, openSignUp, signOut } = useClerk();
+  const { user } = useUser();
   const [isDark, setIsDark] = useState(() => document.documentElement.classList.contains('dark'));
 
   const toggleTheme = () => {
@@ -112,6 +114,23 @@ export const WheelHeader = memo(function WheelHeader({
               {isDark ? <Sun className="w-4 h-4 mr-2" /> : <Moon className="w-4 h-4 mr-2" />}
               {isDark ? "Light mode" : "Dark mode"}
             </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <Show when="signed-out">
+              <DropdownMenuItem onClick={() => openSignIn()}>
+                <LogIn className="w-4 h-4 mr-2" />Sign in
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => openSignUp()}>
+                <LogIn className="w-4 h-4 mr-2" />Sign up
+              </DropdownMenuItem>
+            </Show>
+            <Show when="signed-in">
+              <DropdownMenuLabel className="font-normal text-xs text-muted-foreground truncate">
+                {user?.primaryEmailAddress?.emailAddress ?? user?.username ?? "Signed in"}
+              </DropdownMenuLabel>
+              <DropdownMenuItem onClick={() => signOut({ redirectUrl: "/app" })}>
+                <LogOut className="w-4 h-4 mr-2" />Sign out
+              </DropdownMenuItem>
+            </Show>
           </DropdownMenuContent>
         </DropdownMenu>
 
