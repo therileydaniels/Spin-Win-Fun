@@ -1,8 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useLocation } from "wouter";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useWheelStorage } from "@/hooks/useWheelStorage";
 import { useCustomSegments, SavedWheelData } from "@/hooks/useCustomSegments";
 import { useToast } from "@/hooks/use-toast";
-import { getLocalWheels, deleteLocalWheel, duplicateLocalWheel, encodeWheelToUrl, LocalWheel } from "@/lib/localWheelStorage";
+import { encodeWheelToUrl, type LocalWheel } from "@/lib/localWheelStorage";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -24,19 +26,37 @@ export default function MyWheels() {
   const { loadWheel, hasUnsavedChanges } = useCustomSegments();
   const { toast } = useToast();
 
-  const [wheels, setWheels] = useState<LocalWheel[]>([]);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [loadId, setLoadId] = useState<string | null>(null);
   const [pendingLoad, setPendingLoad] = useState<LocalWheel | null>(null);
 
-  useEffect(() => {
-    setWheels(getLocalWheels());
-  }, []);
+  const storage = useWheelStorage();
+  const queryClient = useQueryClient();
 
-  const handleDelete = (id: string) => {
-    const result = deleteLocalWheel(id);
+  const wheelsQuery = useQuery<LocalWheel[]>({
+    queryKey: ["wheels", storage.isCloud],
+    queryFn: () => storage.list(),
+  });
+
+  const wheels = wheelsQuery.data ?? [];
+  const isLoading = wheelsQuery.isLoading;
+
+  const invalidate = () =>
+    queryClient.invalidateQueries({ queryKey: ["wheels", storage.isCloud] });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => storage.remove(id),
+    onSuccess: invalidate,
+  });
+
+  const duplicateMutation = useMutation({
+    mutationFn: (id: string) => storage.duplicate(id),
+    onSuccess: invalidate,
+  });
+
+  const handleDelete = async (id: string) => {
+    const result = await deleteMutation.mutateAsync(id);
     if (result.success) {
-      setWheels(getLocalWheels());
       toast({
         title: "Wheel deleted",
         description: "Your wheel has been deleted.",
@@ -51,10 +71,9 @@ export default function MyWheels() {
     setDeleteId(null);
   };
 
-  const handleDuplicate = (id: string) => {
-    const result = duplicateLocalWheel(id);
+  const handleDuplicate = async (id: string) => {
+    const result = await duplicateMutation.mutateAsync(id);
     if (result.success && result.wheel) {
-      setWheels(getLocalWheels());
       toast({
         title: "Wheel duplicated",
         description: `"${result.wheel.name}" has been created.`,
@@ -159,7 +178,11 @@ export default function MyWheels() {
           </div>
         </div>
 
-        {wheels.length === 0 ? (
+        {isLoading ? (
+          <div className="text-center text-muted-foreground py-12">
+            Loading wheels...
+          </div>
+        ) : wheels.length === 0 ? (
           <Card className="max-w-md mx-auto text-center border-border bg-card/80 backdrop-blur-sm">
             <CardContent className="pt-6 pb-6">
               <CircleDot className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
