@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import rateLimit from "express-rate-limit";
 import { spinRequestSchema } from "@shared/schema";
+import { wheelsRouter } from "./wheelsRouter";
 
 const spinLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
@@ -56,6 +57,8 @@ export async function registerRoutes(
 
     return res.json({ winnerIndex });
   });
+
+  app.use("/api/wheels", wheelsRouter);
 
   return httpServer;
 }
