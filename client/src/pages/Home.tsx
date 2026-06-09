@@ -15,7 +15,9 @@ import { fireWinConfetti, fireCenterBurst } from "@/lib/confetti";
 import { Footer } from "@/components/Footer";
 import { ChangelogCard } from "@/components/ChangelogCard";
 import { CHANGELOG_VERSION } from "@/lib/changelog";
-import { saveWheelToLocal, updateLocalWheel, decodeWheelFromUrl, encodeWheelToUrl } from "@/lib/localWheelStorage";
+import { decodeWheelFromUrl, encodeWheelToUrl } from "@/lib/localWheelStorage";
+import { useWheelStorage } from "@/hooks/useWheelStorage";
+import { useQueryClient } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Settings, ChevronLeft, Mail, Download } from "lucide-react";
 
@@ -58,6 +60,8 @@ export default function Home() {
   } = useCustomSegments();
 
   const { toast } = useToast();
+  const storage = useWheelStorage();
+  const queryClient = useQueryClient();
 
   const [presentationMode, setPresentationMode] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -98,7 +102,7 @@ export default function Home() {
     }
   }, []);
 
-  const handleSaveWheel = () => {
+  const handleSaveWheel = async () => {
     if (currentWheelId && !saveAsMode) {
       const wheelData = getWheelData();
       const segmentsWithProb = wheelData.segments.map((seg, idx) => ({
@@ -107,11 +111,12 @@ export default function Home() {
         color: seg.color,
         probability: wheelData.probabilities[idx],
       }));
-      const result = updateLocalWheel(currentWheelId, {
+      const result = await storage.update(currentWheelId, {
         name: currentWheelName || "My Wheel",
         segments: segmentsWithProb,
       });
       if (result.success && result.wheel) {
+        queryClient.invalidateQueries({ queryKey: ["wheels", storage.isCloud] });
         markSaved(result.wheel.id, result.wheel.name);
         setSettingsOpen(false);
         toast({
@@ -131,7 +136,7 @@ export default function Home() {
     }
   };
 
-  const handleSaveNew = (name: string) => {
+  const handleSaveNew = async (name: string) => {
     const wheelData = getWheelData();
     const segmentsWithProb = wheelData.segments.map((seg, idx) => ({
       id: seg.id,
@@ -139,11 +144,12 @@ export default function Home() {
       color: seg.color,
       probability: wheelData.probabilities[idx],
     }));
-    const result = saveWheelToLocal({
+    const result = await storage.save({
       name,
       segments: segmentsWithProb,
     });
     if (result.success && result.wheel) {
+      queryClient.invalidateQueries({ queryKey: ["wheels", storage.isCloud] });
       markSaved(result.wheel.id, result.wheel.name);
       setSaveModalOpen(false);
       setSettingsOpen(false);
