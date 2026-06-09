@@ -5,9 +5,9 @@ A prize wheel spinner PWA. Users customize wheel segments, spin to pick a winner
 
 ## Stack
 - **Frontend:** React 18 + TypeScript, Vite, Tailwind CSS v3, shadcn/ui (Radix), Wouter routing, Framer Motion
-- **Backend:** Express (TypeScript via tsx), port **5000**
-- **Auth:** Clerk (`@clerk/react`) — modal sign-in/sign-up, client-side only, no backend verification
-- **Storage:** `localStorage` (not tied to auth — auth and storage are deliberately decoupled)
+- **Backend:** Express (TypeScript via tsx), port **5000**; `@clerk/backend` verifies session tokens; Drizzle ORM over Railway Postgres
+- **Auth:** Clerk (`@clerk/react`) — modal sign-in/sign-up; server-side token verification on `/api/wheels` routes
+- **Storage:** Railway Postgres for signed-in users (50-wheel cap); `localStorage` for signed-out users. `useWheelStorage()` hook dispatches automatically.
 - **PWA:** Vite PWA plugin, manifest + service worker in `public/`
 
 ## Key Routes
@@ -25,6 +25,17 @@ A prize wheel spinner PWA. Users customize wheel segments, spin to pick a winner
 { id: string; label: string; color: string; probability: number }
 ```
 Probabilities are normalized weights (not percentages). Equal odds = all 1.0.
+
+## Data Model (saved wheel)
+Cloud:
+```ts
+{ id: uuid; userId: clerk-user-id; name: string; segments: WheelSegment[]; createdAt; updatedAt }
+```
+Indexed on `user_id`. 50-wheel-per-user cap enforced server-side.
+
+Local: same shape minus `userId`, IDs are `crypto.randomUUID()` strings.
+
+`MigrationPrompt` (one-time per device) imports local wheels to cloud on first sign-in.
 
 ## Core Components
 - `SpinWheel.tsx` — pure SVG wheel renderer; `data-testid="wheel-svg"` on the main SVG, `data-testid="wheel-pointer"` on the pointer overlay div
@@ -47,3 +58,8 @@ Probabilities are normalized weights (not percentages). Equal odds = all 1.0.
 - Share links encode wheel data as base64 in `?wheel=` query param
 - OBS embed link: `/app/embed?wheel=<encoded>`
 - Changelog version gating via `CHANGELOG_VERSION` in `lib/changelog.ts`
+
+## Environment
+- `VITE_CLERK_PUBLISHABLE_KEY` — Clerk frontend key (`pk_test_…` / `pk_live_…`)
+- `CLERK_SECRET_KEY` — Clerk backend key for token verification (`sk_test_…` / `sk_live_…`)
+- `DATABASE_URL` — Postgres connection string (provided by Railway)
