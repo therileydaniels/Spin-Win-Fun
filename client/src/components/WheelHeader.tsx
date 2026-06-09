@@ -6,6 +6,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { SoundToggle } from "@/components/SoundToggle";
 import { InstallPrompt } from "@/components/InstallPrompt";
+import { MigrationPrompt } from "@/components/MigrationPrompt";
 import { Menu, Monitor, Settings, FolderOpen, History, Trash2, LayoutGrid, Volume2, VolumeX, Sun, Moon, LogIn, LogOut } from "lucide-react";
 import { Show, SignInButton, SignUpButton, UserButton, useClerk, useUser } from "@clerk/react";
 
@@ -235,6 +236,7 @@ export const WheelHeader = memo(function WheelHeader({
           <InstallPrompt />
         </div>
       </div>
+      <MigrationPrompt />
     </header>
   );
 });
