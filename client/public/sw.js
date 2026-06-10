@@ -1,20 +1,23 @@
-const CACHE_NAME = 'quickwheel-v2';
+const CACHE_NAME = 'quickwheel-v3';
+// Paths must match the app's base ("/app/"). The SW is registered at
+// /app/sw.js so its scope is /app/. Root paths like /index.html 404 here.
 const STATIC_ASSETS = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/favicon-32x32.png',
-  '/icons/icon-192.png',
-  '/icons/icon-512.png',
-  '/sounds/win.mp3'
+  '/app/',
+  '/app/manifest.json',
+  '/app/favicon-32x32.png',
+  '/app/icons/icon-192.png',
+  '/app/icons/icon-512.png',
+  '/app/sounds/win.mp3'
 ];
 
-// Install - cache static assets
+// Install - cache static assets. Use individual adds with allSettled so a
+// single missing/4xx asset can't reject the whole install and brick the SW
+// (which would leave a stale SW serving outdated app code).
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(STATIC_ASSETS);
-    })
+    caches.open(CACHE_NAME).then((cache) =>
+      Promise.allSettled(STATIC_ASSETS.map((url) => cache.add(url)))
+    )
   );
   self.skipWaiting();
 });
@@ -59,9 +62,9 @@ self.addEventListener('fetch', (event) => {
           if (cachedResponse) {
             return cachedResponse;
           }
-          // If it's a navigation request, return the cached index.html
+          // If it's a navigation request, return the cached app shell
           if (event.request.mode === 'navigate') {
-            return caches.match('/index.html');
+            return caches.match('/app/');
           }
           return new Response('Offline', { status: 503 });
         });
