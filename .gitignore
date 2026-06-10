@@ -8,3 +8,4 @@ vite.config.ts.*
 .env.*
 !.env.example
 .mcp.json
+.playwright-mcp/
