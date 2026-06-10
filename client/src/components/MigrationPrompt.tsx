@@ -32,7 +32,10 @@ export function MigrationPrompt() {
     if (localStorage.getItem(FLAG_KEY) === "true") return;
     const found = getLocalWheels();
     if (found.length === 0) {
-      localStorage.setItem(FLAG_KEY, "true");
+      // Nothing to migrate yet — don't burn the one-time flag. If the user
+      // later builds local wheels (e.g. while signed out) and signs back in,
+      // they should still get the prompt. The flag is only set after an actual
+      // import or an explicit skip.
       return;
     }
     setLocalWheels(found);
