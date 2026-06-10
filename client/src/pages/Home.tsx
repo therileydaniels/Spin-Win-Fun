@@ -103,37 +103,65 @@ export default function Home() {
   }, []);
 
   const handleSaveWheel = async () => {
-    if (currentWheelId && !saveAsMode) {
-      const wheelData = getWheelData();
-      const segmentsWithProb = wheelData.segments.map((seg, idx) => ({
-        id: seg.id,
-        label: seg.label,
-        color: seg.color,
-        probability: wheelData.probabilities[idx],
-      }));
-      const result = await storage.update(currentWheelId, {
-        name: currentWheelName || "My Wheel",
-        segments: segmentsWithProb,
-      });
-      if (result.success && result.wheel) {
-        queryClient.invalidateQueries({ queryKey: ["wheels", storage.isCloud] });
-        markSaved(result.wheel.id, result.wheel.name);
-        setSettingsOpen(false);
-        toast({
-          title: "Wheel updated!",
-          description: `"${result.wheel.name}" has been saved.`,
-        });
-      } else {
-        toast({
-          title: "Error",
-          description: result.error || "Failed to update wheel.",
-          variant: "destructive",
-        });
-      }
-    } else {
+    if (!currentWheelId || saveAsMode) {
       setSaveAsMode(false);
       setSaveModalOpen(true);
+      return;
     }
+
+    const wheelData = getWheelData();
+    const segmentsWithProb = wheelData.segments.map((seg, idx) => ({
+      id: seg.id,
+      label: seg.label,
+      color: seg.color,
+      probability: wheelData.probabilities[idx],
+    }));
+    const name = currentWheelName || "My Wheel";
+
+    const result = await storage.update(currentWheelId, {
+      name,
+      segments: segmentsWithProb,
+    });
+    if (result.success && result.wheel) {
+      queryClient.invalidateQueries({ queryKey: ["wheels", storage.isCloud] });
+      markSaved(result.wheel.id, result.wheel.name);
+      setSettingsOpen(false);
+      toast({
+        title: "Wheel updated!",
+        description: `"${result.wheel.name}" has been saved.`,
+      });
+      return;
+    }
+
+    // The wheel we think we're editing isn't in the active backend — e.g. it
+    // was saved to the cloud and we're now signed out (or vice-versa), or it
+    // was deleted elsewhere. The persisted currentWheelId points at the wrong
+    // store. Reconcile by saving it fresh in the active backend.
+    if (result.error?.toLowerCase().includes("not found")) {
+      const created = await storage.save({ name, segments: segmentsWithProb });
+      if (created.success && created.wheel) {
+        queryClient.invalidateQueries({ queryKey: ["wheels", storage.isCloud] });
+        markSaved(created.wheel.id, created.wheel.name);
+        setSettingsOpen(false);
+        toast({
+          title: "Wheel saved!",
+          description: `"${created.wheel.name}" has been saved.`,
+        });
+        return;
+      }
+      toast({
+        title: "Error",
+        description: created.error || "Failed to save wheel.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Error",
+      description: result.error || "Failed to update wheel.",
+      variant: "destructive",
+    });
   };
 
   const handleSaveNew = async (name: string) => {
