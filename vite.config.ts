@@ -66,5 +66,12 @@ export default defineConfig({
       strict: true,
       deny: ["**/.*"],
     },
+    // The project lives on a network drive (NAS). Native file-system events
+    // are unreliable there and crash the dev server with ETIMEDOUT. Poll
+    // instead so HMR stays stable on the network share.
+    watch: {
+      usePolling: true,
+      interval: 1000,
+    },
   },
 });
