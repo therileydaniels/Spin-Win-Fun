@@ -19,15 +19,22 @@ if (process.env.NODE_ENV === "production") {
   });
 
   // Security headers (production only - Vite dev server needs unrestricted access)
+  // Clerk's frontend API (clerk-js, environment calls) and Cloudflare bot
+  // protection must be allow-listed or the browser blocks Clerk from loading.
+  // See https://clerk.com/docs/security/clerk-csp — fapi host = clerk.quickwheel.co.
+  const clerkFapi = "https://clerk.quickwheel.co";
+  const clerkChallenges = "https://challenges.cloudflare.com";
   const helmetMiddleware = helmet({
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "'unsafe-inline'", "https://www.googletagmanager.com"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "https://www.googletagmanager.com", clerkFapi, clerkChallenges],
         styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
         fontSrc: ["'self'", "https://fonts.gstatic.com"],
-        imgSrc: ["'self'", "data:", "blob:", "https://www.google-analytics.com"],
-        connectSrc: ["'self'", "https://www.google-analytics.com", "https://*.google-analytics.com", "https://*.analytics.google.com"],
+        imgSrc: ["'self'", "data:", "blob:", "https://www.google-analytics.com", "https://img.clerk.com"],
+        connectSrc: ["'self'", "https://www.google-analytics.com", "https://*.google-analytics.com", "https://*.analytics.google.com", clerkFapi],
+        workerSrc: ["'self'", "blob:"],
+        frameSrc: ["'self'", clerkChallenges],
         mediaSrc: ["'self'"],
       },
     },
