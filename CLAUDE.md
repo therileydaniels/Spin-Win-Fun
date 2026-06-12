@@ -48,8 +48,8 @@ Local: same shape minus `userId`, IDs are `crypto.randomUUID()` strings.
 - `useCustomSegments` — segment CRUD, probability management, save/load
 - `useSound` — win sound toggle
 
-## PNG Export
-`handleDownloadPng` in `Home.tsx` composites the wheel SVG (`data-testid="wheel-svg"`) and pointer SVG (`data-testid="wheel-pointer" > svg`) onto a canvas using `getBoundingClientRect` for positioning, then downloads as a transparent-background PNG at 2.5× screen resolution. The "Save as PNG" button appears below the Spin button when not in presentation mode.
+## SVG Export
+`handleDownloadSvg` in `Home.tsx` composites the wheel SVG (`data-testid="wheel-svg"`) and pointer SVG (`data-testid="wheel-pointer" > svg`) into a single combined SVG document. It uses `getBoundingClientRect` to position each piece and scales each from its own viewBox (wheel 500×500, pointer 40×52) into the shared CSS-pixel space, then downloads it as an `.svg` file. The "Save as SVG" button appears below the Spin button when not in presentation mode.
 
 ## Conventions
 - Wheel SVG uses a 500×500 viewBox, radius 200, center at (250, 250)
