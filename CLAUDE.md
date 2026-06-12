@@ -60,6 +60,15 @@ Local: same shape minus `userId`, IDs are `crypto.randomUUID()` strings.
 - Changelog version gating via `CHANGELOG_VERSION` in `lib/changelog.ts`
 
 ## Environment
-- `VITE_CLERK_PUBLISHABLE_KEY` — Clerk frontend key (`pk_test_…` / `pk_live_…`)
+- `VITE_CLERK_PUBLISHABLE_KEY` — Clerk frontend key (`pk_test_…` / `pk_live_…`). **Baked into the frontend at build time** — changing it requires a fresh build/deploy, not just a restart.
 - `CLERK_SECRET_KEY` — Clerk backend key for token verification (`sk_test_…` / `sk_live_…`)
-- `DATABASE_URL` — Postgres connection string (provided by Railway)
+- `DATABASE_URL` — Postgres connection string. Read at server startup (`server/db.ts` throws if unset → boot crash / 502). Must be present in the Railway service's own variables.
+
+## Deployment
+- **Host:** Railway, serving `quickwheel.co`. **Auto-deploys on push to `main`** (GitHub repo `therileydaniels/Spin-Win-Fun`). Treat any push to `main` as a production release.
+- **Build/start:** `npm run build` (Vite client → `dist/public`, esbuild server → `dist/index.cjs`) then `npm start`. Server reads `PORT` (Railway-provided), defaults 5000.
+- **DNS/proxy:** Cloudflare in front. Clerk's verification CNAMEs (`clerk`, `accounts`, `clkmail`, `clk._domainkey`, `clk2._domainkey`) must be **DNS-only (grey cloud)**, not proxied.
+- **Shared DB gotcha:** local `.env.local` `DATABASE_URL` points at the *same* Railway Postgres as production — dev writes are real production rows.
+
+## Content Security Policy (production only)
+`server/index.ts` sets a helmet CSP that applies only when `NODE_ENV=production`. It **must** allow Clerk's frontend API (`clerk.quickwheel.co`) and Cloudflare bot protection (`challenges.cloudflare.com`) in `script-src`/`connect-src`/`frame-src`, plus `img.clerk.com` and `worker-src blob:` — otherwise the browser blocks `clerk-js` and the sign-in/up UI silently never renders (works locally where CSP is off). See https://clerk.com/docs/security/clerk-csp. Known harmless gap: Cloudflare's `static.cloudflareinsights.com` beacon is CSP-blocked (console error only).

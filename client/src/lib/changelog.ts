@@ -1,8 +1,10 @@
 // Bump CHANGELOG_VERSION each time you push an update that needs a new popup.
 // Users who have already seen the current version won't see it again.
-export const CHANGELOG_VERSION = "4";
+export const CHANGELOG_VERSION = "5";
 
 export const CHANGELOG_ENTRIES: string[] = [
+  "Accounts are here: sign up or sign in (top-right) to save your wheels to your account",
+  "Cloud sync: when you're signed in, your saved wheels follow you across devices — up to 50 wheels, and your existing on-device wheels import with one tap",
   "Save as SVG: download your wheel as a transparent vector image — drag it straight into Canva, Word, or any design tool",
   "Prize tracker: a live counter appears below the spin button after your first spin — tap it to see all prizes won this session, with a Clear button to reset",
   "Mobile revamp: cleaner header, full-screen Customize panel, and bottom-drawer history on phones",
