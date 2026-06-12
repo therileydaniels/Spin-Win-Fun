@@ -164,7 +164,7 @@ export default function MyWheels() {
         </div>
         <div className="flex items-center gap-2">
           <span className="text-sm text-muted-foreground">
-            {wheelCount}/10 saved
+            {wheelCount}/{storage.isCloud ? 50 : 10} saved
           </span>
           <ThemeToggle />
         </div>
@@ -174,7 +174,11 @@ export default function MyWheels() {
         <div className="max-w-4xl mx-auto mb-4">
           <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/50 border border-border text-sm text-muted-foreground">
             <AlertTriangle className="w-4 h-4 flex-shrink-0" />
-            <span>Wheels are saved locally in your browser. Clearing browser data will delete them.</span>
+            <span>
+              {storage.isCloud
+                ? "Wheels are saved to your account and sync across your devices."
+                : "Wheels are saved locally in your browser. Clearing browser data will delete them."}
+            </span>
           </div>
         </div>
 

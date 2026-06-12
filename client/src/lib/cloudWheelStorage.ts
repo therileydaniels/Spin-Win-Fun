@@ -45,6 +45,16 @@ export async function listCloudWheels(getToken: GetToken): Promise<LocalWheel[]>
   return rows.map(toLocalShape);
 }
 
+export async function getCloudWheel(
+  getToken: GetToken,
+  id: string
+): Promise<LocalWheel | null> {
+  const res = await authedFetch(getToken, `/${id}`);
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`Get failed: ${res.status}`);
+  return toLocalShape(await res.json());
+}
+
 export async function saveCloudWheel(
   getToken: GetToken,
   wheel: { name: string; segments: LocalWheel["segments"] }
@@ -91,8 +101,7 @@ export async function duplicateCloudWheel(
   getToken: GetToken,
   id: string
 ): Promise<{ success: boolean; wheel?: LocalWheel; error?: string }> {
-  const list = await listCloudWheels(getToken);
-  const source = list.find((w) => w.id === id);
+  const source = await getCloudWheel(getToken, id);
   if (!source) return { success: false, error: "Wheel not found" };
   return saveCloudWheel(getToken, {
     name: `${source.name} (Copy)`,
