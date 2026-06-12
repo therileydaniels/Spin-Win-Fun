@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, sql } from "drizzle-orm";
 import { db } from "./db";
 import { wheels, insertWheelSchema, MAX_CLOUD_WHEELS } from "@shared/schema";
 import { requireClerkAuth } from "./clerkAuth";
@@ -18,6 +18,19 @@ wheelsRouter.get("/", async (req, res) => {
   res.json(rows);
 });
 
+wheelsRouter.get("/:id", async (req, res) => {
+  const userId = req.auth!.userId;
+  const { id } = req.params;
+  const [row] = await db
+    .select()
+    .from(wheels)
+    .where(and(eq(wheels.id, id), eq(wheels.userId, userId)));
+  if (!row) {
+    return res.status(404).json({ error: "Wheel not found" });
+  }
+  res.json(row);
+});
+
 wheelsRouter.post("/", async (req, res) => {
   const userId = req.auth!.userId;
 
@@ -26,18 +39,29 @@ wheelsRouter.post("/", async (req, res) => {
     return res.status(400).json({ error: "Invalid wheel payload", details: parsed.error.flatten() });
   }
 
-  const countRows = await db
-    .select({ id: wheels.id })
-    .from(wheels)
-    .where(eq(wheels.userId, userId));
-  if (countRows.length >= MAX_CLOUD_WHEELS) {
+  // Count and insert inside one transaction guarded by a per-user advisory
+  // lock, so two concurrent saves can't both pass the cap check and push the
+  // user over MAX_CLOUD_WHEELS. The lock is keyed on the user id and released
+  // automatically when the transaction ends.
+  const created = await db.transaction(async (tx) => {
+    await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${userId}))`);
+    const countRows = await tx
+      .select({ id: wheels.id })
+      .from(wheels)
+      .where(eq(wheels.userId, userId));
+    if (countRows.length >= MAX_CLOUD_WHEELS) {
+      return null;
+    }
+    const [row] = await tx
+      .insert(wheels)
+      .values({ ...parsed.data, userId })
+      .returning();
+    return row;
+  });
+
+  if (!created) {
     return res.status(409).json({ error: `Wheel limit reached (${MAX_CLOUD_WHEELS})` });
   }
-
-  const [created] = await db
-    .insert(wheels)
-    .values({ ...parsed.data, userId } as any)
-    .returning();
   res.status(201).json(created);
 });
 
@@ -52,7 +76,7 @@ wheelsRouter.put("/:id", async (req, res) => {
 
   const [updated] = await db
     .update(wheels)
-    .set({ ...parsed.data, updatedAt: new Date() } as any)
+    .set({ ...parsed.data, updatedAt: new Date() })
     .where(and(eq(wheels.id, id), eq(wheels.userId, userId)))
     .returning();
 

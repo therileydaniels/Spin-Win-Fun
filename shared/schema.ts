@@ -9,6 +9,24 @@ export type WheelSegment = {
   probability: number;
 };
 
+// Wheel size limits — shared by the client UI and the server-side API so both
+// enforce the same rules. Declared here (above the schemas that reference them)
+// to avoid a temporal-dead-zone error at module load.
+export const MIN_SEGMENTS = 2;
+export const MAX_SEGMENTS = 20;
+export const MAX_LABEL_LENGTH = 25;
+export const MAX_CLOUD_WHEELS = 50;
+
+// Validates a single segment inside a wheel payload. The client already
+// enforces these limits in the UI, but the API must enforce them too — a
+// signed-in user could otherwise POST an oversized or malformed wheel directly.
+export const wheelSegmentSchema = z.object({
+  id: z.string(),
+  label: z.string().max(MAX_LABEL_LENGTH),
+  color: z.string(),
+  probability: z.number().finite().nonnegative(),
+});
+
 export const wheels = pgTable(
   "wheels",
   {
@@ -24,7 +42,10 @@ export const wheels = pgTable(
   })
 );
 
-export const insertWheelSchema = createInsertSchema(wheels).omit({
+export const insertWheelSchema = createInsertSchema(wheels, {
+  name: z.string().min(1).max(255),
+  segments: z.array(wheelSegmentSchema).min(MIN_SEGMENTS).max(MAX_SEGMENTS),
+}).omit({
   id: true,
   userId: true,
   createdAt: true,
@@ -54,8 +75,3 @@ export const customSegmentSchema = z.object({
 });
 
 export type CustomSegment = z.infer<typeof customSegmentSchema>;
-
-export const MIN_SEGMENTS = 2;
-export const MAX_SEGMENTS = 20;
-export const MAX_LABEL_LENGTH = 25;
-export const MAX_CLOUD_WHEELS = 50;
