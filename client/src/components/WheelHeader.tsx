@@ -1,5 +1,6 @@
-import { memo, useState } from "react";
+import { memo } from "react";
 import { useLocation } from "wouter";
+import { useTheme } from "@/hooks/useTheme";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -36,14 +37,7 @@ export const WheelHeader = memo(function WheelHeader({
   const [, setLocation] = useLocation();
   const { openSignIn, openSignUp, signOut } = useClerk();
   const { user } = useUser();
-  const [isDark, setIsDark] = useState(() => document.documentElement.classList.contains('dark'));
-
-  const toggleTheme = () => {
-    const newDark = !isDark;
-    setIsDark(newDark);
-    document.documentElement.classList.toggle('dark', newDark);
-    localStorage.setItem('theme', newDark ? 'dark' : 'light');
-  };
+  const { isDark, toggleTheme } = useTheme();
 
   return (
     <header className="relative z-10 flex items-center justify-between gap-4 px-4 py-3 border-b border-border">
@@ -225,8 +219,12 @@ export const WheelHeader = memo(function WheelHeader({
 
         <div className="hidden sm:flex items-center gap-1">
           <Show when="signed-out">
-            <SignInButton mode="modal" />
-            <SignUpButton mode="modal" />
+            <SignInButton mode="modal">
+              <Button variant="ghost" size="sm" data-testid="button-sign-in">Sign in</Button>
+            </SignInButton>
+            <SignUpButton mode="modal">
+              <Button size="sm" data-testid="button-sign-up">Sign up</Button>
+            </SignUpButton>
           </Show>
           <Show when="signed-in">
             <UserButton />

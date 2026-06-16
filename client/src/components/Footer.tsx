@@ -21,7 +21,7 @@ export function Footer() {
           </Link>
         </div>
         <span className="hidden sm:inline text-muted-foreground/40">·</span>
-        <span className="text-muted-foreground/50">&copy; 2025 QuickWheel</span>
+        <span className="text-muted-foreground/50">&copy; {new Date().getFullYear()} QuickWheel</span>
       </div>
     </footer>
   );

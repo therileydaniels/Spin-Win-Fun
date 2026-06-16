@@ -97,7 +97,12 @@ export function ProbabilityPanel({
                   {currentWheelName || "Wheel Settings"}
                 </span>
                 {hasUnsavedChanges && (
-                  <span className="text-xs text-amber-400 shrink-0">*</span>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="text-xs text-amber-400 shrink-0 cursor-default" aria-label="Unsaved changes">*</span>
+                    </TooltipTrigger>
+                    <TooltipContent><p>Unsaved changes</p></TooltipContent>
+                  </Tooltip>
                 )}
               </CardTitle>
               <p className="text-xs text-muted-foreground font-medium mt-1">
@@ -197,7 +202,8 @@ export function ProbabilityPanel({
         </CardHeader>
       <CardContent className="space-y-5">
         <div>
-          <p className="font-semibold text-sm text-foreground tracking-wide uppercase mb-3">Segments</p>
+          <p className="font-semibold text-sm text-foreground tracking-wide uppercase mb-1">Segments</p>
+          <p className="text-xs text-muted-foreground mb-3">Leave the odds at 0 for equal chances.</p>
           <div className="max-h-[45vh] sm:max-h-[320px] overflow-y-auto space-y-2 pr-1">
           {segments.map((segment, index) => {
             const isClaimed = claimedIds.includes(segment.id);

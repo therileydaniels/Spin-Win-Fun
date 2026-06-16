@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { encodeWheelToUrl, type LocalWheel } from "@/lib/localWheelStorage";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import {
   AlertDialog,
@@ -19,7 +20,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Footer } from "@/components/Footer";
-import { ArrowLeft, Trash2, Play, CircleDot, AlertTriangle, Copy, Share2 } from "lucide-react";
+import { ArrowLeft, Trash2, Play, CircleDot, AlertTriangle, Copy, Share2, Loader2 } from "lucide-react";
 
 export default function MyWheels() {
   const [, setLocation] = useLocation();
@@ -89,7 +90,7 @@ export default function MyWheels() {
 
   const handleShare = async (wheel: LocalWheel) => {
     const encoded = encodeWheelToUrl(wheel);
-    const shareUrl = `${window.location.origin}/?wheel=${encoded}`;
+    const shareUrl = `${window.location.origin}/app/?wheel=${encoded}`;
     
     try {
       await navigator.clipboard.writeText(shareUrl);
@@ -183,8 +184,20 @@ export default function MyWheels() {
         </div>
 
         {isLoading ? (
-          <div className="text-center text-muted-foreground py-12">
-            Loading wheels...
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 max-w-4xl mx-auto">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Card key={i} className="border-border bg-card/80 backdrop-blur-sm">
+                <CardHeader className="pb-2">
+                  <Skeleton className="h-5 w-32 mb-2" />
+                  <Skeleton className="h-3 w-20" />
+                </CardHeader>
+                <CardContent>
+                  <Skeleton className="h-4 w-24 mb-3" />
+                  <Skeleton className="h-9 w-full mb-2" />
+                  <Skeleton className="h-9 w-full" />
+                </CardContent>
+              </Card>
+            ))}
           </div>
         ) : wheels.length === 0 ? (
           <Card className="max-w-md mx-auto text-center border-border bg-card/80 backdrop-blur-sm">
@@ -251,10 +264,15 @@ export default function MyWheels() {
                       variant="outline"
                       size="sm"
                       onClick={() => handleDuplicate(wheel.id)}
+                      disabled={duplicateMutation.isPending && duplicateMutation.variables === wheel.id}
                       className="flex-1 border-border"
                       data-testid={`button-duplicate-wheel-${wheel.id}`}
                     >
-                      <Copy className="w-3.5 h-3.5 mr-1" />
+                      {duplicateMutation.isPending && duplicateMutation.variables === wheel.id ? (
+                        <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" />
+                      ) : (
+                        <Copy className="w-3.5 h-3.5 mr-1" />
+                      )}
                       Duplicate
                     </Button>
                     <Button

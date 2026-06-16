@@ -1,4 +1,4 @@
-import { type Express } from "express";
+import { type Express, type Request, type Response, type NextFunction } from "express";
 import { createServer as createViteServer, createLogger } from "vite";
 import { type Server } from "http";
 import viteConfig from "../vite.config";
@@ -30,6 +30,39 @@ export async function setupVite(server: Server, app: Express) {
     },
     server: serverOptions,
     appType: "custom",
+  });
+
+  // SPA HTML fallback for the React app. This MUST run before vite.middlewares,
+  // which otherwise 404s deep links like /app/my-wheels on a direct load or
+  // refresh. We only intercept actual page navigations (Accept: text/html and
+  // not a file/module request); everything else falls through to Vite so HMR,
+  // /src modules, and /@vite assets keep working.
+  const serveAppHtml = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const clientTemplate = path.resolve(__dirname, "..", "client", "index.html");
+      let template = await fs.promises.readFile(clientTemplate, "utf-8");
+      template = template.replace(
+        `src="/src/main.tsx"`,
+        `src="/src/main.tsx?v=${nanoid()}"`,
+      );
+      const page = await vite.transformIndexHtml(req.originalUrl, template);
+      res.status(200).set({ "Content-Type": "text/html" }).end(page);
+    } catch (e) {
+      vite.ssrFixStacktrace(e as Error);
+      next(e);
+    }
+  };
+
+  app.get(/^\/app(\/.*)?$/, (req: Request, res: Response, next: NextFunction) => {
+    const accept = req.headers.accept || "";
+    const isHtmlNav = accept.includes("text/html");
+    const looksLikeAsset =
+      /\.[a-zA-Z0-9]+$/.test(req.path) ||
+      req.path.startsWith("/app/src/") ||
+      req.path.startsWith("/app/@") ||
+      req.path.startsWith("/app/node_modules");
+    if (isHtmlNav && !looksLikeAsset) return serveAppHtml(req, res, next);
+    return next();
   });
 
   app.use(vite.middlewares);
@@ -87,54 +120,6 @@ export async function setupVite(server: Server, app: Express) {
     }
   });
 
-  // Serve React app at /app and /app/*
-  app.use("/app/*", async (req, res, next) => {
-    const url = req.originalUrl;
-
-    try {
-      const clientTemplate = path.resolve(
-        __dirname,
-        "..",
-        "client",
-        "index.html",
-      );
-
-      // always reload the index.html file from disk incase it changes
-      let template = await fs.promises.readFile(clientTemplate, "utf-8");
-      template = template.replace(
-        `src="/src/main.tsx"`,
-        `src="/src/main.tsx?v=${nanoid()}"`,
-      );
-      const page = await vite.transformIndexHtml(url, template);
-      res.status(200).set({ "Content-Type": "text/html" }).end(page);
-    } catch (e) {
-      vite.ssrFixStacktrace(e as Error);
-      next(e);
-    }
-  });
-
-  // Also handle bare /app (no trailing slash)
-  app.get("/app", async (req, res, next) => {
-    const url = req.originalUrl;
-
-    try {
-      const clientTemplate = path.resolve(
-        __dirname,
-        "..",
-        "client",
-        "index.html",
-      );
-
-      let template = await fs.promises.readFile(clientTemplate, "utf-8");
-      template = template.replace(
-        `src="/src/main.tsx"`,
-        `src="/src/main.tsx?v=${nanoid()}"`,
-      );
-      const page = await vite.transformIndexHtml(url, template);
-      res.status(200).set({ "Content-Type": "text/html" }).end(page);
-    } catch (e) {
-      vite.ssrFixStacktrace(e as Error);
-      next(e);
-    }
-  });
+  // Note: the React app's HTML routes (/app and /app/*) are handled by the
+  // serveAppHtml guard registered above, before vite.middlewares.
 }

@@ -17,7 +17,7 @@ export function ChangelogCard({ open, onClose }: ChangelogCardProps) {
           animate={{ opacity: 1, x: 0, y: 0 }}
           exit={{ opacity: 0, x: -40, y: 20 }}
           transition={{ type: "spring", damping: 28, stiffness: 320 }}
-          className="fixed bottom-4 left-4 z-50 w-76 max-w-[calc(100vw-2rem)] rounded-xl border border-white/10 bg-card/95 backdrop-blur-xl shadow-2xl shadow-black/50"
+          className="fixed bottom-4 left-4 z-50 w-80 max-w-[calc(100vw-2rem)] rounded-xl border border-white/10 bg-card/95 backdrop-blur-xl shadow-2xl shadow-black/50"
         >
           <div className="flex items-start justify-between gap-3 p-4 pb-2">
             <div className="flex items-center gap-2">

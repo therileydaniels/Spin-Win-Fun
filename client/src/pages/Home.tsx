@@ -87,7 +87,7 @@ export default function Home() {
           probabilities: decoded.segments.map(s => s.probability),
         };
         loadWheel("shared", decoded.name, data);
-        window.history.replaceState({}, "", "/");
+        window.history.replaceState({}, "", "/app/");
         toast({
           title: "Wheel loaded!",
           description: `"${decoded.name}" has been loaded from shared link.`,
@@ -191,6 +191,9 @@ export default function Home() {
         description: result.error || "Failed to save wheel.",
         variant: "destructive",
       });
+      // Throw so SaveWheelModal keeps the dialog open and preserves the typed
+      // name instead of closing on a failed save.
+      throw new Error(result.error || "Failed to save wheel.");
     }
   };
 
@@ -198,7 +201,7 @@ export default function Home() {
     setPresentationMode(false);
   }, []);
 
-  const handleShare = useCallback(() => {
+  const handleShare = useCallback(async () => {
     const data = getWheelData();
     const wheel = {
       id: "share",
@@ -208,12 +211,16 @@ export default function Home() {
       updatedAt: new Date().toISOString(),
     };
     const encoded = encodeWheelToUrl(wheel);
-    const url = `${window.location.origin}/?wheel=${encoded}`;
-    navigator.clipboard.writeText(url);
-    toast({ title: "Share link copied!" });
+    const url = `${window.location.origin}/app/?wheel=${encoded}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      toast({ title: "Share link copied!" });
+    } catch {
+      toast({ title: "Here's your share link", description: url });
+    }
   }, [getWheelData, currentWheelName, toast]);
 
-  const handleOBSEmbed = useCallback(() => {
+  const handleOBSEmbed = useCallback(async () => {
     const data = getWheelData();
     const wheel = {
       id: "obs",
@@ -224,17 +231,27 @@ export default function Home() {
     };
     const encoded = encodeWheelToUrl(wheel);
     const url = `${window.location.origin}/app/embed?wheel=${encoded}`;
-    navigator.clipboard.writeText(url);
-    toast({ title: "OBS link copied!", description: "Paste as browser source in OBS" });
+    try {
+      await navigator.clipboard.writeText(url);
+      toast({ title: "OBS link copied!", description: "Paste as browser source in OBS" });
+    } catch {
+      toast({ title: "Here's your OBS link", description: url });
+    }
   }, [getWheelData, currentWheelName, toast]);
 
   const handleDownloadSvg = useCallback(() => {
     const wheelSvgEl = document.querySelector<SVGSVGElement>('[data-testid="wheel-svg"]');
     const pointerEl = document.querySelector<HTMLElement>('[data-testid="wheel-pointer"]');
-    if (!wheelSvgEl || !pointerEl) return;
+    if (!wheelSvgEl || !pointerEl) {
+      toast({ title: "Couldn't save the image", description: "Try again in a moment.", variant: "destructive" });
+      return;
+    }
 
     const pointerSvgEl = pointerEl.querySelector<SVGSVGElement>("svg");
-    if (!pointerSvgEl) return;
+    if (!pointerSvgEl) {
+      toast({ title: "Couldn't save the image", description: "Try again in a moment.", variant: "destructive" });
+      return;
+    }
 
     const wheelRect = wheelSvgEl.getBoundingClientRect();
     const pointerRect = pointerEl.getBoundingClientRect();
@@ -266,7 +283,8 @@ export default function Home() {
     a.download = `${currentWheelName || "wheel"}.svg`;
     a.click();
     URL.revokeObjectURL(url);
-  }, [currentWheelName]);
+    toast({ title: "Saved as SVG", description: "Check your downloads folder." });
+  }, [currentWheelName, toast]);
 
   useEffect(() => {
     if (showResult && winner) {
@@ -289,8 +307,12 @@ export default function Home() {
         });
       }
 
-      if (removeWinnerMode && segments.length > 2) {
-        removeSegment(winner.id);
+      if (removeWinnerMode) {
+        if (segments.length > 2) {
+          removeSegment(winner.id);
+        } else {
+          toast({ title: "Can't remove the last winner", description: "A wheel needs at least 2 options to spin." });
+        }
       }
 
       return cleanupConfetti;
@@ -426,6 +448,14 @@ export default function Home() {
             isSpinning={isSpinning}
           />
 
+          {!presentationMode && !isLoading && !isSpinning && !canSpin && (
+            <p className="text-xs text-amber-400 text-center max-w-[280px]" data-testid="text-spin-disabled-reason">
+              {allClaimed
+                ? "Every prize has been claimed. Open Customize to reset and spin again."
+                : "Odds need to total 100%, or leave them all at 0 for equal odds."}
+            </p>
+          )}
+
           {!presentationMode && !isLoading && (
             <Button
               variant="ghost"
@@ -515,7 +545,7 @@ export default function Home() {
       {!presentationMode && <Footer />}
 
       <ChangelogCard
-        open={showChangelog}
+        open={showChangelog && !showResult}
         onClose={() => {
           localStorage.setItem("quickwheel-seen-version", CHANGELOG_VERSION);
           setShowChangelog(false);
