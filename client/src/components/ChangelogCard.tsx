@@ -1,4 +1,4 @@
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { X, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CHANGELOG_VERSION, CHANGELOG_ENTRIES } from "@/lib/changelog";
@@ -9,15 +9,16 @@ interface ChangelogCardProps {
 }
 
 export function ChangelogCard({ open, onClose }: ChangelogCardProps) {
+  const reduceMotion = useReducedMotion();
   return (
     <AnimatePresence>
       {open && (
         <motion.div
-          initial={{ opacity: 0, x: -40, y: 20 }}
-          animate={{ opacity: 1, x: 0, y: 0 }}
-          exit={{ opacity: 0, x: -40, y: 20 }}
+          initial={reduceMotion ? { opacity: 0 } : { opacity: 0, x: -40, y: 20 }}
+          animate={reduceMotion ? { opacity: 1 } : { opacity: 1, x: 0, y: 0 }}
+          exit={reduceMotion ? { opacity: 0 } : { opacity: 0, x: -40, y: 20 }}
           transition={{ type: "spring", damping: 28, stiffness: 320 }}
-          className="fixed bottom-4 left-4 z-50 w-80 max-w-[calc(100vw-2rem)] rounded-xl border border-white/10 bg-card/95 backdrop-blur-xl shadow-2xl shadow-black/50"
+          className="fixed bottom-4 left-4 z-50 w-80 max-w-[calc(100vw-2rem)] rounded-xl border border-border bg-card/95 backdrop-blur-xl shadow-[var(--shadow-float)]"
         >
           <div className="flex items-start justify-between gap-3 p-4 pb-2">
             <div className="flex items-center gap-2">

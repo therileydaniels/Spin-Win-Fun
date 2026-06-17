@@ -64,7 +64,6 @@ export function MigrationPrompt() {
     } else {
       toast({
         title: `Imported ${imported} of ${imported + failed}. ${failed} still saved locally.`,
-        variant: "destructive",
       });
     }
   };
@@ -85,7 +84,7 @@ export function MigrationPrompt() {
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button variant="ghost" onClick={handleSkip} disabled={importing}>
+          <Button variant="outline" onClick={handleSkip} disabled={importing}>
             Skip
           </Button>
           <Button onClick={handleImport} disabled={importing}>

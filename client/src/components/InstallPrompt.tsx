@@ -63,7 +63,7 @@ export function InstallPrompt() {
           variant="outline"
           size="icon"
           onClick={handleInstall}
-          className="h-9 w-9 bg-gradient-to-r from-purple-500/10 to-pink-500/10 border-purple-500/30 hover:border-purple-500/50 hover:from-purple-500/20 hover:to-pink-500/20"
+          className="border-primary/30"
           data-testid="button-install-app"
         >
           <img 

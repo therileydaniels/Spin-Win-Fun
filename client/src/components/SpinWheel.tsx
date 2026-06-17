@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { CustomSegment } from "@shared/schema";
 import { adjustColor } from "@/lib/colorUtils";
 
@@ -123,6 +124,21 @@ export function SpinWheel({ segments, rotation, isSpinning, spinDuration, size, 
   const centerX = viewBoxSize / 2;
   const centerY = viewBoxSize / 2;
 
+  // Memoize the per-segment radial-column layout (an unmemoized nested loop in
+  // getRadialColumns otherwise reruns for every segment on every parent
+  // re-render, e.g. on each spin tick). Recompute only when the labels or the
+  // segment count change, since those are the only inputs to the layout.
+  const segmentCount = segments.length;
+  const columnsById = useMemo(() => {
+    const map: Record<string, { columns: string[]; fontSize: number }> = {};
+    for (const segment of segments) {
+      const displayLabel = truncateLabel(segment.label);
+      map[segment.id] = getRadialColumns(displayLabel, segmentCount, radius);
+    }
+    return map;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [segments.map(s => `${s.id}:${s.label}`).join("|"), segmentCount, radius]);
+
   function polarToCartesian(cx: number, cy: number, r: number, angleDegrees: number) {
     const angleRadians = ((angleDegrees - 90) * Math.PI) / 180;
     return {
@@ -202,8 +218,7 @@ export function SpinWheel({ segments, rotation, isSpinning, spinDuration, size, 
           const path = describeArc(centerX, centerY, radius, startAngle, endAngle);
 
           const isClaimed = claimedIds.includes(segment.id);
-          const displayLabel = truncateLabel(segment.label);
-          const { columns, fontSize } = getRadialColumns(displayLabel, segments.length, radius);
+          const { columns, fontSize } = columnsById[segment.id];
           const textColor = getContrastColor(segment.color);
           const isLightText = textColor === '#FFFFFF';
           const colStep = fontSize * 1.3;

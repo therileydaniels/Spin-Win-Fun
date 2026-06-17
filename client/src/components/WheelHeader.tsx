@@ -143,7 +143,7 @@ export const WheelHeader = memo(function WheelHeader({
                 variant="ghost"
                 size="icon"
                 onClick={() => setLocation("/my-wheels")}
-                className="text-muted-foreground h-8 w-8"
+                className="text-muted-foreground"
                 data-testid="button-my-wheels"
                 aria-label="My Wheels"
               >
@@ -160,7 +160,7 @@ export const WheelHeader = memo(function WheelHeader({
                 variant="ghost"
                 size="icon"
                 onClick={() => setLocation("/templates")}
-                className="text-muted-foreground h-8 w-8"
+                className="text-muted-foreground"
                 data-testid="button-templates"
                 aria-label="Templates"
               >
@@ -177,7 +177,7 @@ export const WheelHeader = memo(function WheelHeader({
                 variant={showHistory ? "secondary" : "ghost"}
                 size="icon"
                 onClick={onToggleHistory}
-                className="text-muted-foreground h-8 w-8"
+                className="text-muted-foreground"
                 data-testid="button-toggle-history"
                 aria-label={showHistory ? "Hide history" : "Show history"}
               >
@@ -194,7 +194,7 @@ export const WheelHeader = memo(function WheelHeader({
                 variant={removeWinnerMode ? "secondary" : "ghost"}
                 size="icon"
                 onClick={onToggleRemoveWinner}
-                className="text-muted-foreground h-8 w-8"
+                className="text-muted-foreground"
                 data-testid="button-toggle-remove-winner"
                 aria-label={removeWinnerMode ? "Remove winner: ON" : "Remove winner: OFF"}
               >
@@ -211,7 +211,7 @@ export const WheelHeader = memo(function WheelHeader({
                 variant="ghost"
                 size="icon"
                 onClick={onEnterPresentation}
-                className="text-muted-foreground h-8 w-8 relative"
+                className="text-muted-foreground relative"
                 data-testid="button-enter-presentation"
                 aria-label="Enter presentation mode"
               >

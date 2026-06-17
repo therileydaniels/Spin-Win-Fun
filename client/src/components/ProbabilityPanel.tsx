@@ -98,7 +98,7 @@ export function ProbabilityPanel({
 
   return (
     <>
-      <Card className="w-full sm:max-w-sm border border-white/5 bg-card/80 backdrop-blur-xl shadow-xl shadow-black/20">
+      <Card className="w-full sm:max-w-sm border border-border bg-card/80 backdrop-blur-xl">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between gap-2">
             <div className="min-w-0 flex-1">
@@ -238,7 +238,7 @@ export function ProbabilityPanel({
                 <button
                   type="button"
                   onClick={() => onUpgrade("Custom colors")}
-                  className="w-6 h-6 rounded-md border border-white/10 shrink-0 relative"
+                  className="w-6 h-6 rounded-md shrink-0 relative"
                   style={{ backgroundColor: segment.color }}
                   aria-label="Custom colors are a Pro feature"
                   data-testid={`button-color-locked-${index}`}

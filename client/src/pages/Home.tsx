@@ -402,7 +402,7 @@ export default function Home() {
 
       {!presentationMode && settingsOpen && (
         <div className="relative z-10 px-4 pt-3">
-          <div className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-card/80 backdrop-blur-xl border border-white/5 text-xs text-muted-foreground">
+          <div className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-card/80 backdrop-blur-xl border border-border text-xs text-muted-foreground">
             <Mail className="w-3.5 h-3.5 shrink-0" />
             <span className="hidden sm:inline">
               Having an issue? Reach out to Riley, the creator, at{" "}
@@ -433,6 +433,13 @@ export default function Home() {
 
       <main className={`relative z-10 flex-1 flex flex-col ${presentationMode ? "" : settingsOpen ? "md:flex-row" : ""} items-center justify-center gap-6 p-4 sm:p-6`}>
         <div className={`flex flex-col items-center gap-6 ${settingsOpen ? "hidden md:flex" : ""}`}>
+          <div className="sr-only" role="status" aria-live="assertive">
+            {isSpinning
+              ? "Spinning…"
+              : showResult && winner
+                ? `Winner: ${winner.label}`
+                : ""}
+          </div>
           <div className="w-full flex items-center justify-center">
             {isLoading ? (
               <div className={`aspect-square flex items-center justify-center transition-all duration-300 ${wheelSizeClass}`}>
@@ -483,7 +490,7 @@ export default function Home() {
           {!presentationMode && spinHistory.length > 0 && (
             <button
               onClick={() => setShowHistory(v => !v)}
-              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-card/80 backdrop-blur-xl border border-white/10 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-card/80 backdrop-blur-xl border border-border text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
               aria-label="Toggle prize history"
             >
               <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />

@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-06-16T00:00:00Z",
+  "title": "Design System: QuickWheel",
+  "extensions": {
+    "colorMeta": {
+      "primary-violet": { "role": "primary", "displayName": "Spotlight Violet", "canonical": "hsl(262 83% 58%)", "tonalRamp": ["#150a2e", "#2a1559", "#3f1f85", "#5429b0", "#6a34dc", "#7C3AED", "#9b6af1", "#bfa0f6", "#e3d5fb"] },
+      "brand-grad-pink": { "role": "secondary", "displayName": "Marquee Pink", "canonical": "#F43F8A", "tonalRamp": ["#3a0e22", "#5e1738", "#82204e", "#a62964", "#cf3279", "#F43F8A", "#f76ca6", "#fa9dc4", "#fdcee1"] },
+      "brand-grad-blue": { "role": "secondary", "displayName": "Marquee Blue", "canonical": "#0099FF", "tonalRamp": ["#001f33", "#003355", "#004d80", "#0066aa", "#0080d5", "#0099FF", "#4db8ff", "#80ccff", "#cce9ff"] },
+      "stage-navy": { "role": "neutral", "displayName": "Stage Navy", "canonical": "hsl(222 47% 11%)", "tonalRamp": ["#0F172A", "#1a2540", "#263356", "#33426d", "#415285", "#5066a0", "#7385b8", "#9fadce", "#cdd5e6"] },
+      "studio-black": { "role": "neutral", "displayName": "Studio Black", "canonical": "hsl(0 0% 9%)", "tonalRamp": ["#171717", "#262626", "#363636", "#474747", "#5a5a5a", "#6e6e6e", "#8f8f8f", "#b5b5b5", "#dcdcdc"] },
+      "hairline": { "role": "neutral", "displayName": "Hairline", "canonical": "hsl(0 0% 16%)", "tonalRamp": ["#171717", "#1f1f1f", "#292929", "#383838", "#4a4a4a", "#5f5f5f", "#838383", "#adadad", "#d9d9d9"] },
+      "ink": { "role": "neutral", "displayName": "Ink", "canonical": "hsl(0 0% 98%)", "tonalRamp": ["#1a1a1a", "#333333", "#4d4d4d", "#666666", "#808080", "#999999", "#b3b3b3", "#d9d9d9", "#FAFAFA"] },
+      "muted-ink": { "role": "neutral", "displayName": "Muted Ink", "canonical": "hsl(0 0% 65%)", "tonalRamp": ["#262626", "#404040", "#595959", "#737373", "#8c8c8c", "#A6A6A6", "#bfbfbf", "#d9d9d9", "#f2f2f2"] },
+      "danger": { "role": "tertiary", "displayName": "Danger Red", "canonical": "hsl(0 84% 45%)", "tonalRamp": ["#2e0606", "#570b0b", "#820f0f", "#aa1414", "#D31212", "#e23a3a", "#ec6f6f", "#f4a3a3", "#fad6d6"] },
+      "segment-teal": { "role": "tertiary", "displayName": "Segment Teal", "canonical": "hsl(173 58% 59%)", "tonalRamp": ["#103330", "#175e57", "#1f827a", "#29a69b", "#3fcabd", "#5FD0C0", "#86dcd0", "#aee8e0", "#d6f4f0"] },
+      "segment-gold": { "role": "tertiary", "displayName": "Segment Gold", "canonical": "hsl(43 74% 69%)", "tonalRamp": ["#33280e", "#5e4917", "#826620", "#a68429", "#cfa432", "#E6C265", "#ecd089", "#f2deae", "#f8edd3"] },
+      "segment-peach": { "role": "tertiary", "displayName": "Segment Peach", "canonical": "hsl(27 87% 77%)", "tonalRamp": ["#3a1e0e", "#5e3217", "#824620", "#a65b29", "#cf7232", "#F6B98C", "#f8c9a4", "#fadabd", "#fceee0"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "h1 page titles only; rendered with the brand gradient. Compact (20px) by design." },
+      "title": { "displayName": "Title", "purpose": "Card titles and dialog headers." },
+      "section": { "displayName": "Section", "purpose": "Sub-section headers inside panels." },
+      "body": { "displayName": "Body", "purpose": "Default content; cap measure at 65-75ch in prose." },
+      "label": { "displayName": "Label", "purpose": "Metadata, form labels, hints; Muted Ink." }
+    },
+    "shadows": [
+      { "name": "flat-default", "value": "none", "purpose": "All surfaces at rest. Cards and panels carry no shadow; the --shadow-* tokens are intentionally zeroed." },
+      { "name": "spin-glow", "value": "0 4px 20px rgba(139,92,246,0.4), 0 8px 30px rgba(99,102,241,0.2)", "purpose": "The spin button only. Animates to 0.55/0.35 at the pulse-glow peak." },
+      { "name": "modal-float", "value": "0 16px 48px rgba(0,0,0,0.5)", "purpose": "Winner reveal and modal dialogs — floating emphasis above the dimmed stage." }
+    ],
+    "motion": [
+      { "name": "spin-ease", "value": "cubic-bezier(0.17, 0.67, 0.12, 0.99)", "purpose": "The wheel spin — long ease-out, 4-5s with +/-0.5s variance, gentle settle on landing." },
+      { "name": "ease-out-standard", "value": "cubic-bezier(0.0, 0.0, 0.2, 1)", "purpose": "Default state transitions; transition-all duration-300." },
+      { "name": "pulse-glow", "value": "pulse-glow 2.5s ease-in-out infinite", "purpose": "Spin button aura breathing while idle and ready." },
+      { "name": "idle-breathe", "value": "idle-breathe 3s ease-in-out infinite (scale 1 -> 1.02)", "purpose": "Subtle life on the idle hero." },
+      { "name": "slide-in-right", "value": "slide-in-right 200ms ease-out both", "purpose": "Panel/list item entrances from the right." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "lg", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The default call to action — Spotlight Violet, tactile lift on hover.",
+      "html": "<button class=\"ds-btn-primary\">Save Wheel</button>",
+      "css": ".ds-btn-primary { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 36px; padding: 8px 16px; font: 500 0.875rem/1 Inter, 'Open Sans', sans-serif; color: #FAFAFA; background: #7C3AED; border: 1px solid #6a2fd4; border-radius: 6px; cursor: pointer; transition: filter 0.15s ease, transform 0.1s ease; } .ds-btn-primary:hover { filter: brightness(1.08); } .ds-btn-primary:active { filter: brightness(0.94); transform: translateY(1px); } .ds-btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 1px #7C3AED; }"
+    },
+    {
+      "name": "Spin Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The marquee CTA — primary violet with the signature breathing glow.",
+      "html": "<button class=\"ds-btn-spin\">SPIN</button>",
+      "css": ".ds-btn-spin { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 12px 40px; font: 700 1rem/1 Inter, 'Open Sans', sans-serif; letter-spacing: 0.02em; color: #FAFAFA; background: #7C3AED; border: none; border-radius: 9px; cursor: pointer; box-shadow: 0 4px 20px rgba(139,92,246,0.4), 0 8px 30px rgba(99,102,241,0.2); animation: ds-pulse-glow 2.5s ease-in-out infinite; } @keyframes ds-pulse-glow { 0%,100% { box-shadow: 0 4px 20px rgba(139,92,246,0.4), 0 8px 30px rgba(99,102,241,0.2); } 50% { box-shadow: 0 4px 25px rgba(139,92,246,0.55), 0 8px 40px rgba(99,102,241,0.35); } } .ds-btn-spin:active { transform: translateY(1px); } @media (prefers-reduced-motion: reduce) { .ds-btn-spin { animation: none; } }"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Secondary action — transparent, inherits surface, hairline border.",
+      "html": "<button class=\"ds-btn-outline\">Cancel</button>",
+      "css": ".ds-btn-outline { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 36px; padding: 8px 16px; font: 500 0.875rem/1 Inter, 'Open Sans', sans-serif; color: #FAFAFA; background: transparent; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; cursor: pointer; transition: background 0.15s ease; } .ds-btn-outline:hover { background: rgba(255,255,255,0.04); } .ds-btn-outline:active { background: rgba(255,255,255,0.09); } .ds-btn-outline:focus-visible { outline: none; box-shadow: 0 0 0 1px #7C3AED; }"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "Standard field — semi-transparent fill, branded violet focus ring.",
+      "html": "<input class=\"ds-input\" type=\"text\" placeholder=\"Wheel name\" />",
+      "css": ".ds-input { display: block; width: 100%; height: 36px; padding: 8px 12px; font: 400 0.875rem/1.4 Inter, 'Open Sans', sans-serif; color: #FAFAFA; background: rgba(15,23,42,0.5); border: 1px solid #404040; border-radius: 6px; } .ds-input::placeholder { color: #A6A6A6; } .ds-input:focus-visible { outline: none; border-color: #7C3AED; box-shadow: 0 0 0 2px rgba(124,58,237,0.5); } .ds-input:disabled { opacity: 0.5; cursor: not-allowed; }"
+    },
+    {
+      "name": "Card",
+      "kind": "card",
+      "refersTo": "card-surface",
+      "description": "Flat panel — Studio Black with a whisper of glass and a hairline border. No shadow.",
+      "html": "<div class=\"ds-card\"><h3 class=\"ds-card-title\">My Wheels</h3><p class=\"ds-card-body\">3 of 3 saved.</p></div>",
+      "css": ".ds-card { padding: 16px; background: rgba(23,23,23,0.8); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); border: 1px solid #292929; border-radius: 9px; } .ds-card-title { margin: 0 0 4px; font: 600 1.125rem/1.3 Inter, 'Open Sans', sans-serif; color: #FAFAFA; } .ds-card-body { margin: 0; font: 400 0.875rem/1.5 Inter, 'Open Sans', sans-serif; color: #A6A6A6; }"
+    },
+    {
+      "name": "Header Nav",
+      "kind": "nav",
+      "refersTo": "card-surface",
+      "description": "Top app bar — gradient title left, ghost icon actions right, hairline base.",
+      "html": "<header class=\"ds-nav\"><span class=\"ds-nav-title\">QuickWheel</span><button class=\"ds-nav-icon\" aria-label=\"Settings\"><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"3\"/><path d=\"M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z\"/></svg></button></header>",
+      "css": ".ds-nav { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #0F172A; border-bottom: 1px solid #292929; } .ds-nav-title { font: 700 1.25rem/1.2 Inter, 'Open Sans', sans-serif; letter-spacing: -0.02em; background: linear-gradient(135deg, #B44AFF, #F43F8A, #0099FF); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; } .ds-nav-icon { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; color: #FAFAFA; background: transparent; border: 1px solid transparent; border-radius: 6px; cursor: pointer; transition: background 0.15s ease; } .ds-nav-icon:hover { background: rgba(255,255,255,0.04); } .ds-nav-icon:focus-visible { outline: none; box-shadow: 0 0 0 1px #7C3AED; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Spotlight Stage",
+    "overview": "QuickWheel is a dark studio with one thing lit: the wheel. Everything else recedes into the low light so the spin can carry the stage. The deep navy-charcoal background is the unlit theater; the violet-to-pink-to-blue brand gradient is the stage lighting, used sparingly and only where it earns a moment. The spin itself is the show. This is premium broadcast energy: confident, polished, with a deliberate wink of fun. The system is restrained by construction: surfaces are flat at rest, shadows are globally zeroed, and depth comes from interaction and from two signature glows. Color is rationed so the bright gradient reads as premium rather than garish.",
+    "keyCharacteristics": [
+      "Dark-first stage; the wheel is the only fully-lit element.",
+      "Brand gradient as stage lighting -- rare, deliberate, never wallpaper.",
+      "Flat-by-default surfaces; depth earned through interaction and signature glows.",
+      "Compact, confident typography that yields the spotlight to the wheel.",
+      "Tactile components that respond to touch via a brightness-lift elevate system."
+    ],
+    "rules": [
+      { "name": "The Stage Lighting Rule", "body": "The brand gradient is lighting, not paint. It appears on <=10% of any screen -- a title, one CTA, a celebration. The moment it tiles a background or repeats per-card, it stops reading as premium and starts reading as the casino tool we reject.", "section": "colors" },
+      { "name": "The One Violet Rule", "body": "Exactly one accent hue (Spotlight Violet) carries interactivity across the whole product. Status colors are functional signals only, never decoration.", "section": "colors" },
+      { "name": "The Gradient-Title Rule", "body": "The brand gradient on text is reserved for the single h1 page title per screen. Never apply background-clip: text to body copy, card titles, or labels.", "section": "typography" },
+      { "name": "The Quiet Chrome Rule", "body": "No display type exceeds 20px in the app shell. If a heading wants to be bigger, the wheel should be bigger instead.", "section": "typography" },
+      { "name": "The Flat-By-Default Rule", "body": "Surfaces are flat at rest. A shadow on a card is a bug. Depth appears only as a response to hover, to significance (the three signature glows), or to modality.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do keep the wheel the single lit hero of every screen it appears on; quiet the chrome around it.",
+      "Do ration the brand gradient to <=10% of a screen -- a title, one CTA, a celebration.",
+      "Do keep surfaces flat at rest; earn depth through hover-elevate/active-elevate-2 and the three signature glows only.",
+      "Do use border-border (Hairline) for all borders so they adapt to light/dark -- never border-white/10.",
+      "Do hold body and placeholder text to >=4.5:1 contrast; bump Muted Ink toward Ink if it drifts close.",
+      "Do honor prefers-reduced-motion: the spin, pulse-glow, idle-breathe, and slide-ins all need a crossfade-or-instant fallback.",
+      "Do indicate the winner by pointer position + label highlight, not color alone.",
+      "Do use size=icon for icon-only buttons; let the component own its dimensions."
+    ],
+    "donts": [
+      "Don't drift toward the cheap, ad-stuffed 'spin to win' casino aesthetic -- no garish flashing, no fake-prize urgency, no neon stacking.",
+      "Don't let the app collapse into a generic SaaS dashboard -- identical card grids, cards-everywhere, zero personality.",
+      "Don't go childish / clip-art -- no Comic Sans, no primary-color clip art, no kids'-toy energy.",
+      "Don't ship flat and lifeless -- a static form that happens to spin. Motion and depth are the product.",
+      "Don't put a drop shadow on a card; if it looks like a 2014 Material card, the shadow is the bug.",
+      "Don't apply the gradient background-clip: text to anything but the single h1 page title.",
+      "Don't nest cards or use border-left/border-right >1px as a colored accent stripe.",
+      "Don't exceed 20px display type in the app shell; make the wheel bigger instead."
+    ]
+  }
+}

@@ -18,10 +18,24 @@ export default function Pricing() {
         <ThemeToggle />
       </header>
       <main className="flex-1 p-4 sm:p-8 max-w-4xl mx-auto w-full">
-        <p className="text-muted-foreground text-center mb-6">
+        <p className="text-foreground text-center mb-6 max-w-2xl mx-auto">
           Unlock OBS overlays, presentation mode, custom colors, exports, no watermark, and up to 50 wheels.
         </p>
-        <PricingTable />
+        <div className="overflow-x-auto">
+          <PricingTable
+            appearance={{
+              variables: {
+                colorPrimary: "hsl(var(--primary))",
+                colorBackground: "hsl(var(--card))",
+                colorText: "hsl(var(--foreground))",
+                colorTextSecondary: "hsl(var(--muted-foreground))",
+                colorInputBackground: "hsl(var(--background))",
+                colorInputText: "hsl(var(--foreground))",
+                borderRadius: "0.5rem",
+              },
+            }}
+          />
+        </div>
       </main>
       <Footer />
     </div>

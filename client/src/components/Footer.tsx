@@ -3,7 +3,7 @@ import { Link } from "wouter";
 export function Footer() {
   return (
     <footer className="relative z-10 border-t border-border/50 py-6 px-6">
-      <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 text-xs text-muted-foreground/70">
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 text-xs text-muted-foreground">
         <div className="flex items-center gap-6">
           <Link 
             href="/terms" 
@@ -21,7 +21,7 @@ export function Footer() {
           </Link>
         </div>
         <span className="hidden sm:inline text-muted-foreground/40">·</span>
-        <span className="text-muted-foreground/50">&copy; {new Date().getFullYear()} QuickWheel</span>
+        <span className="text-muted-foreground">&copy; {new Date().getFullYear()} QuickWheel</span>
       </div>
     </footer>
   );

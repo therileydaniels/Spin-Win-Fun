@@ -37,6 +37,8 @@ export function ColorPicker({ color, onChange }: ColorPickerProps) {
     setCustomColor(value);
   };
 
+  const isHexValid = /^#?[0-9a-fA-F]{6}$/.test(customColor);
+
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
@@ -69,22 +71,30 @@ export function ColorPicker({ color, onChange }: ColorPickerProps) {
               />
             ))}
           </div>
-          <div className="flex items-center gap-2 pt-2 border-t border-border">
-            <input
-              type="color"
-              value={customColor.startsWith("#") ? customColor : "#A855F7"}
-              onChange={handleColorInputChange}
-              className="w-8 h-8 rounded cursor-pointer border-0 bg-transparent"
-              data-testid="input-custom-color"
-            />
-            <Input
-              type="text"
-              value={customColor}
-              onChange={handleCustomChange}
-              placeholder="#A855F7"
-              className="flex-1 h-8 text-xs bg-background/50 border-border"
-              data-testid="input-color-hex"
-            />
+          <div className="pt-2 border-t border-border space-y-1">
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                value={customColor.startsWith("#") ? customColor : "#A855F7"}
+                onChange={handleColorInputChange}
+                className="w-8 h-8 rounded cursor-pointer border-0 bg-transparent"
+                data-testid="input-custom-color"
+              />
+              <Input
+                type="text"
+                value={customColor}
+                onChange={handleCustomChange}
+                placeholder="#A855F7"
+                aria-invalid={!isHexValid}
+                className="flex-1 h-8 text-xs bg-background/50 border-border"
+                data-testid="input-color-hex"
+              />
+            </div>
+            {!isHexValid && (
+              <p className="text-[10px] text-muted-foreground" data-testid="text-color-hex-hint">
+                Enter a 6-digit hex color, e.g. #A855F7
+              </p>
+            )}
           </div>
         </div>
       </PopoverContent>

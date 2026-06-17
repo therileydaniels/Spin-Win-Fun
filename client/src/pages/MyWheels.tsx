@@ -247,12 +247,12 @@ export default function MyWheels() {
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-wrap gap-1 mb-2">
-                    {wheel.segments.slice(0, 5).map((seg, idx) => (
+                    {wheel.segments.slice(0, 5).map((seg) => (
                       <div
-                        key={idx}
+                        key={seg.id}
                         className="w-4 h-4 rounded-full"
                         style={{ background: seg.color }}
-                        title={seg.label}
+                        aria-label={seg.label}
                       />
                     ))}
                     {wheel.segments.length > 5 && (
@@ -294,19 +294,21 @@ export default function MyWheels() {
                     </Button>
                     <Button
                       variant="outline"
-                      size="sm"
+                      size="icon"
                       onClick={() => handleShare(wheel)}
                       className="border-border"
                       data-testid={`button-share-wheel-${wheel.id}`}
+                      aria-label="Share wheel"
                     >
                       <Share2 className="w-3.5 h-3.5" />
                     </Button>
                     <Button
                       variant="outline"
-                      size="sm"
+                      size="icon"
                       onClick={() => setDeleteId(wheel.id)}
                       className="border-border"
                       data-testid={`button-delete-wheel-${wheel.id}`}
+                      aria-label="Delete wheel"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </Button>

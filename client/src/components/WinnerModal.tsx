@@ -30,7 +30,7 @@ export function WinnerModal({ isOpen, onClose, onSpinAgain, winner }: WinnerModa
       >
         <DialogHeader className="text-center">
           <div 
-            className="mx-auto mb-4 w-16 h-16 rounded-full flex items-center justify-center shadow-2xl animate-bounce-in"
+            className="mx-auto mb-4 w-16 h-16 rounded-full flex items-center justify-center shadow-2xl animate-reveal-in"
             style={{
               background: `linear-gradient(135deg, ${winner.color}, ${gradientEnd})`,
               boxShadow: `0 0 30px ${winner.color}50`
@@ -48,7 +48,7 @@ export function WinnerModal({ isOpen, onClose, onSpinAgain, winner }: WinnerModa
 
         <div className="flex flex-col items-center gap-6 py-4">
           <div
-            className="px-8 py-4 rounded-xl text-center shadow-2xl animate-bounce-in"
+            className="px-8 py-4 rounded-xl text-center shadow-2xl animate-reveal-in"
             style={{
               background: `linear-gradient(135deg, ${winner.color}, ${gradientEnd})`,
               color: "#FFFFFF",

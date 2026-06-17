@@ -24,7 +24,7 @@ export function UpgradeDialog({ open, onOpenChange, feature }: UpgradeDialogProp
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-amber-400" />
+            <Sparkles className="w-5 h-5 text-primary" />
             Upgrade to Pro
           </AlertDialogTitle>
           <AlertDialogDescription>

@@ -49,6 +49,7 @@ export function SpinButton({ onClick, disabled, isSpinning }: SpinButtonProps) {
         ...(getScale() ? { transform: getScale() } : {}),
       }}
       data-testid="button-spin"
+      aria-label={isSpinning ? "Spinning" : "Spin the wheel"}
     >
       {isSpinning ? (
         <span className="flex items-center gap-3">

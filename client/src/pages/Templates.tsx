@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useLocation } from "wouter";
 import { useCustomSegments, SavedWheelData } from "@/hooks/useCustomSegments";
 import { useToast } from "@/hooks/use-toast";
@@ -32,9 +32,13 @@ export default function Templates() {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [pendingTemplate, setPendingTemplate] = useState<WheelTemplate | null>(null);
 
-  const filtered = activeCategory
-    ? WHEEL_TEMPLATES.filter((t) => t.category === activeCategory)
-    : WHEEL_TEMPLATES;
+  const filtered = useMemo(
+    () =>
+      activeCategory
+        ? WHEEL_TEMPLATES.filter((t) => t.category === activeCategory)
+        : WHEEL_TEMPLATES,
+    [activeCategory],
+  );
 
   const performLoad = (template: WheelTemplate) => {
     const data: SavedWheelData = {
@@ -67,7 +71,7 @@ export default function Templates() {
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col relative overflow-hidden">
       <div
-        className="absolute inset-0 opacity-30 pointer-events-none"
+        className="absolute inset-0 opacity-20 pointer-events-none"
         style={{
           background:
             "radial-gradient(ellipse at 50% 0%, rgba(139,92,246,0.15) 0%, transparent 50%), radial-gradient(ellipse at 80% 80%, rgba(236,72,153,0.1) 0%, transparent 40%)",
@@ -84,7 +88,7 @@ export default function Templates() {
         >
           <ArrowLeft className="w-4 h-4" />
         </Button>
-        <h1 className="text-xl font-bold">Wheel Templates</h1>
+        <h1 className="text-xl font-extrabold tracking-tight text-gradient-brand">Wheel Templates</h1>
       </header>
 
       <main className="relative z-10 flex-1 p-4 sm:p-6 max-w-4xl mx-auto w-full">

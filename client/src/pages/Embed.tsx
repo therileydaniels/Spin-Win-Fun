@@ -57,6 +57,14 @@ export default function Embed() {
 
   const showBranding = useMemo(() => params.get("nb") !== "1", [params]);
 
+  const prefersReducedMotion = useMemo(
+    () =>
+      typeof window !== "undefined" &&
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+    []
+  );
+
   // Load wheel from URL parameter on mount
   useEffect(() => {
     const wheelParam = params.get("wheel");
@@ -93,7 +101,7 @@ export default function Embed() {
     const winnerIndex = selectWeightedWinner(probabilities);
     const selectedWinner = segments[winnerIndex];
 
-    const duration = 4 + Math.random() * 1;
+    const duration = prefersReducedMotion ? 0.001 : 4 + Math.random() * 1;
     setSpinDuration(duration);
 
     const newRotation = calculateRotationForWinner(
@@ -114,7 +122,7 @@ export default function Embed() {
       setShowResult(true);
       timeoutRef.current = null;
     }, duration * 1000);
-  }, [canSpin, segments, probabilities, rotation]);
+  }, [canSpin, segments, probabilities, rotation, prefersReducedMotion]);
 
   // Spacebar and click to spin
   useEffect(() => {
@@ -131,6 +139,11 @@ export default function Embed() {
   // Confetti + auto-dismiss winner
   useEffect(() => {
     if (showResult && winner) {
+      if (prefersReducedMotion) {
+        const dismissTimer = setTimeout(() => setShowResult(false), 3000);
+        return () => clearTimeout(dismissTimer);
+      }
+
       fireCenterBurst();
       const cleanupConfetti = fireWinConfetti();
       const dismissTimer = setTimeout(() => setShowResult(false), 3000);
@@ -140,7 +153,7 @@ export default function Embed() {
         clearTimeout(dismissTimer);
       };
     }
-  }, [showResult, winner]);
+  }, [showResult, winner, prefersReducedMotion]);
 
   return (
     <div
