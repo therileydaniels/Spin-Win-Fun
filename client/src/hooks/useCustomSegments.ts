@@ -248,7 +248,9 @@ export function useCustomSegments(): UseCustomSegmentsReturn {
   }, [segments, probabilities]);
 
   const quickFill = useCallback((labels: string[]) => {
-    const capped = labels.slice(0, MAX_SEGMENTS);
+    // Cap at the tier limit (not the absolute MAX_SEGMENTS) so Quick Add can't
+    // bypass the free segment gate that addSegment/canAdd enforce.
+    const capped = labels.slice(0, maxSegments);
     const newSegments: CustomSegment[] = capped.map((label, i) => ({
       id: generateId(),
       label: label.slice(0, MAX_LABEL_LENGTH),
@@ -260,7 +262,7 @@ export function useCustomSegments(): UseCustomSegmentsReturn {
     setCurrentWheelName(null);
     setLastSavedState(null);
     setHasUnsavedChanges(false);
-  }, []);
+  }, [maxSegments]);
 
   const canAdd = segments.length < maxSegments;
   const canRemove = segments.length > MIN_SEGMENTS;

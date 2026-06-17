@@ -39,6 +39,7 @@ interface ProbabilityPanelProps {
   maxSegments: number;
   customColors: boolean;
   canUseObs: boolean;
+  isPro: boolean;
   total: number;
   isValid: boolean;
   isEqualOdds: boolean;
@@ -72,6 +73,7 @@ export function ProbabilityPanel({
   maxSegments,
   customColors,
   canUseObs,
+  isPro,
   total,
   isValid,
   isEqualOdds,
@@ -284,7 +286,8 @@ export function ProbabilityPanel({
           <Button
             variant="outline"
             size="sm"
-            onClick={canAdd ? onAdd : () => onUpgrade("More segments")}
+            onClick={canAdd ? onAdd : isPro ? undefined : () => onUpgrade("More segments")}
+            disabled={!canAdd && isPro}
             className="w-full mt-3 border-border"
             data-testid="button-add-segment"
           >

@@ -534,6 +534,7 @@ export default function Home() {
               maxSegments={maxSegments}
               customColors={ent.customColors}
               canUseObs={ent.obs}
+              isPro={ent.isPro}
               total={total}
               isValid={isValid}
               isEqualOdds={isEqualOdds}
