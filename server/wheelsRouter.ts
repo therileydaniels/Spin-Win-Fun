@@ -1,7 +1,8 @@
 import { Router } from "express";
 import { eq, and, desc, sql } from "drizzle-orm";
 import { db } from "./db";
-import { wheels, insertWheelSchema, MAX_CLOUD_WHEELS } from "@shared/schema";
+import { wheels, insertWheelSchema } from "@shared/schema";
+import { entitlementsFor, canSaveWheel, isSegmentCountAllowed } from "@shared/entitlements";
 import { requireClerkAuth } from "./clerkAuth";
 
 export const wheelsRouter = Router();
@@ -33,23 +34,28 @@ wheelsRouter.get("/:id", async (req, res) => {
 
 wheelsRouter.post("/", async (req, res) => {
   const userId = req.auth!.userId;
+  const ent = entitlementsFor(req.auth!.isPro);
 
   const parsed = insertWheelSchema.safeParse(req.body);
   if (!parsed.success) {
     return res.status(400).json({ error: "Invalid wheel payload", details: parsed.error.flatten() });
   }
 
-  // Count and insert inside one transaction guarded by a per-user advisory
-  // lock, so two concurrent saves can't both pass the cap check and push the
-  // user over MAX_CLOUD_WHEELS. The lock is keyed on the user id and released
-  // automatically when the transaction ends.
+  if (!isSegmentCountAllowed(parsed.data.segments.length, ent)) {
+    return res.status(422).json({
+      error: `Free wheels are limited to ${ent.maxSegments} segments. Upgrade to Pro for up to 20 segments.`,
+    });
+  }
+
+  // Count and insert inside one transaction guarded by a per-user advisory lock
+  // so two concurrent saves can't both pass the cap check.
   const created = await db.transaction(async (tx) => {
     await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${userId}))`);
     const countRows = await tx
       .select({ id: wheels.id })
       .from(wheels)
       .where(eq(wheels.userId, userId));
-    if (countRows.length >= MAX_CLOUD_WHEELS) {
+    if (!canSaveWheel(countRows.length, ent)) {
       return null;
     }
     const [row] = await tx
@@ -60,7 +66,7 @@ wheelsRouter.post("/", async (req, res) => {
   });
 
   if (!created) {
-    return res.status(409).json({ error: `Wheel limit reached (${MAX_CLOUD_WHEELS})` });
+    return res.status(409).json({ error: `Wheel limit reached (${ent.maxWheels})` });
   }
   res.status(201).json(created);
 });
@@ -72,6 +78,10 @@ wheelsRouter.put("/:id", async (req, res) => {
   const parsed = insertWheelSchema.partial().safeParse(req.body);
   if (!parsed.success) {
     return res.status(400).json({ error: "Invalid wheel payload" });
+  }
+
+  if (parsed.data.segments && !isSegmentCountAllowed(parsed.data.segments.length, entitlementsFor(req.auth!.isPro))) {
+    return res.status(422).json({ error: "Segment limit exceeded for your plan." });
   }
 
   const [updated] = await db
