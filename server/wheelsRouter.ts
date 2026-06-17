@@ -2,7 +2,7 @@ import { Router } from "express";
 import { eq, and, desc, sql } from "drizzle-orm";
 import { db } from "./db";
 import { wheels, insertWheelSchema } from "@shared/schema";
-import { entitlementsFor, canSaveWheel, isSegmentCountAllowed } from "@shared/entitlements";
+import { entitlementsFor, canSaveWheel, isSegmentCountAllowed, PRO } from "@shared/entitlements";
 import { requireClerkAuth } from "./clerkAuth";
 
 export const wheelsRouter = Router();
@@ -43,7 +43,7 @@ wheelsRouter.post("/", async (req, res) => {
 
   if (!isSegmentCountAllowed(parsed.data.segments.length, ent)) {
     return res.status(422).json({
-      error: `Free wheels are limited to ${ent.maxSegments} segments. Upgrade to Pro for up to 20 segments.`,
+      error: `Free wheels are limited to ${ent.maxSegments} segments. Upgrade to Pro for up to ${PRO.maxSegments} segments.`,
     });
   }
 
@@ -81,7 +81,9 @@ wheelsRouter.put("/:id", async (req, res) => {
   }
 
   if (parsed.data.segments && !isSegmentCountAllowed(parsed.data.segments.length, entitlementsFor(req.auth!.isPro))) {
-    return res.status(422).json({ error: "Segment limit exceeded for your plan." });
+    return res.status(422).json({
+      error: `Free wheels are limited to ${entitlementsFor(req.auth!.isPro).maxSegments} segments. Upgrade to Pro for up to ${PRO.maxSegments} segments.`,
+    });
   }
 
   const [updated] = await db

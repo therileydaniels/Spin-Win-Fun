@@ -1,5 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import { createClerkClient } from "@clerk/backend";
+import { PRO_PLAN } from "@shared/entitlements";
 
 declare module "express-serve-static-core" {
   interface Request {
@@ -15,6 +16,11 @@ const clerkClient =
   secretKey && publishableKey
     ? createClerkClient({ secretKey, publishableKey })
     : null;
+
+// In production, restrict which origins' tokens we accept (azp claim) to harden
+// against CSRF. Left unset in dev so local origins/ports aren't rejected.
+const authorizedParties =
+  process.env.NODE_ENV === "production" ? ["https://quickwheel.co"] : undefined;
 
 // Build a Fetch API Request carrying just the Authorization header, which is all
 // authenticateRequest needs to validate a Bearer session token.
@@ -37,7 +43,8 @@ export async function requireClerkAuth(
 
   try {
     const requestState = await clerkClient.authenticateRequest(
-      toFetchRequest(req)
+      toFetchRequest(req),
+      authorizedParties ? { authorizedParties } : undefined
     );
     const auth = requestState.toAuth();
 
@@ -46,7 +53,7 @@ export async function requireClerkAuth(
       return;
     }
 
-    req.auth = { userId: auth.userId, isPro: auth.has({ plan: "pro" }) };
+    req.auth = { userId: auth.userId, isPro: auth.has({ plan: PRO_PLAN }) };
     next();
   } catch {
     res.status(401).json({ error: "Invalid token" });
