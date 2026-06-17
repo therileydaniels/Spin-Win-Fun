@@ -7,7 +7,7 @@ export interface Entitlements {
   maxWheels: number;
   /** Max segments allowed when saving/editing a wheel. */
   maxSegments: number;
-  /** SVG/PNG export of the wheel. */
+  /** SVG export of the wheel. */
   export: boolean;
   /** Generate the OBS browser-source overlay link. */
   obs: boolean;
