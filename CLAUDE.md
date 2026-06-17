@@ -7,8 +7,19 @@ A prize wheel spinner PWA. Users customize wheel segments, spin to pick a winner
 - **Frontend:** React 18 + TypeScript, Vite, Tailwind CSS v3, shadcn/ui (Radix), Wouter routing, Framer Motion
 - **Backend:** Express (TypeScript via tsx), port **5000**; `@clerk/backend` verifies session tokens; Drizzle ORM over Railway Postgres
 - **Auth:** Clerk (`@clerk/react`) — modal sign-in/sign-up; server-side token verification on `/api/wheels` routes
-- **Storage:** Railway Postgres for signed-in users (50-wheel cap); `localStorage` for signed-out users. `useWheelStorage()` hook dispatches automatically.
+- **Storage:** Railway Postgres for signed-in users; `localStorage` for signed-out users. `useWheelStorage()` hook dispatches automatically. Wheel cap is tier-aware (see Monetization).
 - **PWA:** Vite PWA plugin, manifest + service worker in `public/`
+
+## Monetization
+- **Tiers:** Free (anonymous + signed-in) and **Pro** (Clerk Billing plan slug `pro`, monthly + annual). Clerk Billing is in Beta; `@clerk/react`/`@clerk/backend` are pinned-ish — watch for breaking changes.
+- **Source of truth:** `shared/entitlements.ts` — `entitlementsFor(isPro)` returns the caps object (pure, no deps; portable to other Clerk apps). Client reads it via `useEntitlements()`; server reads `req.auth.isPro` (set in `server/clerkAuth.ts` via `authenticateRequest().has({ plan: 'pro' })`).
+- **Hard gates (server, authoritative):** wheel cap (Free 3 / Pro 50) + segment count (Free 8 / Pro 20) in `server/wheelsRouter.ts`. Anonymous local cap is `FREE.maxWheels` in `localWheelStorage.ts`.
+- **Soft gates (client UX):** export, OBS link, presentation mode, custom colors, branding watermark — all read from `useEntitlements()`; bypassable in devtools (accepted).
+- **Branding:** `SpinWheel showBranding`; Pro OBS links append `nb=1` so `/embed` hides the watermark. Free users may view/spin shared wheels with >8 segments but can't author past their tier.
+- **Pricing UI:** `/pricing` (`Pricing.tsx`) renders Clerk `<PricingTable />`; `UpgradeDialog` + "Go Pro" nav entries route there.
+- **Env:** server now needs `CLERK_PUBLISHABLE_KEY` (same value as `VITE_CLERK_PUBLISHABLE_KEY`) for `authenticateRequest`. `authorizedParties` is set to `https://quickwheel.co` in production only.
+- **Tests:** Vitest (`npm test`) covers the pure entitlements logic (`shared/entitlements.test.ts`). Tests never touch the DB.
+- **Migration to direct Stripe (future):** Clerk does NOT sync subscriptions to Stripe Billing — moving off Clerk means re-creating subscriptions, but the entitlements layer keeps the app code provider-agnostic. See spec.
 
 ## Key Routes
 | Path | Component | Notes |
@@ -16,6 +27,7 @@ A prize wheel spinner PWA. Users customize wheel segments, spin to pick a winner
 | `/` | `Home.tsx` | Main wheel + spin UI |
 | `/my-wheels` | `MyWheels.tsx` | Saved wheels list |
 | `/templates` | `Templates.tsx` | Preset wheel templates |
+| `/pricing` | `Pricing.tsx` | Clerk `<PricingTable />` — Free vs Pro |
 | `/embed` | `Embed.tsx` | OBS browser-source overlay |
 | `/privacy` | `Privacy.tsx` | Privacy policy |
 | `/terms` | `Terms.tsx` | Terms of service |
