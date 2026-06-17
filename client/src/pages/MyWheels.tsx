@@ -193,7 +193,7 @@ export default function MyWheels() {
             <div className="flex items-center gap-2 p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 text-sm text-amber-300">
               <AlertTriangle className="w-4 h-4 flex-shrink-0" />
               <span>
-                You're over the free limit of {cap}. Your wheels are safe, but you
+                You're over your limit of {cap}. Your wheels are safe, but you
                 can't save new ones until you delete some{ent.isPro ? "." : " or upgrade to Pro."}
               </span>
             </div>

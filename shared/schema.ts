@@ -15,6 +15,9 @@ export type WheelSegment = {
 export const MIN_SEGMENTS = 2;
 export const MAX_SEGMENTS = 20;
 export const MAX_LABEL_LENGTH = 25;
+// SUPERSEDED: the per-user wheel cap is now tier-aware — see `maxWheels` in
+// shared/entitlements.ts (FREE 3 / PRO 50). Kept only for backward reference;
+// not used for enforcement.
 export const MAX_CLOUD_WHEELS = 50;
 
 // Validates a single segment inside a wheel payload. The client already

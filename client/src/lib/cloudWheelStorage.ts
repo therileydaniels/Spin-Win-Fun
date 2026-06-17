@@ -63,9 +63,11 @@ export async function saveCloudWheel(
     method: "POST",
     body: JSON.stringify(wheel),
   });
-  if (res.status === 409) {
+  // 409 = wheel cap reached; 422 = segment count over the plan limit. Both carry
+  // a user-facing `error` message (e.g. the Pro upgrade nudge) — surface it.
+  if (res.status === 409 || res.status === 422) {
     const body = await res.json().catch(() => ({}));
-    return { success: false, error: body.error ?? "Wheel limit reached" };
+    return { success: false, error: body.error ?? "Couldn't save wheel" };
   }
   if (!res.ok) return { success: false, error: `Save failed: ${res.status}` };
   const created: CloudWheel = await res.json();
@@ -82,6 +84,10 @@ export async function updateCloudWheel(
     body: JSON.stringify(data),
   });
   if (res.status === 404) return { success: false, error: "Wheel not found" };
+  if (res.status === 422) {
+    const body = await res.json().catch(() => ({}));
+    return { success: false, error: body.error ?? "Segment limit exceeded for your plan." };
+  }
   if (!res.ok) return { success: false, error: `Update failed: ${res.status}` };
   const updated: CloudWheel = await res.json();
   return { success: true, wheel: toLocalShape(updated) };
