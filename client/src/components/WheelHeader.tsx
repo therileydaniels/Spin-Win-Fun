@@ -8,7 +8,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { SoundToggle } from "@/components/SoundToggle";
 import { InstallPrompt } from "@/components/InstallPrompt";
 import { MigrationPrompt } from "@/components/MigrationPrompt";
-import { Menu, Monitor, Settings, FolderOpen, History, Trash2, LayoutGrid, Volume2, VolumeX, Sun, Moon, LogIn, LogOut, Lock } from "lucide-react";
+import { Menu, Monitor, Settings, FolderOpen, History, Trash2, LayoutGrid, Volume2, VolumeX, Sun, Moon, LogIn, LogOut, Lock, Sparkles } from "lucide-react";
 import { Show, SignInButton, SignUpButton, UserButton, useClerk, useUser } from "@clerk/react";
 
 interface WheelHeaderProps {
@@ -124,6 +124,11 @@ export const WheelHeader = memo(function WheelHeader({
               <DropdownMenuLabel className="font-normal text-xs text-muted-foreground truncate">
                 {user?.primaryEmailAddress?.emailAddress ?? user?.username ?? "Signed in"}
               </DropdownMenuLabel>
+              {!isPro && (
+                <DropdownMenuItem onClick={() => setLocation("/pricing")}>
+                  <Sparkles className="w-4 h-4 mr-2 text-amber-400" />Go Pro
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem onClick={() => signOut({ redirectUrl: "/app" })}>
                 <LogOut className="w-4 h-4 mr-2" />Sign out
               </DropdownMenuItem>
@@ -230,6 +235,11 @@ export const WheelHeader = memo(function WheelHeader({
             </SignUpButton>
           </Show>
           <Show when="signed-in">
+            {!isPro && (
+              <Button variant="ghost" size="sm" onClick={() => setLocation("/pricing")} className="gap-1 text-amber-400" data-testid="button-go-pro">
+                <Sparkles className="w-4 h-4" />Go Pro
+              </Button>
+            )}
             <UserButton />
           </Show>
           <SoundToggle isMuted={isMuted} onToggle={onToggleMute} />
