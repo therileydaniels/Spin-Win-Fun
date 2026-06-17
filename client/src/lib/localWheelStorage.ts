@@ -1,5 +1,7 @@
+import { FREE } from "@shared/entitlements";
+
 const STORAGE_KEY = "quickwheel_saved_wheels";
-const MAX_WHEELS = 10;
+const MAX_WHEELS = FREE.maxWheels; // 3 — anonymous users are always free tier
 
 export interface LocalWheel {
   id: string;

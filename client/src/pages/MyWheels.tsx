@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useWheelStorage } from "@/hooks/useWheelStorage";
+import { useEntitlements } from "@/hooks/useEntitlements";
 import { useCustomSegments, SavedWheelData } from "@/hooks/useCustomSegments";
 import { useToast } from "@/hooks/use-toast";
 import { encodeWheelToUrl, type LocalWheel } from "@/lib/localWheelStorage";
@@ -41,6 +42,10 @@ export default function MyWheels() {
 
   const wheels = wheelsQuery.data ?? [];
   const isLoading = wheelsQuery.isLoading;
+
+  const ent = useEntitlements();
+  const cap = ent.maxWheels;
+  const overCap = wheels.length > cap;
 
   const invalidate = () =>
     queryClient.invalidateQueries({ queryKey: ["wheels", storage.isCloud] });
@@ -165,7 +170,7 @@ export default function MyWheels() {
         </div>
         <div className="flex items-center gap-2">
           <span className="text-sm text-muted-foreground">
-            {wheelCount}/{storage.isCloud ? 50 : 10} saved
+            {wheelCount}/{cap} saved
           </span>
           <ThemeToggle />
         </div>
@@ -182,6 +187,18 @@ export default function MyWheels() {
             </span>
           </div>
         </div>
+
+        {overCap && (
+          <div className="max-w-4xl mx-auto mb-4">
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 text-sm text-amber-300">
+              <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+              <span>
+                You're over the free limit of {cap}. Your wheels are safe, but you
+                can't save new ones until you delete some{ent.isPro ? "." : " or upgrade to Pro."}
+              </span>
+            </div>
+          </div>
+        )}
 
         {isLoading ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 max-w-4xl mx-auto">
