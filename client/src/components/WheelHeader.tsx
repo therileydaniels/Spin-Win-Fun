@@ -8,7 +8,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { SoundToggle } from "@/components/SoundToggle";
 import { InstallPrompt } from "@/components/InstallPrompt";
 import { MigrationPrompt } from "@/components/MigrationPrompt";
-import { Menu, Monitor, Settings, FolderOpen, History, Trash2, LayoutGrid, Volume2, VolumeX, Sun, Moon, LogIn, LogOut } from "lucide-react";
+import { Menu, Monitor, Settings, FolderOpen, History, Trash2, LayoutGrid, Volume2, VolumeX, Sun, Moon, LogIn, LogOut, Lock } from "lucide-react";
 import { Show, SignInButton, SignUpButton, UserButton, useClerk, useUser } from "@clerk/react";
 
 interface WheelHeaderProps {
@@ -19,6 +19,7 @@ interface WheelHeaderProps {
   removeWinnerMode: boolean;
   onToggleRemoveWinner: () => void;
   onEnterPresentation: () => void;
+  isPro: boolean;
   isMuted: boolean;
   onToggleMute: () => void;
 }
@@ -31,6 +32,7 @@ export const WheelHeader = memo(function WheelHeader({
   removeWinnerMode,
   onToggleRemoveWinner,
   onEnterPresentation,
+  isPro,
   isMuted,
   onToggleMute,
 }: WheelHeaderProps) {
@@ -98,7 +100,7 @@ export const WheelHeader = memo(function WheelHeader({
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={onEnterPresentation}>
-              <Monitor className="w-4 h-4 mr-2" />Presentation mode
+              <Monitor className="w-4 h-4 mr-2" />Presentation mode{!isPro && <Lock className="w-3 h-3 ml-auto text-amber-400" />}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={onToggleMute}>
@@ -204,11 +206,12 @@ export const WheelHeader = memo(function WheelHeader({
                 variant="ghost"
                 size="icon"
                 onClick={onEnterPresentation}
-                className="text-muted-foreground h-8 w-8"
+                className="text-muted-foreground h-8 w-8 relative"
                 data-testid="button-enter-presentation"
                 aria-label="Enter presentation mode"
               >
                 <Monitor className="w-4 h-4" />
+                {!isPro && <Lock className="w-2.5 h-2.5 absolute top-0 right-0 text-amber-400" />}
               </Button>
             </TooltipTrigger>
             <TooltipContent>

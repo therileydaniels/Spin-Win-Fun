@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CustomSegment, MAX_SEGMENTS, MIN_SEGMENTS, MAX_LABEL_LENGTH } from "@shared/schema";
+import { CustomSegment, MAX_LABEL_LENGTH } from "@shared/schema";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,7 +13,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Check, AlertTriangle, Scale, Percent, FilePlus2, Trash2, Plus, Save, X, Share2, Monitor, RotateCcw, CheckCircle2, ListPlus, MoreHorizontal } from "lucide-react";
+import { Check, AlertTriangle, Scale, Percent, FilePlus2, Trash2, Plus, Save, X, Share2, Monitor, RotateCcw, CheckCircle2, ListPlus, MoreHorizontal, Lock } from "lucide-react";
 import { ColorPicker } from "./ColorPicker";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -35,6 +35,10 @@ interface ProbabilityPanelProps {
   onSaveWheel: () => void;
   onShare: () => void;
   onOBSEmbed: () => void;
+  onUpgrade: (feature: string) => void;
+  maxSegments: number;
+  customColors: boolean;
+  canUseObs: boolean;
   total: number;
   isValid: boolean;
   isEqualOdds: boolean;
@@ -64,6 +68,10 @@ export function ProbabilityPanel({
   onSaveWheel,
   onShare,
   onOBSEmbed,
+  onUpgrade,
+  maxSegments,
+  customColors,
+  canUseObs,
   total,
   isValid,
   isEqualOdds,
@@ -106,7 +114,7 @@ export function ProbabilityPanel({
                 )}
               </CardTitle>
               <p className="text-xs text-muted-foreground font-medium mt-1">
-                {segments.length}/{MAX_SEGMENTS} segments
+                {segments.length}/{maxSegments} segments
               </p>
             </div>
             {/* Mobile header: Save + overflow menu + Close */}
@@ -124,8 +132,8 @@ export function ProbabilityPanel({
                   <DropdownMenuItem onClick={onShare} data-testid="button-share-wheel">
                     <Share2 className="w-4 h-4 mr-2" />Copy share link
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={onOBSEmbed} data-testid="button-obs-embed">
-                    <Monitor className="w-4 h-4 mr-2" />Copy OBS link
+                  <DropdownMenuItem onClick={canUseObs ? onOBSEmbed : () => onUpgrade("OBS overlay")} data-testid="button-obs-embed">
+                    <Monitor className="w-4 h-4 mr-2" />Copy OBS link{!canUseObs && <Lock className="w-3 h-3 ml-auto text-amber-400" />}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={onResetProbabilities} data-testid="button-reset-probability">
@@ -167,8 +175,9 @@ export function ProbabilityPanel({
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" onClick={onOBSEmbed} className="text-muted-foreground" data-testid="button-obs-embed">
+                  <Button variant="ghost" size="icon" onClick={canUseObs ? onOBSEmbed : () => onUpgrade("OBS overlay")} className="text-muted-foreground relative" data-testid="button-obs-embed">
                     <Monitor className="w-4 h-4" />
+                    {!canUseObs && <Lock className="w-2.5 h-2.5 absolute top-0 right-0 text-amber-400" />}
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent><p>Copy OBS embed link</p></TooltipContent>
@@ -218,10 +227,23 @@ export function ProbabilityPanel({
                   className={`w-3.5 h-3.5 shrink-0 ${isClaimed ? "text-emerald-400" : "text-muted-foreground/30"}`}
                 />
               )}
-              <ColorPicker
-                color={segment.color}
-                onChange={(color) => onRecolor(segment.id, color)}
-              />
+              {customColors ? (
+                <ColorPicker
+                  color={segment.color}
+                  onChange={(color) => onRecolor(segment.id, color)}
+                />
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => onUpgrade("Custom colors")}
+                  className="w-6 h-6 rounded-md border border-white/10 shrink-0 relative"
+                  style={{ backgroundColor: segment.color }}
+                  aria-label="Custom colors are a Pro feature"
+                  data-testid={`button-color-locked-${index}`}
+                >
+                  <Lock className="w-2.5 h-2.5 absolute -top-1 -right-1 text-amber-400" />
+                </button>
+              )}
               <Input
                 type="text"
                 value={segment.label}
@@ -262,8 +284,7 @@ export function ProbabilityPanel({
           <Button
             variant="outline"
             size="sm"
-            onClick={onAdd}
-            disabled={!canAdd}
+            onClick={canAdd ? onAdd : () => onUpgrade("More segments")}
             className="w-full mt-3 border-border"
             data-testid="button-add-segment"
           >

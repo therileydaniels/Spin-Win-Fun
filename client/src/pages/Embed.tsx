@@ -55,6 +55,8 @@ export default function Embed() {
     return 400;
   }, [params]);
 
+  const showBranding = useMemo(() => params.get("nb") !== "1", [params]);
+
   // Load wheel from URL parameter on mount
   useEffect(() => {
     const wheelParam = params.get("wheel");
@@ -162,6 +164,7 @@ export default function Embed() {
           isSpinning={isSpinning}
           spinDuration={spinDuration}
           size={size}
+          showBranding={showBranding}
         />
       </div>
 

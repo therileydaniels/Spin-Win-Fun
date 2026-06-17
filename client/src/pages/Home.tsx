@@ -17,6 +17,8 @@ import { ChangelogCard } from "@/components/ChangelogCard";
 import { CHANGELOG_VERSION } from "@/lib/changelog";
 import { decodeWheelFromUrl, encodeWheelToUrl } from "@/lib/localWheelStorage";
 import { useWheelStorage } from "@/hooks/useWheelStorage";
+import { useEntitlements } from "@/hooks/useEntitlements";
+import { UpgradeDialog } from "@/components/UpgradeDialog";
 import { useQueryClient } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Settings, ChevronLeft, Mail, Download } from "lucide-react";
@@ -46,6 +48,7 @@ export default function Home() {
     resetProbabilities,
     resetToDefault,
     canAdd,
+    maxSegments,
     canRemove,
     total,
     isValid,
@@ -62,6 +65,9 @@ export default function Home() {
   const { toast } = useToast();
   const storage = useWheelStorage();
   const queryClient = useQueryClient();
+  const ent = useEntitlements();
+  const [upgradeFeature, setUpgradeFeature] = useState<string | null>(null);
+  const openUpgrade = useCallback((feature: string) => setUpgradeFeature(feature), []);
 
   const [presentationMode, setPresentationMode] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -221,6 +227,7 @@ export default function Home() {
   }, [getWheelData, currentWheelName, toast]);
 
   const handleOBSEmbed = useCallback(async () => {
+    if (!ent.obs) { setUpgradeFeature("OBS overlay"); return; }
     const data = getWheelData();
     const wheel = {
       id: "obs",
@@ -230,16 +237,17 @@ export default function Home() {
       updatedAt: new Date().toISOString(),
     };
     const encoded = encodeWheelToUrl(wheel);
-    const url = `${window.location.origin}/app/embed?wheel=${encoded}`;
+    const url = `${window.location.origin}/app/embed?wheel=${encoded}&nb=1`;
     try {
       await navigator.clipboard.writeText(url);
       toast({ title: "OBS link copied!", description: "Paste as browser source in OBS" });
     } catch {
       toast({ title: "Here's your OBS link", description: url });
     }
-  }, [getWheelData, currentWheelName, toast]);
+  }, [getWheelData, currentWheelName, toast, ent.obs]);
 
   const handleDownloadSvg = useCallback(() => {
+    if (!ent.export) { setUpgradeFeature("SVG export"); return; }
     const wheelSvgEl = document.querySelector<SVGSVGElement>('[data-testid="wheel-svg"]');
     const pointerEl = document.querySelector<HTMLElement>('[data-testid="wheel-pointer"]');
     if (!wheelSvgEl || !pointerEl) {
@@ -284,7 +292,7 @@ export default function Home() {
     a.click();
     URL.revokeObjectURL(url);
     toast({ title: "Saved as SVG", description: "Check your downloads folder." });
-  }, [currentWheelName, toast]);
+  }, [currentWheelName, toast, ent.export]);
 
   useEffect(() => {
     if (showResult && winner) {
@@ -385,7 +393,8 @@ export default function Home() {
           onToggleHistory={() => setShowHistory(!showHistory)}
           removeWinnerMode={removeWinnerMode}
           onToggleRemoveWinner={() => setRemoveWinnerMode(!removeWinnerMode)}
-          onEnterPresentation={() => setPresentationMode(true)}
+          onEnterPresentation={() => ent.presentation ? setPresentationMode(true) : openUpgrade("Presentation mode")}
+          isPro={ent.isPro}
           isMuted={isMuted}
           onToggleMute={toggleMute}
         />
@@ -437,6 +446,7 @@ export default function Home() {
                   isSpinning={isSpinning}
                   spinDuration={spinDuration}
                   claimedIds={noRepeatEnabled ? claimedIds : []}
+                  showBranding={ent.branding}
                 />
               </div>
             )}
@@ -465,7 +475,7 @@ export default function Home() {
               title="Download wheel as SVG"
             >
               <Download className="w-3.5 h-3.5" />
-              Save as SVG
+              {ent.export ? "Save as SVG" : "Save as SVG (Pro)"}
             </Button>
           )}
 
@@ -520,6 +530,10 @@ export default function Home() {
               onSaveWheel={handleSaveWheel}
               onShare={handleShare}
               onOBSEmbed={handleOBSEmbed}
+              onUpgrade={openUpgrade}
+              maxSegments={maxSegments}
+              customColors={ent.customColors}
+              canUseObs={ent.obs}
               total={total}
               isValid={isValid}
               isEqualOdds={isEqualOdds}
@@ -563,6 +577,11 @@ export default function Home() {
         onOpenChange={setSaveModalOpen}
         onSave={handleSaveNew}
         defaultName={currentWheelName || "My Wheel"}
+      />
+      <UpgradeDialog
+        open={upgradeFeature !== null}
+        onOpenChange={(o) => !o && setUpgradeFeature(null)}
+        feature={upgradeFeature ?? undefined}
       />
     </div>
   );
