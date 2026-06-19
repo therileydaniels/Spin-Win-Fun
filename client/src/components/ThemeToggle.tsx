@@ -11,14 +11,17 @@ export function ThemeToggle() {
       size="icon"
       onClick={toggleTheme}
       className="rounded-full"
+      aria-pressed={isDark}
       data-testid="button-theme-toggle"
     >
       {isDark ? (
-        <Sun className="w-5 h-5 text-foreground" />
+        <Sun className="w-5 h-5 text-foreground" aria-hidden="true" />
       ) : (
-        <Moon className="w-5 h-5 text-foreground" />
+        <Moon className="w-5 h-5 text-foreground" aria-hidden="true" />
       )}
-      <span className="sr-only">Toggle theme</span>
+      <span className="sr-only">
+        {isDark ? "Switch to light theme" : "Switch to dark theme"}
+      </span>
     </Button>
   );
 }

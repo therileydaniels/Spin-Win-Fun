@@ -46,11 +46,13 @@ export function ColorPicker({ color, onChange }: ColorPickerProps) {
           variant="ghost"
           size="icon"
           className="p-1 shrink-0"
+          aria-label={`Pick segment color (current ${color})`}
           data-testid="button-color-picker"
         >
           <div
             className="w-5 h-5 rounded-sm border border-border"
             style={{ backgroundColor: color }}
+            aria-hidden="true"
           />
         </Button>
       </PopoverTrigger>
@@ -61,6 +63,8 @@ export function ColorPicker({ color, onChange }: ColorPickerProps) {
               <button
                 key={presetColor}
                 onClick={() => handlePresetClick(presetColor)}
+                aria-label={`Use color ${presetColor}`}
+                aria-pressed={color === presetColor}
                 className={`w-7 h-7 rounded-md border-2 transition-transform hover:scale-110 ${
                   color === presetColor
                     ? "border-foreground"
@@ -77,6 +81,7 @@ export function ColorPicker({ color, onChange }: ColorPickerProps) {
                 type="color"
                 value={customColor.startsWith("#") ? customColor : "#A855F7"}
                 onChange={handleColorInputChange}
+                aria-label="Custom color picker"
                 className="w-8 h-8 rounded cursor-pointer border-0 bg-transparent"
                 data-testid="input-custom-color"
               />
@@ -85,13 +90,20 @@ export function ColorPicker({ color, onChange }: ColorPickerProps) {
                 value={customColor}
                 onChange={handleCustomChange}
                 placeholder="#A855F7"
+                aria-label="Hex color value"
                 aria-invalid={!isHexValid}
+                aria-describedby={!isHexValid ? "color-hex-hint" : undefined}
                 className="flex-1 h-8 text-xs bg-background/50 border-border"
                 data-testid="input-color-hex"
               />
             </div>
             {!isHexValid && (
-              <p className="text-[10px] text-muted-foreground" data-testid="text-color-hex-hint">
+              <p
+                id="color-hex-hint"
+                role="alert"
+                className="text-[10px] text-muted-foreground"
+                data-testid="text-color-hex-hint"
+              >
                 Enter a 6-digit hex color, e.g. #A855F7
               </p>
             )}

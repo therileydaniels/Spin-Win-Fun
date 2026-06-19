@@ -61,10 +61,11 @@ export function QuickAddDialog({ open, onOpenChange, onSubmit }: QuickAddDialogP
             placeholder={"Grand Prize\nRunner Up\nConsolation Prize\n..."}
             value={text}
             onChange={e => setText(e.target.value)}
+            aria-label="Prize list, one per line"
             autoFocus
           />
 
-          <div className="flex items-start gap-2 min-h-[1.5rem]">
+          <div className="flex items-start gap-2 min-h-[1.5rem]" aria-live="polite">
             {tooMany ? (
               <>
                 <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />

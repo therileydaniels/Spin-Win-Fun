@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { X, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,10 +11,23 @@ interface ChangelogCardProps {
 
 export function ChangelogCard({ open, onClose }: ChangelogCardProps) {
   const reduceMotion = useReducedMotion();
+
+  // Allow keyboard users to dismiss the notification with Escape.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, onClose]);
+
   return (
     <AnimatePresence>
       {open && (
         <motion.div
+          role="dialog"
+          aria-labelledby="changelog-card-title"
           initial={reduceMotion ? { opacity: 0 } : { opacity: 0, x: -40, y: 20 }}
           animate={reduceMotion ? { opacity: 1 } : { opacity: 1, x: 0, y: 0 }}
           exit={reduceMotion ? { opacity: 0 } : { opacity: 0, x: -40, y: 20 }}
@@ -22,9 +36,9 @@ export function ChangelogCard({ open, onClose }: ChangelogCardProps) {
         >
           <div className="flex items-start justify-between gap-3 p-4 pb-2">
             <div className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-primary shrink-0" />
+              <Sparkles className="w-4 h-4 text-primary shrink-0" aria-hidden="true" />
               <div>
-                <h3 className="font-semibold text-sm text-foreground leading-tight">What's New</h3>
+                <h3 id="changelog-card-title" className="font-semibold text-sm text-foreground leading-tight">What's New</h3>
                 <p className="text-xs text-muted-foreground">Update {CHANGELOG_VERSION}</p>
               </div>
             </div>
@@ -35,7 +49,7 @@ export function ChangelogCard({ open, onClose }: ChangelogCardProps) {
               className="text-muted-foreground hover:text-foreground -mt-1 -mr-1 h-7 w-7 shrink-0"
               aria-label="Dismiss"
             >
-              <X className="w-3.5 h-3.5" />
+              <X className="w-3.5 h-3.5" aria-hidden="true" />
             </Button>
           </div>
 

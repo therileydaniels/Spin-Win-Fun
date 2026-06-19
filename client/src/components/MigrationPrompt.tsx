@@ -73,8 +73,11 @@ export function MigrationPrompt() {
     setOpen(false);
   };
 
+  // Escape / overlay-click dismisses for this session only — it must NOT burn
+  // the one-time flag, or a stray Escape would forfeit migration forever. Only
+  // the explicit "Skip" button (handleSkip) or a successful import sets it.
   return (
-    <Dialog open={open} onOpenChange={(o) => !o && handleSkip()}>
+    <Dialog open={open} onOpenChange={(o) => !o && setOpen(false)}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Import your local wheels?</DialogTitle>

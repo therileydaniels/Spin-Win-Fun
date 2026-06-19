@@ -251,6 +251,7 @@ export function ProbabilityPanel({
                 value={segment.label}
                 onChange={(e) => onRename(segment.id, e.target.value)}
                 maxLength={MAX_LABEL_LENGTH}
+                aria-label={`Segment ${index + 1} name`}
                 className={`flex-1 h-8 text-sm bg-background/50 border-border ${isClaimed ? "line-through text-muted-foreground" : ""}`}
                 data-testid={`input-segment-name-${index}`}
               />
@@ -263,20 +264,22 @@ export function ProbabilityPanel({
                   onChange={(e) =>
                     onProbabilityChange(index, parseInt(e.target.value) || 0)
                   }
+                  aria-label={`Win probability (percent) for ${segment.label || `segment ${index + 1}`}`}
                   className="w-16 h-8 text-center text-sm bg-background/50 border-border"
                   data-testid={`input-probability-${index}`}
                 />
-                <span className="text-xs text-muted-foreground w-3">%</span>
+                <span className="text-xs text-muted-foreground w-3" aria-hidden="true">%</span>
               </div>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => onRemove(segment.id)}
                 disabled={!canRemove}
+                aria-label={`Delete ${segment.label || `segment ${index + 1}`}`}
                 className="text-muted-foreground hover:text-destructive shrink-0"
                 data-testid={`button-delete-segment-${index}`}
               >
-                <Trash2 className="w-3.5 h-3.5" />
+                <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
               </Button>
             </div>
             );
@@ -303,10 +306,11 @@ export function ProbabilityPanel({
               <button
                 key={palette.name}
                 onClick={() => onApplyColorPalette(palette.colors)}
+                aria-label={`Apply ${palette.name} color theme`}
                 className="flex flex-col items-center gap-1 shrink-0 rounded-md px-2 py-1.5 hover:bg-accent transition-colors"
                 data-testid={`palette-${palette.name.toLowerCase()}`}
               >
-                <div className="flex gap-0.5">
+                <div className="flex gap-0.5" aria-hidden="true">
                   {palette.colors.slice(0, 5).map((color, i) => (
                     <div
                       key={i}

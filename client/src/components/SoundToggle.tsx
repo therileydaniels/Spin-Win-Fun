@@ -13,12 +13,13 @@ export function SoundToggle({ isMuted, onToggle }: SoundToggleProps) {
       size="icon"
       onClick={onToggle}
       className="rounded-full"
+      aria-pressed={isMuted}
       data-testid="button-sound-toggle"
     >
       {isMuted ? (
-        <VolumeX className="w-5 h-5 text-muted-foreground" />
+        <VolumeX className="w-5 h-5 text-muted-foreground" aria-hidden="true" />
       ) : (
-        <Volume2 className="w-5 h-5 text-muted-foreground" />
+        <Volume2 className="w-5 h-5 text-muted-foreground" aria-hidden="true" />
       )}
       <span className="sr-only">{isMuted ? "Unmute" : "Mute"}</span>
     </Button>
