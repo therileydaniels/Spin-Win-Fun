@@ -4,9 +4,37 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { Footer } from "@/components/Footer";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { useTheme } from "@/hooks/useTheme";
+
+// Clerk's widget can't resolve our `hsl(var(--token))` CSS variables (it renders
+// outside the .dark scope where the vars are defined), so it fell back to its
+// light default and rendered light cards on our dark stage. Pass literal
+// theme-aware colors from the committed palette instead — works regardless of
+// how Clerk scopes its styles, and follows the theme toggle.
+const CLERK_THEME = {
+  dark: {
+    colorPrimary: "#7C3AED",
+    colorBackground: "#171717",
+    colorText: "#FAFAFA",
+    colorTextSecondary: "#A6A6A6",
+    colorInputBackground: "#0F172A",
+    colorInputText: "#FAFAFA",
+    borderRadius: "0.5rem",
+  },
+  light: {
+    colorPrimary: "#7C3AED",
+    colorBackground: "#FAFAFA",
+    colorText: "#171717",
+    colorTextSecondary: "#595959",
+    colorInputBackground: "#F9F9FC",
+    colorInputText: "#171717",
+    borderRadius: "0.5rem",
+  },
+} as const;
 
 export default function Pricing() {
   const [, setLocation] = useLocation();
+  const { isDark } = useTheme();
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       <header className="flex items-center justify-between gap-4 px-4 py-3 border-b border-border">
@@ -24,15 +52,7 @@ export default function Pricing() {
         <div className="overflow-x-auto">
           <PricingTable
             appearance={{
-              variables: {
-                colorPrimary: "hsl(var(--primary))",
-                colorBackground: "hsl(var(--card))",
-                colorText: "hsl(var(--foreground))",
-                colorTextSecondary: "hsl(var(--muted-foreground))",
-                colorInputBackground: "hsl(var(--background))",
-                colorInputText: "hsl(var(--foreground))",
-                borderRadius: "0.5rem",
-              },
+              variables: isDark ? CLERK_THEME.dark : CLERK_THEME.light,
             }}
           />
         </div>
