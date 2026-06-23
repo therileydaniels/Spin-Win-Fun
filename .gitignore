@@ -15,3 +15,5 @@ Thumbs.db
 
 # impeccable live-mode runtime journal (keep config + design.json, ignore session state)
 .impeccable/live/sessions/
+# Brainstorming visual companion (local mockups)
+.superpowers/
