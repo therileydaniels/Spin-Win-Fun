@@ -75,6 +75,8 @@ Local: same shape minus `userId`, IDs are `crypto.randomUUID()` strings.
 - `VITE_CLERK_PUBLISHABLE_KEY` — Clerk frontend key (`pk_test_…` / `pk_live_…`). **Baked into the frontend at build time** — changing it requires a fresh build/deploy, not just a restart.
 - `CLERK_SECRET_KEY` — Clerk backend key for token verification (`sk_test_…` / `sk_live_…`)
 - `DATABASE_URL` — Postgres connection string. Read at server startup (`server/db.ts` throws if unset → boot crash / 502). Must be present in the Railway service's own variables.
+- **Prod Clerk = three `live` keys.** The Production Clerk instance is separate from Development and has its own key set. When pointing prod at it, **all three** must be the `live` values together: `VITE_CLERK_PUBLISHABLE_KEY` (`pk_live_…`), `CLERK_PUBLISHABLE_KEY` (`pk_live_…`), `CLERK_SECRET_KEY` (`sk_live_…`). A mismatch (e.g. live publishable + test secret) means the server can't verify frontend tokens → wheel save/load + server-side `isPro` break while the UI still looks fine.
+- **New prod instance warm-up:** a freshly-created Clerk production instance can serve intermittent **503s on `clerk-js`** (`clerk.<domain>/npm/@clerk/clerk-js…`) for a while after first deploy while the custom domain / SSL propagates. Sign-in flickers then; it self-resolves — not a code bug.
 
 ## Deployment
 - **Host:** Railway, serving `quickwheel.co`. **Auto-deploys on push to `main`** (GitHub repo `therileydaniels/Spin-Win-Fun`). Treat any push to `main` as a production release.
