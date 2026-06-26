@@ -11,23 +11,29 @@ import { useTheme } from "@/hooks/useTheme";
 // light default and rendered light cards on our dark stage. Pass literal
 // theme-aware colors from the committed palette instead — works regardless of
 // how Clerk scopes its styles, and follows the theme toggle.
+//
+// NOTE: these MUST use Clerk's current appearance-variable names (v5/6 renamed
+// them). Old names like `colorText` are silently ignored, which left dark text
+// on the dark stage = unreadable. Current names:
+//   colorForeground (text), colorMutedForeground (secondary text),
+//   colorInput (input bg), colorInputForeground (input text).
 const CLERK_THEME = {
   dark: {
     colorPrimary: "#7C3AED",
     colorBackground: "#171717",
-    colorText: "#FAFAFA",
-    colorTextSecondary: "#A6A6A6",
-    colorInputBackground: "#0F172A",
-    colorInputText: "#FAFAFA",
+    colorForeground: "#FAFAFA",
+    colorMutedForeground: "#A6A6A6",
+    colorInput: "#0F172A",
+    colorInputForeground: "#FAFAFA",
     borderRadius: "0.5rem",
   },
   light: {
     colorPrimary: "#7C3AED",
     colorBackground: "#FAFAFA",
-    colorText: "#171717",
-    colorTextSecondary: "#595959",
-    colorInputBackground: "#F9F9FC",
-    colorInputText: "#171717",
+    colorForeground: "#171717",
+    colorMutedForeground: "#595959",
+    colorInput: "#F9F9FC",
+    colorInputForeground: "#171717",
     borderRadius: "0.5rem",
   },
 } as const;
