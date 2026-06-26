@@ -19,6 +19,7 @@ import { decodeWheelFromUrl, encodeWheelToUrl } from "@/lib/localWheelStorage";
 import { useWheelStorage } from "@/hooks/useWheelStorage";
 import { useEntitlements } from "@/hooks/useEntitlements";
 import { UpgradeDialog } from "@/components/UpgradeDialog";
+import { SupportPrompt } from "@/components/SupportPrompt";
 import { useQueryClient } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Settings, ChevronLeft, Mail, Download } from "lucide-react";
@@ -580,6 +581,7 @@ export default function Home() {
         winner={winner}
         onSpinAgain={canSpin ? handleSpin : undefined}
       />
+      <SupportPrompt spinResultOpen={showResult} />
       <SaveWheelModal
         open={saveModalOpen}
         onOpenChange={setSaveModalOpen}
