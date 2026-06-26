@@ -33,6 +33,12 @@ export function SupportPrompt({ spinResultOpen }: SupportPromptProps) {
   const sawResultRef = useRef(false);
   // True once we've decided to open (don't re-trigger this session).
   const handledRef = useRef(false);
+  // Latest isPro, read inside the delayed open so a late Clerk plan upgrade
+  // (stale false → true within the open delay) can still suppress the popup.
+  const isProRef = useRef(isPro);
+  useEffect(() => {
+    isProRef.current = isPro;
+  }, [isPro]);
 
   useEffect(() => {
     if (spinResultOpen) {
@@ -49,7 +55,10 @@ export function SupportPrompt({ spinResultOpen }: SupportPromptProps) {
       return;
     }
     handledRef.current = true;
-    const t = window.setTimeout(() => setOpen(true), OPEN_DELAY_MS);
+    const t = window.setTimeout(() => {
+      // Re-check Pro at fire time — Clerk may have corrected a stale false.
+      if (!isProRef.current) setOpen(true);
+    }, OPEN_DELAY_MS);
     return () => window.clearTimeout(t);
   }, [spinResultOpen, isLoaded, isPro]);
 
