@@ -46,8 +46,11 @@ export default function Pricing() {
         <ThemeToggle />
       </header>
       <main className="flex-1 p-4 sm:p-8 max-w-4xl mx-auto w-full">
-        <p className="text-foreground text-center mb-6 max-w-2xl mx-auto">
+        <p className="text-foreground text-center mb-2 max-w-2xl mx-auto">
           Unlock OBS overlays, presentation mode, custom colors, exports, no watermark, and up to 50 wheels.
+        </p>
+        <p className="text-muted-foreground text-sm text-center mb-6 max-w-2xl mx-auto">
+          Use the <span className="font-semibold text-foreground">"Billed annually"</span> toggle on the Pro plan to switch between monthly and annual pricing — annual saves you money.
         </p>
         <div className="overflow-x-auto">
           <PricingTable
