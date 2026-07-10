@@ -13,7 +13,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Check, AlertTriangle, Scale, Percent, FilePlus2, Trash2, Plus, Save, X, Share2, Monitor, RotateCcw, CheckCircle2, ListPlus, MoreHorizontal, Lock } from "lucide-react";
+import { Percent, FilePlus2, Trash2, Plus, Save, X, Share2, Monitor, RotateCcw, CheckCircle2, ListPlus, MoreHorizontal, Lock } from "lucide-react";
 import { ColorPicker } from "./ColorPicker";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -23,13 +23,13 @@ import { COLOR_PALETTES } from "@/lib/colorPalettes";
 
 interface ProbabilityPanelProps {
   segments: CustomSegment[];
-  probabilities: number[];
-  onProbabilityChange: (index: number, value: number) => void;
+  weights: number[];
+  onWeightChange: (index: number, value: number) => void;
   onRename: (id: string, label: string) => void;
   onRecolor: (id: string, color: string) => void;
   onAdd: () => void;
   onRemove: (id: string) => void;
-  onResetProbabilities: () => void;
+  onResetWeights: () => void;
   onApplyColorPalette: (colors: string[]) => void;
   onNewWheel: () => void;
   onSaveWheel: () => void;
@@ -40,9 +40,6 @@ interface ProbabilityPanelProps {
   customColors: boolean;
   canUseObs: boolean;
   isPro: boolean;
-  total: number;
-  isValid: boolean;
-  isEqualOdds: boolean;
   canAdd: boolean;
   canRemove: boolean;
   currentWheelName: string | null;
@@ -57,14 +54,14 @@ interface ProbabilityPanelProps {
 
 export function ProbabilityPanel({
   segments,
-  probabilities,
-  onProbabilityChange,
+  weights,
+  onWeightChange,
   onRename,
   onRecolor,
   onAdd,
   onRemove,
   onApplyColorPalette,
-  onResetProbabilities,
+  onResetWeights,
   onNewWheel,
   onSaveWheel,
   onShare,
@@ -74,9 +71,6 @@ export function ProbabilityPanel({
   customColors,
   canUseObs,
   isPro,
-  total,
-  isValid,
-  isEqualOdds,
   canAdd,
   canRemove,
   currentWheelName,
@@ -138,8 +132,8 @@ export function ProbabilityPanel({
                     <Monitor className="w-4 h-4 mr-2" />Copy OBS link{!canUseObs && <Lock className="w-3 h-3 ml-auto text-amber-400" />}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={onResetProbabilities} data-testid="button-reset-probability">
-                    <Percent className="w-4 h-4 mr-2" />Reset probabilities
+                  <DropdownMenuItem onClick={onResetWeights} data-testid="button-reset-weights">
+                    <Percent className="w-4 h-4 mr-2" />Reset to equal odds
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setShowQuickAdd(true)} data-testid="button-quick-add">
                     <ListPlus className="w-4 h-4 mr-2" />Quick add prizes
@@ -186,11 +180,11 @@ export function ProbabilityPanel({
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" onClick={onResetProbabilities} className="text-muted-foreground" data-testid="button-reset-probability">
+                  <Button variant="ghost" size="icon" onClick={onResetWeights} className="text-muted-foreground" data-testid="button-reset-weights">
                     <Percent className="w-4 h-4" />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent><p>Reset probabilities to equal odds</p></TooltipContent>
+                <TooltipContent><p>Reset to equal odds</p></TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -214,73 +208,76 @@ export function ProbabilityPanel({
       <CardContent className="space-y-5">
         <div>
           <p className="font-semibold text-sm text-foreground tracking-wide uppercase mb-1">Segments</p>
-          <p className="text-xs text-muted-foreground mb-3">Leave the odds at 0 for equal chances.</p>
-          <div className="max-h-[45vh] sm:max-h-[320px] overflow-y-auto space-y-2 pr-1">
+          <p className="text-xs text-muted-foreground mb-3">Drag to set each prize's odds — the rest rebalance automatically.</p>
+          <div className="max-h-[45vh] sm:max-h-[320px] overflow-y-auto space-y-3 pr-1">
           {segments.map((segment, index) => {
             const isClaimed = claimedIds.includes(segment.id);
             return (
             <div
               key={segment.id}
-              className={`flex items-center gap-2 py-0.5 transition-opacity ${isClaimed ? "opacity-50" : ""}`}
+              className={`flex flex-col gap-1.5 py-0.5 transition-opacity ${isClaimed ? "opacity-50" : ""}`}
               data-testid={`segment-row-${index}`}
             >
-              {noRepeatEnabled && (
-                <CheckCircle2
-                  className={`w-3.5 h-3.5 shrink-0 ${isClaimed ? "text-emerald-400" : "text-muted-foreground/30"}`}
-                />
-              )}
-              {customColors ? (
-                <ColorPicker
-                  color={segment.color}
-                  onChange={(color) => onRecolor(segment.id, color)}
-                />
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => onUpgrade("Custom colors")}
-                  className="w-6 h-6 rounded-md shrink-0 relative"
-                  style={{ backgroundColor: segment.color }}
-                  aria-label="Custom colors are a Pro feature"
-                  data-testid={`button-color-locked-${index}`}
-                >
-                  <Lock className="w-2.5 h-2.5 absolute -top-1 -right-1 text-amber-400" />
-                </button>
-              )}
-              <Input
-                type="text"
-                value={segment.label}
-                onChange={(e) => onRename(segment.id, e.target.value)}
-                maxLength={MAX_LABEL_LENGTH}
-                aria-label={`Segment ${index + 1} name`}
-                className={`flex-1 h-8 text-sm bg-background/50 border-border ${isClaimed ? "line-through text-muted-foreground" : ""}`}
-                data-testid={`input-segment-name-${index}`}
-              />
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-2">
+                {noRepeatEnabled && (
+                  <CheckCircle2
+                    className={`w-3.5 h-3.5 shrink-0 ${isClaimed ? "text-emerald-400" : "text-muted-foreground/30"}`}
+                  />
+                )}
+                {customColors ? (
+                  <ColorPicker
+                    color={segment.color}
+                    onChange={(color) => onRecolor(segment.id, color)}
+                  />
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => onUpgrade("Custom colors")}
+                    className="w-6 h-6 rounded-md shrink-0 relative"
+                    style={{ backgroundColor: segment.color }}
+                    aria-label="Custom colors are a Pro feature"
+                    data-testid={`button-color-locked-${index}`}
+                  >
+                    <Lock className="w-2.5 h-2.5 absolute -top-1 -right-1 text-amber-400" />
+                  </button>
+                )}
                 <Input
-                  type="number"
+                  type="text"
+                  value={segment.label}
+                  onChange={(e) => onRename(segment.id, e.target.value)}
+                  maxLength={MAX_LABEL_LENGTH}
+                  aria-label={`Segment ${index + 1} name`}
+                  className={`flex-1 h-8 text-sm bg-background/50 border-border ${isClaimed ? "line-through text-muted-foreground" : ""}`}
+                  data-testid={`input-segment-name-${index}`}
+                />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => onRemove(segment.id)}
+                  disabled={!canRemove}
+                  aria-label={`Delete ${segment.label || `segment ${index + 1}`}`}
+                  className="text-muted-foreground hover:text-destructive shrink-0"
+                  data-testid={`button-delete-segment-${index}`}
+                >
+                  <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
+                </Button>
+              </div>
+              <div className="flex items-center gap-2 pl-8">
+                <input
+                  type="range"
                   min={0}
                   max={100}
-                  value={probabilities[index] ?? 0}
-                  onChange={(e) =>
-                    onProbabilityChange(index, parseInt(e.target.value) || 0)
-                  }
-                  aria-label={`Win probability (percent) for ${segment.label || `segment ${index + 1}`}`}
-                  className="w-16 h-8 text-center text-sm bg-background/50 border-border"
-                  data-testid={`input-probability-${index}`}
+                  step={0.5}
+                  value={weights[index] ?? 0}
+                  onChange={(e) => onWeightChange(index, parseFloat(e.target.value))}
+                  aria-label={`Win odds (percent) for ${segment.label || `segment ${index + 1}`}`}
+                  className="flex-1 h-1.5 accent-primary cursor-pointer"
+                  data-testid={`input-weight-${index}`}
                 />
-                <span className="text-xs text-muted-foreground w-3" aria-hidden="true">%</span>
+                <span className="text-xs text-muted-foreground w-12 text-right tabular-nums shrink-0" aria-hidden="true">
+                  {(weights[index] ?? 0).toFixed(1)}%
+                </span>
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => onRemove(segment.id)}
-                disabled={!canRemove}
-                aria-label={`Delete ${segment.label || `segment ${index + 1}`}`}
-                className="text-muted-foreground hover:text-destructive shrink-0"
-                data-testid={`button-delete-segment-${index}`}
-              >
-                <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
-              </Button>
             </div>
             );
           })}
@@ -356,33 +353,6 @@ export function ProbabilityPanel({
                 <RotateCcw className="w-3 h-3" />
                 Reset
               </Button>
-            </div>
-          )}
-        </div>
-
-        <div className="pt-1 border-t border-border">
-          {isEqualOdds ? (
-            <div className="flex items-center gap-2 text-sm">
-              <Scale className="w-4 h-4 text-blue-400" />
-              <span className="text-blue-400 font-medium">Equal odds</span>
-              <span className="text-muted-foreground text-xs">
-                ({(100 / segments.length).toFixed(1)}% each)
-              </span>
-            </div>
-          ) : isValid ? (
-            <div className="flex items-center gap-2 text-sm">
-              <Check className="w-4 h-4 text-emerald-400" />
-              <span className="text-emerald-400 font-medium">Total: {total}%</span>
-            </div>
-          ) : (
-            <div className="flex items-center gap-2 text-sm">
-              <AlertTriangle className="w-4 h-4 text-amber-400" />
-              <span className="text-amber-400 font-medium">Total: {total}%</span>
-              <span className="text-muted-foreground text-xs">
-                {total < 100
-                  ? `(need ${100 - total}% more)`
-                  : `(${total - 100}% over)`}
-              </span>
             </div>
           )}
         </div>

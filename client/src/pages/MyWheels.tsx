@@ -123,7 +123,7 @@ export default function MyWheels() {
   const performLoad = (wheel: LocalWheel) => {
     const data: SavedWheelData = {
       segments: wheel.segments.map(s => ({ id: s.id, label: s.label, color: s.color })),
-      probabilities: wheel.segments.map(s => s.probability),
+      weights: wheel.segments.map(s => s.weight),
     };
     loadWheel(wheel.id, wheel.name, data);
     setLocation("/");

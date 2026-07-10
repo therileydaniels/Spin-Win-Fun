@@ -2,34 +2,41 @@ import { useState, useEffect, useCallback } from "react";
 import { CustomSegment, MIN_SEGMENTS, MAX_SEGMENTS, MAX_LABEL_LENGTH } from "@shared/schema";
 import { DEFAULT_SEGMENTS, getNextColor, PRESET_COLORS } from "@/lib/wheelSegments";
 import { useEntitlements } from "@/hooks/useEntitlements";
+import {
+  normalizeWeights,
+  computeFairDefault,
+  addWeightForNewSegment,
+  removeWeightAtIndex,
+  normalizeLoadedWeights,
+} from "@/lib/weightedProbability";
 
 const SEGMENTS_STORAGE_KEY = "wheel-segments";
-const PROBABILITIES_STORAGE_KEY = "wheel-probabilities";
+const WEIGHTS_STORAGE_KEY = "wheel-weights";
+// Pre weighted-probability-pattern key name — read once as a fallback so an
+// in-progress (unsaved) editing session isn't silently reset by the rename.
+const LEGACY_WEIGHTS_STORAGE_KEY = "wheel-probabilities";
 const CURRENT_WHEEL_KEY = "current-wheel-id";
 const CURRENT_WHEEL_NAME_KEY = "current-wheel-name";
 
 export interface SavedWheelData {
   segments: CustomSegment[];
-  probabilities: number[];
+  weights: number[];
 }
 
 export interface UseCustomSegmentsReturn {
   segments: CustomSegment[];
-  probabilities: number[];
+  weights: number[];
   addSegment: () => void;
   removeSegment: (id: string) => void;
   renameSegment: (id: string, label: string) => void;
   recolorSegment: (id: string, color: string) => void;
   applyColorPalette: (colors: string[]) => void;
-  setProbability: (index: number, value: number) => void;
-  resetProbabilities: () => void;
+  setWeight: (index: number, value: number) => void;
+  resetWeights: () => void;
   resetToDefault: () => void;
   canAdd: boolean;
   maxSegments: number;
   canRemove: boolean;
-  total: number;
-  isValid: boolean;
-  isEqualOdds: boolean;
   currentWheelId: string | null;
   currentWheelName: string | null;
   hasUnsavedChanges: boolean;
@@ -71,17 +78,19 @@ export function useCustomSegments(): UseCustomSegmentsReturn {
     return DEFAULT_SEGMENTS;
   });
 
-  const [probabilities, setProbabilities] = useState<number[]>(() => {
+  const [weights, setWeights] = useState<number[]>(() => {
     try {
-      const saved = localStorage.getItem(PROBABILITIES_STORAGE_KEY);
+      const saved =
+        localStorage.getItem(WEIGHTS_STORAGE_KEY) ??
+        localStorage.getItem(LEGACY_WEIGHTS_STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) {
-          return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return normalizeLoadedWeights(parsed);
         }
       }
     } catch {}
-    return DEFAULT_SEGMENTS.map(() => 0);
+    return computeFairDefault("independent", DEFAULT_SEGMENTS.length);
   });
 
   const [currentWheelId, setCurrentWheelId] = useState<string | null>(() => {
@@ -102,25 +111,22 @@ export function useCustomSegments(): UseCustomSegmentsReturn {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [lastSavedState, setLastSavedState] = useState<string | null>(null);
 
+  // Safety net only — addSegment/removeSegment keep segments and weights in
+  // sync directly. This only fires if storage ever gets out of sync (e.g.
+  // corrupted localStorage), and always recovers into a valid state.
   useEffect(() => {
-    if (probabilities.length !== segments.length) {
-      setProbabilities((prev) => {
-        if (prev.length < segments.length) {
-          return [...prev, ...Array(segments.length - prev.length).fill(0)];
-        } else {
-          return prev.slice(0, segments.length);
-        }
-      });
+    if (weights.length !== segments.length) {
+      setWeights(computeFairDefault("independent", segments.length));
     }
-  }, [segments.length, probabilities.length]);
+  }, [segments.length, weights.length]);
 
   useEffect(() => {
     localStorage.setItem(SEGMENTS_STORAGE_KEY, JSON.stringify(segments));
   }, [segments]);
 
   useEffect(() => {
-    localStorage.setItem(PROBABILITIES_STORAGE_KEY, JSON.stringify(probabilities));
-  }, [probabilities]);
+    localStorage.setItem(WEIGHTS_STORAGE_KEY, JSON.stringify(weights));
+  }, [weights]);
 
   useEffect(() => {
     if (currentWheelId !== null) {
@@ -140,10 +146,10 @@ export function useCustomSegments(): UseCustomSegmentsReturn {
 
   useEffect(() => {
     if (lastSavedState !== null) {
-      const currentState = JSON.stringify({ segments, probabilities });
+      const currentState = JSON.stringify({ segments, weights });
       setHasUnsavedChanges(currentState !== lastSavedState);
     }
-  }, [segments, probabilities, lastSavedState]);
+  }, [segments, weights, lastSavedState]);
 
   const addSegment = useCallback(() => {
     if (segments.length >= maxSegments) return;
@@ -155,20 +161,17 @@ export function useCustomSegments(): UseCustomSegmentsReturn {
       color: getNextColor(existingColors),
     };
     setSegments((prev) => [...prev, newSegment]);
+    setWeights((prev) => addWeightForNewSegment(prev));
   }, [segments, maxSegments]);
 
   const removeSegment = useCallback((id: string) => {
     if (segments.length <= MIN_SEGMENTS) return;
-    
+
     const index = segments.findIndex((s) => s.id === id);
     if (index === -1) return;
-    
+
     setSegments((prev) => prev.filter((s) => s.id !== id));
-    setProbabilities((prev) => {
-      const next = [...prev];
-      next.splice(index, 1);
-      return next;
-    });
+    setWeights((prev) => removeWeightAtIndex(prev, index));
   }, [segments]);
 
   const renameSegment = useCallback((id: string, label: string) => {
@@ -190,21 +193,17 @@ export function useCustomSegments(): UseCustomSegmentsReturn {
     );
   }, []);
 
-  const setProbability = useCallback((index: number, value: number) => {
-    setProbabilities((prev) => {
-      const next = [...prev];
-      next[index] = Math.max(0, Math.min(100, Math.floor(value) || 0));
-      return next;
-    });
+  const setWeight = useCallback((index: number, value: number) => {
+    setWeights((prev) => normalizeWeights(prev, index, value));
   }, []);
 
-  const resetProbabilities = useCallback(() => {
-    setProbabilities(segments.map(() => 0));
+  const resetWeights = useCallback(() => {
+    setWeights(computeFairDefault("independent", segments.length));
   }, [segments]);
 
   const resetToDefault = useCallback(() => {
     setSegments(DEFAULT_SEGMENTS);
-    setProbabilities(DEFAULT_SEGMENTS.map(() => 0));
+    setWeights(computeFairDefault("independent", DEFAULT_SEGMENTS.length));
     setCurrentWheelId(null);
     setCurrentWheelName(null);
     setLastSavedState(null);
@@ -212,16 +211,18 @@ export function useCustomSegments(): UseCustomSegmentsReturn {
   }, []);
 
   const loadWheel = useCallback((id: string, name: string, data: SavedWheelData) => {
+    const migratedWeights = normalizeLoadedWeights(data.weights);
+
     localStorage.setItem(SEGMENTS_STORAGE_KEY, JSON.stringify(data.segments));
-    localStorage.setItem(PROBABILITIES_STORAGE_KEY, JSON.stringify(data.probabilities));
+    localStorage.setItem(WEIGHTS_STORAGE_KEY, JSON.stringify(migratedWeights));
     localStorage.setItem(CURRENT_WHEEL_KEY, id);
     localStorage.setItem(CURRENT_WHEEL_NAME_KEY, name);
-    
+
     setSegments(data.segments);
-    setProbabilities(data.probabilities);
+    setWeights(migratedWeights);
     setCurrentWheelId(id);
     setCurrentWheelName(name);
-    const savedState = JSON.stringify({ segments: data.segments, probabilities: data.probabilities });
+    const savedState = JSON.stringify({ segments: data.segments, weights: migratedWeights });
     setLastSavedState(savedState);
     setHasUnsavedChanges(false);
   }, []);
@@ -238,14 +239,14 @@ export function useCustomSegments(): UseCustomSegmentsReturn {
     setCurrentWheelName(name);
     localStorage.setItem(CURRENT_WHEEL_KEY, id);
     localStorage.setItem(CURRENT_WHEEL_NAME_KEY, name);
-    const savedState = JSON.stringify({ segments, probabilities });
+    const savedState = JSON.stringify({ segments, weights });
     setLastSavedState(savedState);
     setHasUnsavedChanges(false);
-  }, [segments, probabilities]);
+  }, [segments, weights]);
 
   const getWheelData = useCallback((): SavedWheelData => {
-    return { segments, probabilities };
-  }, [segments, probabilities]);
+    return { segments, weights };
+  }, [segments, weights]);
 
   const quickFill = useCallback((labels: string[]) => {
     // Cap at the tier limit (not the absolute MAX_SEGMENTS) so Quick Add can't
@@ -257,7 +258,7 @@ export function useCustomSegments(): UseCustomSegmentsReturn {
       color: PRESET_COLORS[i % PRESET_COLORS.length],
     }));
     setSegments(newSegments);
-    setProbabilities(newSegments.map(() => 0));
+    setWeights(computeFairDefault("independent", newSegments.length));
     setCurrentWheelId(null);
     setCurrentWheelName(null);
     setLastSavedState(null);
@@ -266,27 +267,21 @@ export function useCustomSegments(): UseCustomSegmentsReturn {
 
   const canAdd = segments.length < maxSegments;
   const canRemove = segments.length > MIN_SEGMENTS;
-  const total = probabilities.reduce((a, b) => a + b, 0);
-  const isEqualOdds = total === 0;
-  const isValid = total === 100 || isEqualOdds;
 
   return {
     segments,
-    probabilities,
+    weights,
     addSegment,
     removeSegment,
     renameSegment,
     recolorSegment,
     applyColorPalette,
-    setProbability,
-    resetProbabilities,
+    setWeight,
+    resetWeights,
     resetToDefault,
     canAdd,
     maxSegments,
     canRemove,
-    total,
-    isValid,
-    isEqualOdds,
     currentWheelId,
     currentWheelName,
     hasUnsavedChanges,

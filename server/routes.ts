@@ -12,14 +12,14 @@ const spinLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-function selectWeightedWinner(probabilities: number[], excludedIndices: number[] = []): number {
-  const available = probabilities
-    .map((prob, i) => ({ prob, i }))
+function selectWeightedIndex(weights: number[], excludedIndices: number[] = []): number {
+  const available = weights
+    .map((w, i) => ({ w, i }))
     .filter(({ i }) => !excludedIndices.includes(i));
 
   if (available.length === 0) return 0;
 
-  const total = available.reduce((sum, { prob }) => sum + prob, 0);
+  const total = available.reduce((sum, { w }) => sum + w, 0);
 
   if (total === 0) {
     return available[Math.floor(Math.random() * available.length)].i;
@@ -27,8 +27,8 @@ function selectWeightedWinner(probabilities: number[], excludedIndices: number[]
 
   const random = Math.random() * total;
   let cumulative = 0;
-  for (const { prob, i } of available) {
-    cumulative += prob;
+  for (const { w, i } of available) {
+    cumulative += w;
     if (random < cumulative) return i;
   }
 
@@ -43,17 +43,23 @@ export async function registerRoutes(
     const parsed = spinRequestSchema.safeParse(req.body);
 
     if (!parsed.success) {
-      return res.status(400).json({ error: "Invalid probabilities" });
+      console.error("Rejected /api/spin request: schema validation failed", parsed.error.flatten());
+      return res.status(400).json({ error: "Invalid request" });
     }
 
-    const { probabilities, excludedIndices = [] } = parsed.data;
-    const total = probabilities.reduce((a, b) => a + b, 0);
+    const { weights, excludedIndices = [] } = parsed.data;
+    const total = weights.reduce((a, b) => a + b, 0);
 
-    if (total !== 0 && total !== 100) {
-      return res.status(400).json({ error: "Probabilities must total 100% or all be 0" });
+    // The slider UI auto-normalizes on every drag, so it can no longer
+    // produce an invalid total — this is a defensive check on the API
+    // boundary only, not something a normal user should ever trigger. A
+    // rejection here means bad/tampered data got in some other way.
+    if (total !== 0 && Math.abs(total - 100) > 1) {
+      console.error(`Rejected /api/spin request: weights summed to ${total}, expected 0 or ~100`, weights);
+      return res.status(400).json({ error: "Invalid request" });
     }
 
-    const winnerIndex = selectWeightedWinner(probabilities, excludedIndices);
+    const winnerIndex = selectWeightedIndex(weights, excludedIndices);
 
     return res.json({ winnerIndex });
   });

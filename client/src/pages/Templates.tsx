@@ -43,7 +43,7 @@ export default function Templates() {
   const performLoad = (template: WheelTemplate) => {
     const data: SavedWheelData = {
       segments: template.segments.map((s) => ({ id: s.id, label: s.label, color: s.color })),
-      probabilities: template.segments.map((s) => s.probability),
+      weights: template.segments.map((s) => s.weight),
     };
     loadWheel(`template-${template.id}`, template.name, data);
     setLocation("/");

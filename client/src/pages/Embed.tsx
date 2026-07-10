@@ -4,23 +4,8 @@ import { useCustomSegments } from "@/hooks/useCustomSegments";
 import { fireWinConfetti, fireCenterBurst } from "@/lib/confetti";
 import { decodeWheelFromUrl } from "@/lib/localWheelStorage";
 import { calculateRotationForWinner } from "@/lib/wheelSegments";
+import { selectWeightedIndex } from "@/lib/weightedProbability";
 import { CustomSegment } from "@shared/schema";
-
-function selectWeightedWinner(probabilities: number[]): number {
-  const total = probabilities.reduce((a, b) => a + b, 0);
-  if (total === 0) {
-    return Math.floor(Math.random() * probabilities.length);
-  }
-  const random = Math.random() * total;
-  let cumulative = 0;
-  for (let i = 0; i < probabilities.length; i++) {
-    cumulative += probabilities[i];
-    if (random < cumulative) {
-      return i;
-    }
-  }
-  return probabilities.length - 1;
-}
 
 export default function Embed() {
   const [isSpinning, setIsSpinning] = useState(false);
@@ -32,8 +17,7 @@ export default function Embed() {
 
   const {
     segments,
-    probabilities,
-    isValid,
+    weights,
     loadWheel,
   } = useCustomSegments();
 
@@ -73,7 +57,7 @@ export default function Embed() {
       if (decoded && decoded.segments.length >= 2) {
         const data = {
           segments: decoded.segments.map((s) => ({ id: s.id, label: s.label, color: s.color })),
-          probabilities: decoded.segments.map((s) => s.probability),
+          weights: decoded.segments.map((s) => s.weight),
         };
         loadWheel("embed", decoded.name, data);
       }
@@ -89,7 +73,7 @@ export default function Embed() {
     };
   }, []);
 
-  const canSpin = isValid && !isSpinning;
+  const canSpin = !isSpinning;
 
   const handleSpin = useCallback(() => {
     if (!canSpin || segments.length < 2) return;
@@ -98,7 +82,7 @@ export default function Embed() {
     setWinner(null);
     setShowResult(false);
 
-    const winnerIndex = selectWeightedWinner(probabilities);
+    const winnerIndex = selectWeightedIndex(weights);
     const selectedWinner = segments[winnerIndex];
 
     const duration = prefersReducedMotion ? 0.001 : 4 + Math.random() * 1;
@@ -122,7 +106,7 @@ export default function Embed() {
       setShowResult(true);
       timeoutRef.current = null;
     }, duration * 1000);
-  }, [canSpin, segments, probabilities, rotation, prefersReducedMotion]);
+  }, [canSpin, segments, weights, rotation, prefersReducedMotion]);
 
   // Spacebar and click to spin
   useEffect(() => {

@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { eq, and, desc, sql } from "drizzle-orm";
 import { db } from "./db";
-import { wheels, insertWheelSchema } from "@shared/schema";
+import { wheels, insertWheelSchema, migrateSegment } from "@shared/schema";
 import { entitlementsFor, canSaveWheel, isSegmentCountAllowed, PRO } from "@shared/entitlements";
 import { requireClerkAuth } from "./clerkAuth";
 
@@ -16,7 +16,9 @@ wheelsRouter.get("/", async (req, res) => {
     .from(wheels)
     .where(eq(wheels.userId, userId))
     .orderBy(desc(wheels.updatedAt));
-  res.json(rows);
+  // Rows saved before the weighted-probability-pattern rename still have
+  // `probability` instead of `weight` in their stored JSON — migrate on read.
+  res.json(rows.map((row) => ({ ...row, segments: row.segments.map(migrateSegment) })));
 });
 
 wheelsRouter.get("/:id", async (req, res) => {
@@ -29,7 +31,7 @@ wheelsRouter.get("/:id", async (req, res) => {
   if (!row) {
     return res.status(404).json({ error: "Wheel not found" });
   }
-  res.json(row);
+  res.json({ ...row, segments: row.segments.map(migrateSegment) });
 });
 
 wheelsRouter.post("/", async (req, res) => {

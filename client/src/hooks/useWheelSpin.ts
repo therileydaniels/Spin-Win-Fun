@@ -9,7 +9,7 @@ export interface UseWheelSpinReturn {
   rotation: number;
   winner: CustomSegment | null;
   showResult: boolean;
-  spin: (probabilities: number[], segments: CustomSegment[], excludedIndices?: number[]) => void;
+  spin: (weights: number[], segments: CustomSegment[], excludedIndices?: number[]) => void;
   closeResult: () => void;
   spinDuration: number;
   error: string | null;
@@ -33,7 +33,7 @@ export function useWheelSpin(): UseWheelSpinReturn {
     };
   }, []);
 
-  const spin = useCallback(async (probabilities: number[], segments: CustomSegment[], excludedIndices: number[] = []) => {
+  const spin = useCallback(async (weights: number[], segments: CustomSegment[], excludedIndices: number[] = []) => {
     if (isSpinning) return;
 
     setIsSpinning(true);
@@ -42,7 +42,7 @@ export function useWheelSpin(): UseWheelSpinReturn {
     setError(null);
 
     try {
-      const response = await apiRequest("POST", "/api/spin", { probabilities, excludedIndices });
+      const response = await apiRequest("POST", "/api/spin", { weights, excludedIndices });
       const data: SpinResponse = await response.json();
       const winnerIndex = data.winnerIndex;
       const selectedWinner = segments[winnerIndex];

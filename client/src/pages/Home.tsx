@@ -39,21 +39,18 @@ export default function Home() {
   const { isMuted, toggleMute, playWinSound } = useSound();
   const {
     segments,
-    probabilities,
+    weights,
     addSegment,
     removeSegment,
     renameSegment,
     recolorSegment,
     applyColorPalette,
-    setProbability,
-    resetProbabilities,
+    setWeight,
+    resetWeights,
     resetToDefault,
     canAdd,
     maxSegments,
     canRemove,
-    total,
-    isValid,
-    isEqualOdds,
     currentWheelId,
     currentWheelName,
     hasUnsavedChanges,
@@ -91,7 +88,7 @@ export default function Home() {
       if (decoded && decoded.segments.length >= 2) {
         const data = {
           segments: decoded.segments.map(s => ({ id: s.id, label: s.label, color: s.color })),
-          probabilities: decoded.segments.map(s => s.probability),
+          weights: decoded.segments.map(s => s.weight),
         };
         loadWheel("shared", decoded.name, data);
         window.history.replaceState({}, "", "/app/");
@@ -117,17 +114,17 @@ export default function Home() {
     }
 
     const wheelData = getWheelData();
-    const segmentsWithProb = wheelData.segments.map((seg, idx) => ({
+    const segmentsWithWeight = wheelData.segments.map((seg, idx) => ({
       id: seg.id,
       label: seg.label,
       color: seg.color,
-      probability: wheelData.probabilities[idx],
+      weight: wheelData.weights[idx],
     }));
     const name = currentWheelName || "My Wheel";
 
     const result = await storage.update(currentWheelId, {
       name,
-      segments: segmentsWithProb,
+      segments: segmentsWithWeight,
     });
     if (result.success && result.wheel) {
       queryClient.invalidateQueries({ queryKey: ["wheels", storage.isCloud] });
@@ -145,7 +142,7 @@ export default function Home() {
     // was deleted elsewhere. The persisted currentWheelId points at the wrong
     // store. Reconcile by saving it fresh in the active backend.
     if (result.error?.toLowerCase().includes("not found")) {
-      const created = await storage.save({ name, segments: segmentsWithProb });
+      const created = await storage.save({ name, segments: segmentsWithWeight });
       if (created.success && created.wheel) {
         queryClient.invalidateQueries({ queryKey: ["wheels", storage.isCloud] });
         markSaved(created.wheel.id, created.wheel.name);
@@ -173,15 +170,15 @@ export default function Home() {
 
   const handleSaveNew = async (name: string) => {
     const wheelData = getWheelData();
-    const segmentsWithProb = wheelData.segments.map((seg, idx) => ({
+    const segmentsWithWeight = wheelData.segments.map((seg, idx) => ({
       id: seg.id,
       label: seg.label,
       color: seg.color,
-      probability: wheelData.probabilities[idx],
+      weight: wheelData.weights[idx],
     }));
     const result = await storage.save({
       name,
-      segments: segmentsWithProb,
+      segments: segmentsWithWeight,
     });
     if (result.success && result.wheel) {
       queryClient.invalidateQueries({ queryKey: ["wheels", storage.isCloud] });
@@ -213,7 +210,7 @@ export default function Home() {
     const wheel = {
       id: "share",
       name: currentWheelName || "My Wheel",
-      segments: data.segments.map((s, i) => ({ ...s, probability: data.probabilities[i] })),
+      segments: data.segments.map((s, i) => ({ ...s, weight: data.weights[i] })),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -233,7 +230,7 @@ export default function Home() {
     const wheel = {
       id: "obs",
       name: currentWheelName || "My Wheel",
-      segments: data.segments.map((s, i) => ({ ...s, probability: data.probabilities[i] })),
+      segments: data.segments.map((s, i) => ({ ...s, weight: data.weights[i] })),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -335,11 +332,11 @@ export default function Home() {
           return acc;
         }, [])
       : [];
-    spin(probabilities, segments, excludedIndices);
-  }, [spin, probabilities, segments, noRepeatEnabled, claimedIds]);
+    spin(weights, segments, excludedIndices);
+  }, [spin, weights, segments, noRepeatEnabled, claimedIds]);
 
   const allClaimed = noRepeatEnabled && claimedIds.length >= segments.length;
-  const canSpin = isValid && !isSpinning && !allClaimed;
+  const canSpin = !isSpinning && !allClaimed;
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -466,11 +463,9 @@ export default function Home() {
             isSpinning={isSpinning}
           />
 
-          {!presentationMode && !isLoading && !isSpinning && !canSpin && (
+          {!presentationMode && !isLoading && !isSpinning && allClaimed && (
             <p className="text-xs text-amber-400 text-center max-w-[280px]" data-testid="text-spin-disabled-reason">
-              {allClaimed
-                ? "Every prize has been claimed. Open Customize to reset and spin again."
-                : "Odds need to total 100%, or leave them all at 0 for equal odds."}
+              Every prize has been claimed. Open Customize to reset and spin again.
             </p>
           )}
 
@@ -526,14 +521,14 @@ export default function Home() {
             </Button>
             <ProbabilityPanel
               segments={segments}
-              probabilities={probabilities}
-              onProbabilityChange={setProbability}
+              weights={weights}
+              onWeightChange={setWeight}
               onRename={renameSegment}
               onRecolor={recolorSegment}
               onApplyColorPalette={applyColorPalette}
               onAdd={addSegment}
               onRemove={removeSegment}
-              onResetProbabilities={resetProbabilities}
+              onResetWeights={resetWeights}
               onNewWheel={resetToDefault}
               onSaveWheel={handleSaveWheel}
               onShare={handleShare}
@@ -543,9 +538,6 @@ export default function Home() {
               customColors={ent.customColors}
               canUseObs={ent.obs}
               isPro={ent.isPro}
-              total={total}
-              isValid={isValid}
-              isEqualOdds={isEqualOdds}
               canAdd={canAdd}
               canRemove={canRemove}
               currentWheelName={currentWheelName}

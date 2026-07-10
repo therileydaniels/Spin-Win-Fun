@@ -1,4 +1,5 @@
 import { FREE } from "@shared/entitlements";
+import { migrateSegment } from "@shared/schema";
 
 const STORAGE_KEY = "quickwheel_saved_wheels";
 const MAX_WHEELS = FREE.maxWheels; // 3 — anonymous users are always free tier
@@ -10,7 +11,7 @@ export interface LocalWheel {
     id: string;
     label: string;
     color: string;
-    probability: number;
+    weight: number;
   }>;
   createdAt: string;
   updatedAt: string;
@@ -27,7 +28,10 @@ export function getLocalWheels(): LocalWheel[] {
   try {
     const data = localStorage.getItem(STORAGE_KEY);
     if (!data) return [];
-    return JSON.parse(data) as LocalWheel[];
+    const wheels = JSON.parse(data) as LocalWheel[];
+    // Wheels saved before the weighted-probability-pattern rename still have
+    // `probability` instead of `weight` in their stored JSON.
+    return wheels.map((w) => ({ ...w, segments: w.segments.map(migrateSegment) }));
   } catch {
     return [];
   }
@@ -39,7 +43,7 @@ export function saveWheelToLocal(wheel: {
     id: string;
     label: string;
     color: string;
-    probability: number;
+    weight: number;
   }>;
 }): { success: boolean; wheel?: LocalWheel; error?: string } {
   try {
@@ -86,7 +90,7 @@ export function updateLocalWheel(
       id: string;
       label: string;
       color: string;
-      probability: number;
+      weight: number;
     }>;
   }
 ): { success: boolean; wheel?: LocalWheel; error?: string } {
@@ -195,7 +199,7 @@ export function encodeWheelToUrl(wheel: LocalWheel): string {
     s: wheel.segments.map(seg => ({
       l: seg.label,
       c: seg.color,
-      p: seg.probability,
+      p: seg.weight,
     })),
   };
   return btoa(encodeURIComponent(JSON.stringify(data)));
@@ -205,36 +209,36 @@ function isValidHexColor(color: string): boolean {
   return /^#[0-9A-Fa-f]{6}$/.test(color);
 }
 
-export function decodeWheelFromUrl(encoded: string): { name: string; segments: Array<{ id: string; label: string; color: string; probability: number }> } | null {
+export function decodeWheelFromUrl(encoded: string): { name: string; segments: Array<{ id: string; label: string; color: string; weight: number }> } | null {
   try {
     const json = decodeURIComponent(atob(encoded));
     const data = JSON.parse(json);
-    
+
     if (!data.s || !Array.isArray(data.s) || data.s.length < 2 || data.s.length > 20) {
       return null;
     }
-    
+
     const segments = data.s
-      .filter((seg: { l?: string; c?: string; p?: number }) => 
-        typeof seg.l === "string" && 
-        typeof seg.c === "string" && 
+      .filter((seg: { l?: string; c?: string; p?: number }) =>
+        typeof seg.l === "string" &&
+        typeof seg.c === "string" &&
         isValidHexColor(seg.c) &&
-        typeof seg.p === "number" && 
-        isFinite(seg.p) && 
-        seg.p >= 0 && 
+        typeof seg.p === "number" &&
+        isFinite(seg.p) &&
+        seg.p >= 0 &&
         seg.p <= 100
       )
       .map((seg: { l: string; c: string; p: number }) => ({
         id: generateId(),
         label: seg.l.slice(0, 25),
         color: seg.c,
-        probability: Math.min(100, Math.max(0, seg.p)),
+        weight: Math.min(100, Math.max(0, seg.p)),
       }));
-    
+
     if (segments.length < 2) {
       return null;
     }
-    
+
     return {
       name: (typeof data.n === "string" ? data.n.slice(0, 50) : "Shared Wheel"),
       segments,
