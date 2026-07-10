@@ -67,7 +67,11 @@ export async function setupVite(server: Server, app: Express) {
 
   app.use(vite.middlewares);
 
-  // Serve landing page at root
+  // Serve landing page at root. These static marketing pages have no Vite
+  // module imports to resolve, so we skip vite.transformIndexHtml() here —
+  // it unconditionally prefixes root-relative asset URLs (e.g.
+  // /app/screenshots/...) with the configured base ("/app/"), producing
+  // doubled paths like /app/app/screenshots/... in dev only.
   app.get("/", async (_req, res, next) => {
     try {
       const landingPath = path.resolve(
@@ -76,11 +80,9 @@ export async function setupVite(server: Server, app: Express) {
         "client",
         "landing.html",
       );
-      let template = await fs.promises.readFile(landingPath, "utf-8");
-      const page = await vite.transformIndexHtml("/", template);
-      res.status(200).set({ "Content-Type": "text/html" }).end(page);
+      const template = await fs.promises.readFile(landingPath, "utf-8");
+      res.status(200).set({ "Content-Type": "text/html" }).end(template);
     } catch (e) {
-      vite.ssrFixStacktrace(e as Error);
       next(e);
     }
   });
@@ -94,11 +96,9 @@ export async function setupVite(server: Server, app: Express) {
         "client",
         "terms.html",
       );
-      let template = await fs.promises.readFile(termsPath, "utf-8");
-      const page = await vite.transformIndexHtml("/terms", template);
-      res.status(200).set({ "Content-Type": "text/html" }).end(page);
+      const template = await fs.promises.readFile(termsPath, "utf-8");
+      res.status(200).set({ "Content-Type": "text/html" }).end(template);
     } catch (e) {
-      vite.ssrFixStacktrace(e as Error);
       next(e);
     }
   });
@@ -111,11 +111,9 @@ export async function setupVite(server: Server, app: Express) {
         "client",
         "privacy.html",
       );
-      let template = await fs.promises.readFile(privacyPath, "utf-8");
-      const page = await vite.transformIndexHtml("/privacy", template);
-      res.status(200).set({ "Content-Type": "text/html" }).end(page);
+      const template = await fs.promises.readFile(privacyPath, "utf-8");
+      res.status(200).set({ "Content-Type": "text/html" }).end(template);
     } catch (e) {
-      vite.ssrFixStacktrace(e as Error);
       next(e);
     }
   });
