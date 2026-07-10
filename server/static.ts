@@ -27,6 +27,18 @@ export function serveStatic(app: Express) {
     res.sendFile(privacyPath);
   });
 
+  // Root-relative assets referenced by the marketing pages (robots.txt,
+  // sitemap.xml, favicon, og:image, Organization schema logo). express.static
+  // is only mounted at /app below, so these 404'd at the domain root without
+  // this — search engines fetch /robots.txt and /sitemap.xml at the root by
+  // convention regardless of what's inside robots.txt.
+  const rootAssets = ["favicon-32x32.png", "robots.txt", "sitemap.xml", "og-image.png", "logo.png"];
+  for (const asset of rootAssets) {
+    app.get(`/${asset}`, (_req, res) => {
+      res.sendFile(path.resolve(distPath, asset));
+    });
+  }
+
   // Serve React app static assets under /app
   app.use("/app", express.static(distPath));
 
