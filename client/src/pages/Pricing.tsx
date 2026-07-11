@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useLocation } from "wouter";
 import { PricingTable } from "@clerk/react";
 import { Button } from "@/components/ui/button";
@@ -5,6 +6,9 @@ import { ArrowLeft } from "lucide-react";
 import { Footer } from "@/components/Footer";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useTheme } from "@/hooks/useTheme";
+import { trackEvent } from "@/lib/analytics";
+
+const PRICING_SOURCES = new Set(["nav", "dialog", "support_prompt"]);
 
 // Clerk's widget can't resolve our `hsl(var(--token))` CSS variables (it renders
 // outside the .dark scope where the vars are defined), so it fell back to its
@@ -41,6 +45,13 @@ const CLERK_THEME = {
 export default function Pricing() {
   const [, setLocation] = useLocation();
   const { isDark } = useTheme();
+
+  useEffect(() => {
+    const src = new URLSearchParams(window.location.search).get("src");
+    const source = src && PRICING_SOURCES.has(src) ? src : "direct";
+    trackEvent("pricing_page_view", { source });
+  }, []);
+
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       <header className="flex items-center justify-between gap-4 px-4 py-3 border-b border-border">

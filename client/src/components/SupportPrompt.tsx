@@ -70,7 +70,7 @@ export function SupportPrompt({ spinResultOpen }: SupportPromptProps) {
   const handleSupport = () => {
     markSupportPromptSeen();
     setOpen(false);
-    setLocation("/pricing");
+    setLocation("/pricing?src=support_prompt");
   };
 
   // Escape / overlay-click closes for THIS session only — it must NOT burn the

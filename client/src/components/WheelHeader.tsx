@@ -125,7 +125,7 @@ export const WheelHeader = memo(function WheelHeader({
                 {user?.primaryEmailAddress?.emailAddress ?? user?.username ?? "Signed in"}
               </DropdownMenuLabel>
               {!isPro && (
-                <DropdownMenuItem onClick={() => setLocation("/pricing")}>
+                <DropdownMenuItem onClick={() => setLocation("/pricing?src=nav")}>
                   <Sparkles className="w-4 h-4 mr-2 text-amber-400" />Go Pro
                 </DropdownMenuItem>
               )}
@@ -236,7 +236,7 @@ export const WheelHeader = memo(function WheelHeader({
           </Show>
           <Show when="signed-in">
             {!isPro && (
-              <Button variant="ghost" size="sm" onClick={() => setLocation("/pricing")} className="gap-1 text-amber-400" data-testid="button-go-pro">
+              <Button variant="ghost" size="sm" onClick={() => setLocation("/pricing?src=nav")} className="gap-1 text-amber-400" data-testid="button-go-pro">
                 <Sparkles className="w-4 h-4" />Go Pro
               </Button>
             )}

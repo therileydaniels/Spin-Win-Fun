@@ -35,7 +35,7 @@ interface ProbabilityPanelProps {
   onSaveWheel: () => void;
   onShare: () => void;
   onOBSEmbed: () => void;
-  onUpgrade: (feature: string) => void;
+  onUpgrade: (feature: string, gate: string) => void;
   maxSegments: number;
   customColors: boolean;
   canUseObs: boolean;
@@ -128,7 +128,7 @@ export function ProbabilityPanel({
                   <DropdownMenuItem onClick={onShare} data-testid="button-share-wheel">
                     <Share2 className="w-4 h-4 mr-2" />Copy share link
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={canUseObs ? onOBSEmbed : () => onUpgrade("OBS overlay")} data-testid="button-obs-embed">
+                  <DropdownMenuItem onClick={canUseObs ? onOBSEmbed : () => onUpgrade("OBS overlay", "obs_link")} data-testid="button-obs-embed">
                     <Monitor className="w-4 h-4 mr-2" />Copy OBS link{!canUseObs && <Lock className="w-3 h-3 ml-auto text-amber-400" />}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
@@ -171,7 +171,7 @@ export function ProbabilityPanel({
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" onClick={canUseObs ? onOBSEmbed : () => onUpgrade("OBS overlay")} className="text-muted-foreground relative" data-testid="button-obs-embed">
+                  <Button variant="ghost" size="icon" onClick={canUseObs ? onOBSEmbed : () => onUpgrade("OBS overlay", "obs_link")} className="text-muted-foreground relative" data-testid="button-obs-embed">
                     <Monitor className="w-4 h-4" />
                     {!canUseObs && <Lock className="w-2.5 h-2.5 absolute top-0 right-0 text-amber-400" />}
                   </Button>
@@ -232,7 +232,7 @@ export function ProbabilityPanel({
                 ) : (
                   <button
                     type="button"
-                    onClick={() => onUpgrade("Custom colors")}
+                    onClick={() => onUpgrade("Custom colors", "custom_colors")}
                     className="w-6 h-6 rounded-md shrink-0 relative"
                     style={{ backgroundColor: segment.color }}
                     aria-label="Custom colors are a Pro feature"
@@ -286,7 +286,7 @@ export function ProbabilityPanel({
           <Button
             variant="outline"
             size="sm"
-            onClick={canAdd ? onAdd : isPro ? undefined : () => onUpgrade("More segments")}
+            onClick={canAdd ? onAdd : isPro ? undefined : () => onUpgrade("More segments", "segment_cap")}
             disabled={!canAdd && isPro}
             className="w-full mt-3 border-border"
             data-testid="button-add-segment"

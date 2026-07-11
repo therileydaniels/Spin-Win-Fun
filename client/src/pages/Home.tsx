@@ -24,6 +24,15 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Settings, ChevronLeft, Mail, Download } from "lucide-react";
 
+// Matches the two known wheel-cap messages: server's 409 ("Wheel limit
+// reached (N)") and the anonymous local-storage cap ("You can save up to N
+// wheels...").
+function isWheelCapError(error?: string): boolean {
+  if (!error) return false;
+  const lower = error.toLowerCase();
+  return lower.includes("wheel limit reached") || lower.includes("save up to");
+}
+
 export default function Home() {
   const {
     isSpinning,
@@ -65,7 +74,11 @@ export default function Home() {
   const queryClient = useQueryClient();
   const ent = useEntitlements();
   const [upgradeFeature, setUpgradeFeature] = useState<string | null>(null);
-  const openUpgrade = useCallback((feature: string) => setUpgradeFeature(feature), []);
+  const [upgradeGate, setUpgradeGate] = useState<string>("wheel_cap");
+  const openUpgrade = useCallback((feature: string, gate: string) => {
+    setUpgradeFeature(feature);
+    setUpgradeGate(gate);
+  }, []);
 
   const [presentationMode, setPresentationMode] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -153,6 +166,10 @@ export default function Home() {
         });
         return;
       }
+      if (isWheelCapError(created.error)) {
+        openUpgrade("Wheel limit", "wheel_cap");
+        return;
+      }
       toast({
         title: "Error",
         description: created.error || "Failed to save wheel.",
@@ -189,6 +206,9 @@ export default function Home() {
         title: "Wheel saved!",
         description: `"${result.wheel.name}" has been saved.`,
       });
+    } else if (isWheelCapError(result.error)) {
+      setSaveModalOpen(false);
+      openUpgrade("Wheel limit", "wheel_cap");
     } else {
       toast({
         title: "Error",
@@ -225,7 +245,7 @@ export default function Home() {
   }, [getWheelData, currentWheelName, toast]);
 
   const handleOBSEmbed = useCallback(async () => {
-    if (!ent.obs) { setUpgradeFeature("OBS overlay"); return; }
+    if (!ent.obs) { openUpgrade("OBS overlay", "obs_link"); return; }
     const data = getWheelData();
     const wheel = {
       id: "obs",
@@ -242,10 +262,10 @@ export default function Home() {
     } catch {
       toast({ title: "Here's your OBS link", description: url });
     }
-  }, [getWheelData, currentWheelName, toast, ent.obs]);
+  }, [getWheelData, currentWheelName, toast, ent.obs, openUpgrade]);
 
   const handleDownloadSvg = useCallback(() => {
-    if (!ent.export) { setUpgradeFeature("SVG export"); return; }
+    if (!ent.export) { openUpgrade("SVG export", "export"); return; }
     const wheelSvgEl = document.querySelector<SVGSVGElement>('[data-testid="wheel-svg"]');
     const pointerEl = document.querySelector<HTMLElement>('[data-testid="wheel-pointer"]');
     if (!wheelSvgEl || !pointerEl) {
@@ -290,7 +310,7 @@ export default function Home() {
     a.click();
     URL.revokeObjectURL(url);
     toast({ title: "Saved as SVG", description: "Check your downloads folder." });
-  }, [currentWheelName, toast, ent.export]);
+  }, [currentWheelName, toast, ent.export, openUpgrade]);
 
   useEffect(() => {
     if (showResult && winner) {
@@ -391,7 +411,7 @@ export default function Home() {
           onToggleHistory={() => setShowHistory(!showHistory)}
           removeWinnerMode={removeWinnerMode}
           onToggleRemoveWinner={() => setRemoveWinnerMode(!removeWinnerMode)}
-          onEnterPresentation={() => ent.presentation ? setPresentationMode(true) : openUpgrade("Presentation mode")}
+          onEnterPresentation={() => ent.presentation ? setPresentationMode(true) : openUpgrade("Presentation mode", "presentation_mode")}
           isPro={ent.isPro}
           isMuted={isMuted}
           onToggleMute={toggleMute}
@@ -452,6 +472,7 @@ export default function Home() {
                   spinDuration={spinDuration}
                   claimedIds={noRepeatEnabled ? claimedIds : []}
                   showBranding={ent.branding}
+                  onBrandingClick={() => openUpgrade("Branding", "branding")}
                 />
               </div>
             )}
@@ -584,6 +605,7 @@ export default function Home() {
         open={upgradeFeature !== null}
         onOpenChange={(o) => !o && setUpgradeFeature(null)}
         feature={upgradeFeature ?? undefined}
+        gate={upgradeGate}
       />
     </div>
   );

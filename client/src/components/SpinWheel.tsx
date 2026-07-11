@@ -10,6 +10,7 @@ interface SpinWheelProps {
   size?: number;
   claimedIds?: string[];
   showBranding?: boolean;
+  onBrandingClick?: () => void;
 }
 
 function getContrastColor(hexColor: string): string {
@@ -117,7 +118,7 @@ function getRadialColumns(
   return { columns: [label.slice(0, maxChars)], fontSize: minFont };
 }
 
-export function SpinWheel({ segments, rotation, isSpinning, spinDuration, size, claimedIds = [], showBranding = false }: SpinWheelProps) {
+export function SpinWheel({ segments, rotation, isSpinning, spinDuration, size, claimedIds = [], showBranding = false, onBrandingClick }: SpinWheelProps) {
   const segmentAngle = 360 / segments.length;
   const viewBoxSize = 500;
   const radius = 200;
@@ -291,9 +292,11 @@ export function SpinWheel({ segments, rotation, isSpinning, spinDuration, size, 
             fontSize="14"
             fontWeight="600"
             fill="rgba(255,255,255,0.55)"
-            className="pointer-events-none select-none"
+            className={onBrandingClick ? "select-none cursor-pointer" : "pointer-events-none select-none"}
             style={{ fontFamily: "Inter, system-ui, sans-serif" }}
             data-testid="wheel-branding"
+            onClick={onBrandingClick}
+            aria-label={onBrandingClick ? "Made with QuickWheel — upgrade to Pro to remove this" : undefined}
           >
             Made with QuickWheel
           </text>

@@ -21,7 +21,17 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Footer } from "@/components/Footer";
+import { UpgradeDialog } from "@/components/UpgradeDialog";
 import { ArrowLeft, Trash2, Play, CircleDot, AlertTriangle, Copy, Share2, Loader2 } from "lucide-react";
+
+// Matches the two known wheel-cap messages: server's 409 ("Wheel limit
+// reached (N)") and the anonymous local-storage cap ("You can save up to N
+// wheels...").
+function isWheelCapError(error?: string): boolean {
+  if (!error) return false;
+  const lower = error.toLowerCase();
+  return lower.includes("wheel limit reached") || lower.includes("save up to");
+}
 
 export default function MyWheels() {
   const [, setLocation] = useLocation();
@@ -31,6 +41,7 @@ export default function MyWheels() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [loadId, setLoadId] = useState<string | null>(null);
   const [pendingLoad, setPendingLoad] = useState<LocalWheel | null>(null);
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
 
   const storage = useWheelStorage();
   const queryClient = useQueryClient();
@@ -84,6 +95,8 @@ export default function MyWheels() {
         title: "Wheel duplicated",
         description: `"${result.wheel.name}" has been created.`,
       });
+    } else if (isWheelCapError(result.error)) {
+      setUpgradeOpen(true);
     } else {
       toast({
         title: "Error",
@@ -357,6 +370,13 @@ export default function MyWheels() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <UpgradeDialog
+        open={upgradeOpen}
+        onOpenChange={setUpgradeOpen}
+        feature="Wheel limit"
+        gate="wheel_cap"
+      />
 
       <Footer />
     </div>
