@@ -5,21 +5,12 @@ A prize wheel spinner PWA. Users customize wheel segments, spin to pick a winner
 
 ## Stack
 - **Frontend:** React 18 + TypeScript, Vite, Tailwind CSS v3, shadcn/ui (Radix), Wouter routing, Framer Motion
-- **Backend:** Express (TypeScript via tsx), port **5000**; `@clerk/backend` verifies session tokens; Drizzle ORM over Railway Postgres
-- **Auth:** Clerk (`@clerk/react`) — modal sign-in/sign-up; server-side token verification on `/api/wheels` routes
-- **Storage:** Railway Postgres for signed-in users; `localStorage` for signed-out users. `useWheelStorage()` hook dispatches automatically. Wheel cap is tier-aware (see Monetization).
+- **Backend:** Express (TypeScript via tsx), port **5000** — serves the static app and the `/api/spin` endpoint only. No accounts, no database.
+- **Storage:** `localStorage` only, via `useWheelStorage()` / `localWheelStorage.ts`. No cloud sync.
 - **PWA:** Vite PWA plugin, manifest + service worker in `public/`
 
-## Monetization
-- **Tiers:** Free (anonymous + signed-in) and **Pro** (Clerk Billing plan slug `pro`, monthly + annual). Clerk Billing is in Beta; `@clerk/react`/`@clerk/backend` are pinned-ish — watch for breaking changes.
-- **Source of truth:** `shared/entitlements.ts` — `entitlementsFor(isPro)` returns the caps object (pure, no deps; portable to other Clerk apps). Client reads it via `useEntitlements()`; server reads `req.auth.isPro` (set in `server/clerkAuth.ts` via `authenticateRequest().has({ plan: 'pro' })`).
-- **Hard gates (server, authoritative):** wheel cap (Free 3 / Pro 50) + segment count (Free 8 / Pro 20) in `server/wheelsRouter.ts`. Anonymous local cap is `FREE.maxWheels` in `localWheelStorage.ts`.
-- **Soft gates (client UX):** export, OBS link, presentation mode, custom colors, branding watermark — all read from `useEntitlements()`; bypassable in devtools (accepted).
-- **Branding:** `SpinWheel showBranding`; Pro OBS links append `nb=1` so `/embed` hides the watermark. Free users may view/spin shared wheels with >8 segments but can't author past their tier.
-- **Pricing UI:** `/pricing` (`Pricing.tsx`) renders Clerk `<PricingTable />`; `UpgradeDialog` + "Go Pro" nav entries route there.
-- **Env:** server now needs `CLERK_PUBLISHABLE_KEY` (same value as `VITE_CLERK_PUBLISHABLE_KEY`) for `authenticateRequest`. `authorizedParties` is set to `https://quickwheel.co` in production only.
-- **Tests:** Vitest (`npm test`) covers the pure entitlements logic (`shared/entitlements.test.ts`). Tests never touch the DB.
-- **Migration to direct Stripe (future):** Clerk does NOT sync subscriptions to Stripe Billing — moving off Clerk means re-creating subscriptions, but the entitlements layer keeps the app code provider-agnostic. See spec.
+## Entitlements
+Everyone gets the same flat set of limits — there is no free/paid tier. Source of truth: `shared/entitlements.ts` — `ENTITLEMENTS` (10 wheels, 12 segments, export/OBS/presentation mode/custom colors all enabled, no branding watermark). Client reads it via `useEntitlements()`. The wheel cap is enforced in `localWheelStorage.ts` (`saveWheelToLocal`/`duplicateLocalWheel`); the segment cap is enforced in `useCustomSegments.ts`. Hitting either cap shows a plain error/toast — there's no upsell.
 
 ## Key Routes
 | Path | Component | Notes |
@@ -27,7 +18,6 @@ A prize wheel spinner PWA. Users customize wheel segments, spin to pick a winner
 | `/` | `Home.tsx` | Main wheel + spin UI |
 | `/my-wheels` | `MyWheels.tsx` | Saved wheels list |
 | `/templates` | `Templates.tsx` | Preset wheel templates |
-| `/pricing` | `Pricing.tsx` | Clerk `<PricingTable />` — Free vs Pro |
 | `/embed` | `Embed.tsx` | OBS browser-source overlay |
 | `/privacy` | `Privacy.tsx` | Privacy policy |
 | `/terms` | `Terms.tsx` | Terms of service |
@@ -39,15 +29,10 @@ A prize wheel spinner PWA. Users customize wheel segments, spin to pick a winner
 Probabilities are normalized weights (not percentages). Equal odds = all 1.0.
 
 ## Data Model (saved wheel)
-Cloud:
 ```ts
-{ id: uuid; userId: clerk-user-id; name: string; segments: WheelSegment[]; createdAt; updatedAt }
+{ id: string; name: string; segments: WheelSegment[]; createdAt; updatedAt }
 ```
-Indexed on `user_id`. 50-wheel-per-user cap enforced server-side.
-
-Local: same shape minus `userId`, IDs are `crypto.randomUUID()` strings.
-
-`MigrationPrompt` (one-time per device) imports local wheels to cloud on first sign-in.
+Stored in `localStorage` only (`localWheelStorage.ts`), IDs are `crypto.randomUUID()` strings. Capped at `ENTITLEMENTS.maxWheels` (10) per browser.
 
 ## Core Components
 - `SpinWheel.tsx` — pure SVG wheel renderer; `data-testid="wheel-svg"` on the main SVG, `data-testid="wheel-pointer"` on the pointer overlay div
@@ -71,18 +56,17 @@ Local: same shape minus `userId`, IDs are `crypto.randomUUID()` strings.
 - OBS embed link: `/app/embed?wheel=<encoded>`
 - Changelog version gating via `CHANGELOG_VERSION` in `lib/changelog.ts`
 
+## SupportPrompt
+`SupportPrompt.tsx` (a one-time "support QuickWheel" popup after a user's first spin) is disabled — `shouldShowSupportPrompt` in `shared/supportPrompt.ts` always returns `false`. It previously pointed at the now-removed Pro upsell. Re-enable once there's a new donation destination to link it to.
+
 ## Environment
-- `VITE_CLERK_PUBLISHABLE_KEY` — Clerk frontend key (`pk_test_…` / `pk_live_…`). **Baked into the frontend at build time** — changing it requires a fresh build/deploy, not just a restart.
-- `CLERK_SECRET_KEY` — Clerk backend key for token verification (`sk_test_…` / `sk_live_…`)
-- `DATABASE_URL` — Postgres connection string. Read at server startup (`server/db.ts` throws if unset → boot crash / 502). Must be present in the Railway service's own variables.
-- **Prod Clerk = three `live` keys.** The Production Clerk instance is separate from Development and has its own key set. When pointing prod at it, **all three** must be the `live` values together: `VITE_CLERK_PUBLISHABLE_KEY` (`pk_live_…`), `CLERK_PUBLISHABLE_KEY` (`pk_live_…`), `CLERK_SECRET_KEY` (`sk_live_…`). A mismatch (e.g. live publishable + test secret) means the server can't verify frontend tokens → wheel save/load + server-side `isPro` break while the UI still looks fine.
-- **New prod instance warm-up:** a freshly-created Clerk production instance can serve intermittent **503s on `clerk-js`** (`clerk.<domain>/npm/@clerk/clerk-js…`) for a while after first deploy while the custom domain / SSL propagates. Sign-in flickers then; it self-resolves — not a code bug.
+No required environment variables — the app has no accounts or database. `PORT` is optional (defaults to 5000).
 
 ## Deployment
 - **Host:** Railway, serving `quickwheel.co`. **Auto-deploys on push to `main`** (GitHub repo `therileydaniels/Spin-Win-Fun`). Treat any push to `main` as a production release.
 - **Build/start:** `npm run build` (Vite client → `dist/public`, esbuild server → `dist/index.cjs`) then `npm start`. Server reads `PORT` (Railway-provided), defaults 5000.
-- **DNS/proxy:** Cloudflare in front. Clerk's verification CNAMEs (`clerk`, `accounts`, `clkmail`, `clk._domainkey`, `clk2._domainkey`) must be **DNS-only (grey cloud)**, not proxied.
-- **Shared DB gotcha:** local `.env.local` `DATABASE_URL` points at the *same* Railway Postgres as production — dev writes are real production rows.
+- **DNS/proxy:** Cloudflare in front.
+- **Note:** the app previously had Clerk auth/billing and a Railway Postgres-backed cloud wheel store; both were removed. The Postgres database itself was left running (not torn down) with any pre-existing rows intact, but the app no longer reads or writes to it.
 
 ## Content Security Policy (production only)
-`server/index.ts` sets a helmet CSP that applies only when `NODE_ENV=production`. It **must** allow Clerk's frontend API (`clerk.quickwheel.co`) and Cloudflare bot protection (`challenges.cloudflare.com`) in `script-src`/`connect-src`/`frame-src`, plus `img.clerk.com` and `worker-src blob:` — otherwise the browser blocks `clerk-js` and the sign-in/up UI silently never renders (works locally where CSP is off). See https://clerk.com/docs/security/clerk-csp. Known harmless gap: Cloudflare's `static.cloudflareinsights.com` beacon is CSP-blocked (console error only).
+`server/index.ts` sets a helmet CSP that applies only when `NODE_ENV=production`. It allows Google Analytics (`googletagmanager.com`, `google-analytics.com`) for `script-src`/`img-src`/`connect-src`. Known harmless gap: Cloudflare's `static.cloudflareinsights.com` beacon is CSP-blocked (console error only).

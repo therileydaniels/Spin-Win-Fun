@@ -3,13 +3,11 @@ import { useLocation } from "wouter";
 import { useTheme } from "@/hooks/useTheme";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { SoundToggle } from "@/components/SoundToggle";
 import { InstallPrompt } from "@/components/InstallPrompt";
-import { MigrationPrompt } from "@/components/MigrationPrompt";
-import { Menu, Monitor, Settings, FolderOpen, History, Trash2, LayoutGrid, Volume2, VolumeX, Sun, Moon, LogIn, LogOut, Lock, Sparkles } from "lucide-react";
-import { Show, SignInButton, SignUpButton, UserButton, useClerk, useUser } from "@clerk/react";
+import { Menu, Monitor, Settings, FolderOpen, History, Trash2, LayoutGrid, Volume2, VolumeX, Sun, Moon } from "lucide-react";
 
 interface WheelHeaderProps {
   settingsOpen: boolean;
@@ -19,7 +17,6 @@ interface WheelHeaderProps {
   removeWinnerMode: boolean;
   onToggleRemoveWinner: () => void;
   onEnterPresentation: () => void;
-  isPro: boolean;
   isMuted: boolean;
   onToggleMute: () => void;
 }
@@ -32,13 +29,10 @@ export const WheelHeader = memo(function WheelHeader({
   removeWinnerMode,
   onToggleRemoveWinner,
   onEnterPresentation,
-  isPro,
   isMuted,
   onToggleMute,
 }: WheelHeaderProps) {
   const [, setLocation] = useLocation();
-  const { openSignIn, openSignUp, signOut } = useClerk();
-  const { user } = useUser();
   const { isDark, toggleTheme } = useTheme();
 
   return (
@@ -100,7 +94,7 @@ export const WheelHeader = memo(function WheelHeader({
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={onEnterPresentation}>
-              <Monitor className="w-4 h-4 mr-2" />Presentation mode{!isPro && <Lock className="w-3 h-3 ml-auto text-amber-400" />}
+              <Monitor className="w-4 h-4 mr-2" />Presentation mode
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={onToggleMute}>
@@ -111,28 +105,6 @@ export const WheelHeader = memo(function WheelHeader({
               {isDark ? <Sun className="w-4 h-4 mr-2" /> : <Moon className="w-4 h-4 mr-2" />}
               {isDark ? "Light mode" : "Dark mode"}
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <Show when="signed-out">
-              <DropdownMenuItem onClick={() => openSignIn()}>
-                <LogIn className="w-4 h-4 mr-2" />Sign in
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => openSignUp()}>
-                <LogIn className="w-4 h-4 mr-2" />Sign up
-              </DropdownMenuItem>
-            </Show>
-            <Show when="signed-in">
-              <DropdownMenuLabel className="font-normal text-xs text-muted-foreground truncate">
-                {user?.primaryEmailAddress?.emailAddress ?? user?.username ?? "Signed in"}
-              </DropdownMenuLabel>
-              {!isPro && (
-                <DropdownMenuItem onClick={() => setLocation("/pricing?src=nav")}>
-                  <Sparkles className="w-4 h-4 mr-2 text-amber-400" />Go Pro
-                </DropdownMenuItem>
-              )}
-              <DropdownMenuItem onClick={() => signOut({ redirectUrl: "/app" })}>
-                <LogOut className="w-4 h-4 mr-2" />Sign out
-              </DropdownMenuItem>
-            </Show>
           </DropdownMenuContent>
         </DropdownMenu>
 
@@ -216,7 +188,6 @@ export const WheelHeader = memo(function WheelHeader({
                 aria-label="Enter presentation mode"
               >
                 <Monitor className="w-4 h-4" />
-                {!isPro && <Lock className="w-2.5 h-2.5 absolute top-0 right-0 text-amber-400" />}
               </Button>
             </TooltipTrigger>
             <TooltipContent>
@@ -226,28 +197,11 @@ export const WheelHeader = memo(function WheelHeader({
         </div>
 
         <div className="hidden sm:flex items-center gap-1">
-          <Show when="signed-out">
-            <SignInButton mode="modal">
-              <Button variant="ghost" size="sm" data-testid="button-sign-in">Sign in</Button>
-            </SignInButton>
-            <SignUpButton mode="modal">
-              <Button size="sm" data-testid="button-sign-up">Sign up</Button>
-            </SignUpButton>
-          </Show>
-          <Show when="signed-in">
-            {!isPro && (
-              <Button variant="ghost" size="sm" onClick={() => setLocation("/pricing?src=nav")} className="gap-1 text-amber-400" data-testid="button-go-pro">
-                <Sparkles className="w-4 h-4" />Go Pro
-              </Button>
-            )}
-            <UserButton />
-          </Show>
           <SoundToggle isMuted={isMuted} onToggle={onToggleMute} />
           <ThemeToggle />
           <InstallPrompt />
         </div>
       </div>
-      <MigrationPrompt />
     </header>
   );
 });

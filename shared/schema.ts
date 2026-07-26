@@ -1,5 +1,3 @@
-import { pgTable, text, varchar, timestamp, jsonb, uuid, index } from "drizzle-orm/pg-core";
-import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 // Field names follow the Weighted Probability Pattern
@@ -42,10 +40,6 @@ export function migrateSegment(seg: {
 export const MIN_SEGMENTS = 2;
 export const MAX_SEGMENTS = 20;
 export const MAX_LABEL_LENGTH = 25;
-// SUPERSEDED: the per-user wheel cap is now tier-aware — see `maxWheels` in
-// shared/entitlements.ts (FREE 3 / PRO 50). Kept only for backward reference;
-// not used for enforcement.
-export const MAX_CLOUD_WHEELS = 50;
 
 // Validates a single segment inside a wheel payload. The client already
 // enforces these limits in the UI, but the API must enforce them too — a
@@ -56,34 +50,6 @@ export const wheelSegmentSchema = z.object({
   color: z.string(),
   weight: z.number().finite().nonnegative(),
 });
-
-export const wheels = pgTable(
-  "wheels",
-  {
-    id: uuid("id").defaultRandom().primaryKey(),
-    userId: text("user_id").notNull(),
-    name: varchar("name", { length: 255 }).notNull(),
-    segments: jsonb("segments").$type<WheelSegment[]>().notNull(),
-    createdAt: timestamp("created_at").notNull().defaultNow(),
-    updatedAt: timestamp("updated_at").notNull().defaultNow(),
-  },
-  (table) => ({
-    userIdIdx: index("wheels_user_id_idx").on(table.userId),
-  })
-);
-
-export const insertWheelSchema = createInsertSchema(wheels, {
-  name: z.string().min(1).max(255),
-  segments: z.array(wheelSegmentSchema).min(MIN_SEGMENTS).max(MAX_SEGMENTS),
-}).omit({
-  id: true,
-  userId: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-export type InsertWheel = z.infer<typeof insertWheelSchema>;
-export type Wheel = typeof wheels.$inferSelect;
 
 export const spinRequestSchema = z.object({
   weights: z.array(z.number().finite().min(0).max(100)).min(2).max(20),

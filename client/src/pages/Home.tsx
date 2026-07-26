@@ -17,8 +17,6 @@ import { ChangelogCard } from "@/components/ChangelogCard";
 import { CHANGELOG_VERSION } from "@/lib/changelog";
 import { decodeWheelFromUrl, encodeWheelToUrl } from "@/lib/localWheelStorage";
 import { useWheelStorage } from "@/hooks/useWheelStorage";
-import { useEntitlements } from "@/hooks/useEntitlements";
-import { UpgradeDialog } from "@/components/UpgradeDialog";
 import { SupportPrompt } from "@/components/SupportPrompt";
 import { useQueryClient } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -72,13 +70,6 @@ export default function Home() {
   const { toast } = useToast();
   const storage = useWheelStorage();
   const queryClient = useQueryClient();
-  const ent = useEntitlements();
-  const [upgradeFeature, setUpgradeFeature] = useState<string | null>(null);
-  const [upgradeGate, setUpgradeGate] = useState<string>("wheel_cap");
-  const openUpgrade = useCallback((feature: string, gate: string) => {
-    setUpgradeFeature(feature);
-    setUpgradeGate(gate);
-  }, []);
 
   const [presentationMode, setPresentationMode] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -140,7 +131,7 @@ export default function Home() {
       segments: segmentsWithWeight,
     });
     if (result.success && result.wheel) {
-      queryClient.invalidateQueries({ queryKey: ["wheels", storage.isCloud] });
+      queryClient.invalidateQueries({ queryKey: ["wheels"] });
       markSaved(result.wheel.id, result.wheel.name);
       setSettingsOpen(false);
       toast({
@@ -157,7 +148,7 @@ export default function Home() {
     if (result.error?.toLowerCase().includes("not found")) {
       const created = await storage.save({ name, segments: segmentsWithWeight });
       if (created.success && created.wheel) {
-        queryClient.invalidateQueries({ queryKey: ["wheels", storage.isCloud] });
+        queryClient.invalidateQueries({ queryKey: ["wheels"] });
         markSaved(created.wheel.id, created.wheel.name);
         setSettingsOpen(false);
         toast({
@@ -167,7 +158,11 @@ export default function Home() {
         return;
       }
       if (isWheelCapError(created.error)) {
-        openUpgrade("Wheel limit", "wheel_cap");
+        toast({
+          title: "Wheel limit reached",
+          description: created.error,
+          variant: "destructive",
+        });
         return;
       }
       toast({
@@ -198,7 +193,7 @@ export default function Home() {
       segments: segmentsWithWeight,
     });
     if (result.success && result.wheel) {
-      queryClient.invalidateQueries({ queryKey: ["wheels", storage.isCloud] });
+      queryClient.invalidateQueries({ queryKey: ["wheels"] });
       markSaved(result.wheel.id, result.wheel.name);
       setSaveModalOpen(false);
       setSettingsOpen(false);
@@ -208,7 +203,11 @@ export default function Home() {
       });
     } else if (isWheelCapError(result.error)) {
       setSaveModalOpen(false);
-      openUpgrade("Wheel limit", "wheel_cap");
+      toast({
+        title: "Wheel limit reached",
+        description: result.error,
+        variant: "destructive",
+      });
     } else {
       toast({
         title: "Error",
@@ -245,7 +244,6 @@ export default function Home() {
   }, [getWheelData, currentWheelName, toast]);
 
   const handleOBSEmbed = useCallback(async () => {
-    if (!ent.obs) { openUpgrade("OBS overlay", "obs_link"); return; }
     const data = getWheelData();
     const wheel = {
       id: "obs",
@@ -255,17 +253,16 @@ export default function Home() {
       updatedAt: new Date().toISOString(),
     };
     const encoded = encodeWheelToUrl(wheel);
-    const url = `${window.location.origin}/app/embed?wheel=${encoded}&nb=1`;
+    const url = `${window.location.origin}/app/embed?wheel=${encoded}`;
     try {
       await navigator.clipboard.writeText(url);
       toast({ title: "OBS link copied!", description: "Paste as browser source in OBS" });
     } catch {
       toast({ title: "Here's your OBS link", description: url });
     }
-  }, [getWheelData, currentWheelName, toast, ent.obs, openUpgrade]);
+  }, [getWheelData, currentWheelName, toast]);
 
   const handleDownloadSvg = useCallback(() => {
-    if (!ent.export) { openUpgrade("SVG export", "export"); return; }
     const wheelSvgEl = document.querySelector<SVGSVGElement>('[data-testid="wheel-svg"]');
     const pointerEl = document.querySelector<HTMLElement>('[data-testid="wheel-pointer"]');
     if (!wheelSvgEl || !pointerEl) {
@@ -310,7 +307,7 @@ export default function Home() {
     a.click();
     URL.revokeObjectURL(url);
     toast({ title: "Saved as SVG", description: "Check your downloads folder." });
-  }, [currentWheelName, toast, ent.export, openUpgrade]);
+  }, [currentWheelName, toast]);
 
   useEffect(() => {
     if (showResult && winner) {
@@ -411,8 +408,7 @@ export default function Home() {
           onToggleHistory={() => setShowHistory(!showHistory)}
           removeWinnerMode={removeWinnerMode}
           onToggleRemoveWinner={() => setRemoveWinnerMode(!removeWinnerMode)}
-          onEnterPresentation={() => ent.presentation ? setPresentationMode(true) : openUpgrade("Presentation mode", "presentation_mode")}
-          isPro={ent.isPro}
+          onEnterPresentation={() => setPresentationMode(true)}
           isMuted={isMuted}
           onToggleMute={toggleMute}
         />
@@ -471,8 +467,6 @@ export default function Home() {
                   isSpinning={isSpinning}
                   spinDuration={spinDuration}
                   claimedIds={noRepeatEnabled ? claimedIds : []}
-                  showBranding={ent.branding}
-                  onBrandingClick={() => openUpgrade("Branding", "branding")}
                 />
               </div>
             )}
@@ -499,7 +493,7 @@ export default function Home() {
               title="Download wheel as SVG"
             >
               <Download className="w-3.5 h-3.5" />
-              {ent.export ? "Save as SVG" : "Save as SVG (Pro)"}
+              Save as SVG
             </Button>
           )}
 
@@ -554,11 +548,7 @@ export default function Home() {
               onSaveWheel={handleSaveWheel}
               onShare={handleShare}
               onOBSEmbed={handleOBSEmbed}
-              onUpgrade={openUpgrade}
               maxSegments={maxSegments}
-              customColors={ent.customColors}
-              canUseObs={ent.obs}
-              isPro={ent.isPro}
               canAdd={canAdd}
               canRemove={canRemove}
               currentWheelName={currentWheelName}
@@ -600,12 +590,6 @@ export default function Home() {
         onOpenChange={setSaveModalOpen}
         onSave={handleSaveNew}
         defaultName={currentWheelName || "My Wheel"}
-      />
-      <UpgradeDialog
-        open={upgradeFeature !== null}
-        onOpenChange={(o) => !o && setUpgradeFeature(null)}
-        feature={upgradeFeature ?? undefined}
-        gate={upgradeGate}
       />
     </div>
   );

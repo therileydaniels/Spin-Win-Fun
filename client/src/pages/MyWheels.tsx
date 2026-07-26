@@ -21,7 +21,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Footer } from "@/components/Footer";
-import { UpgradeDialog } from "@/components/UpgradeDialog";
 import { ArrowLeft, Trash2, Play, CircleDot, AlertTriangle, Copy, Share2, Loader2 } from "lucide-react";
 
 // Matches the two known wheel-cap messages: server's 409 ("Wheel limit
@@ -41,13 +40,12 @@ export default function MyWheels() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [loadId, setLoadId] = useState<string | null>(null);
   const [pendingLoad, setPendingLoad] = useState<LocalWheel | null>(null);
-  const [upgradeOpen, setUpgradeOpen] = useState(false);
 
   const storage = useWheelStorage();
   const queryClient = useQueryClient();
 
   const wheelsQuery = useQuery<LocalWheel[]>({
-    queryKey: ["wheels", storage.isCloud],
+    queryKey: ["wheels"],
     queryFn: () => storage.list(),
   });
 
@@ -59,7 +57,7 @@ export default function MyWheels() {
   const overCap = wheels.length > cap;
 
   const invalidate = () =>
-    queryClient.invalidateQueries({ queryKey: ["wheels", storage.isCloud] });
+    queryClient.invalidateQueries({ queryKey: ["wheels"] });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => storage.remove(id),
@@ -96,7 +94,11 @@ export default function MyWheels() {
         description: `"${result.wheel.name}" has been created.`,
       });
     } else if (isWheelCapError(result.error)) {
-      setUpgradeOpen(true);
+      toast({
+        title: "Wheel limit reached",
+        description: result.error,
+        variant: "destructive",
+      });
     } else {
       toast({
         title: "Error",
@@ -194,9 +196,7 @@ export default function MyWheels() {
           <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/50 border border-border text-sm text-muted-foreground">
             <AlertTriangle className="w-4 h-4 flex-shrink-0" />
             <span>
-              {storage.isCloud
-                ? "Wheels are saved to your account and sync across your devices."
-                : "Wheels are saved locally in your browser. Clearing browser data will delete them."}
+              Wheels are saved locally in your browser. Clearing browser data will delete them.
             </span>
           </div>
         </div>
@@ -207,7 +207,7 @@ export default function MyWheels() {
               <AlertTriangle className="w-4 h-4 flex-shrink-0" />
               <span>
                 You're over your limit of {cap}. Your wheels are safe, but you
-                can't save new ones until you delete some{ent.isPro ? "." : " or upgrade to Pro."}
+                can't save new ones until you delete some.
               </span>
             </div>
           </div>
@@ -370,13 +370,6 @@ export default function MyWheels() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      <UpgradeDialog
-        open={upgradeOpen}
-        onOpenChange={setUpgradeOpen}
-        feature="Wheel limit"
-        gate="wheel_cap"
-      />
 
       <Footer />
     </div>

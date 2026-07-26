@@ -9,8 +9,6 @@ interface SpinWheelProps {
   spinDuration: number;
   size?: number;
   claimedIds?: string[];
-  showBranding?: boolean;
-  onBrandingClick?: () => void;
 }
 
 function getContrastColor(hexColor: string): string {
@@ -118,7 +116,7 @@ function getRadialColumns(
   return { columns: [label.slice(0, maxChars)], fontSize: minFont };
 }
 
-export function SpinWheel({ segments, rotation, isSpinning, spinDuration, size, claimedIds = [], showBranding = false, onBrandingClick }: SpinWheelProps) {
+export function SpinWheel({ segments, rotation, isSpinning, spinDuration, size, claimedIds = [] }: SpinWheelProps) {
   const segmentAngle = 360 / segments.length;
   const viewBoxSize = 500;
   const radius = 200;
@@ -282,25 +280,6 @@ export function SpinWheel({ segments, rotation, isSpinning, spinDuration, size, 
         </defs>
         <circle cx={centerX} cy={centerY} r="10" fill="#111827" />
         <circle cx={centerX} cy={centerY} r="4" fill="rgba(255,255,255,0.15)" />
-
-        {showBranding && (
-          <text
-            x={centerX}
-            y={viewBoxSize - 8}
-            transform={`rotate(${-rotation}, ${centerX}, ${centerY})`}
-            textAnchor="middle"
-            fontSize="14"
-            fontWeight="600"
-            fill="rgba(255,255,255,0.55)"
-            className={onBrandingClick ? "select-none cursor-pointer" : "pointer-events-none select-none"}
-            style={{ fontFamily: "Inter, system-ui, sans-serif" }}
-            data-testid="wheel-branding"
-            onClick={onBrandingClick}
-            aria-label={onBrandingClick ? "Made with QuickWheel — upgrade to Pro to remove this" : undefined}
-          >
-            Made with QuickWheel
-          </text>
-        )}
       </svg>
 
       <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 z-20" data-testid="wheel-pointer">

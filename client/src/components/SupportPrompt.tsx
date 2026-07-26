@@ -1,6 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { useLocation } from "wouter";
-import { useEntitlements } from "@/hooks/useEntitlements";
 import { shouldShowSupportPrompt } from "@shared/supportPrompt";
 import {
   hasSeenSupportPrompt,
@@ -25,20 +23,15 @@ interface SupportPromptProps {
 // the win celebration.
 const OPEN_DELAY_MS = 1000;
 
+// Currently disabled — see shouldShowSupportPrompt in shared/supportPrompt.ts.
+// Left in place (markup + wiring) so it's easy to re-enable with a new
+// donation destination later.
 export function SupportPrompt({ spinResultOpen }: SupportPromptProps) {
-  const { isPro, isLoaded } = useEntitlements();
-  const [, setLocation] = useLocation();
   const [open, setOpen] = useState(false);
   // True once a spin's result modal has been shown at least once.
   const sawResultRef = useRef(false);
   // True once we've decided to open (don't re-trigger this session).
   const handledRef = useRef(false);
-  // Latest isPro, read inside the delayed open so a late Clerk plan upgrade
-  // (stale false → true within the open delay) can still suppress the popup.
-  const isProRef = useRef(isPro);
-  useEffect(() => {
-    isProRef.current = isPro;
-  }, [isPro]);
 
   useEffect(() => {
     if (spinResultOpen) {
@@ -49,18 +42,15 @@ export function SupportPrompt({ spinResultOpen }: SupportPromptProps) {
     if (!sawResultRef.current || handledRef.current) return;
 
     const seen = hasSeenSupportPrompt();
-    if (!shouldShowSupportPrompt({ isLoaded, isPro, seen, spinSettled: true })) {
-      // Not eligible yet (e.g. Clerk still loading). The effect re-runs when
-      // isLoaded/isPro change, so a late-loading Pro flag is still respected.
+    if (!shouldShowSupportPrompt({ seen, spinSettled: true })) {
       return;
     }
     handledRef.current = true;
     const t = window.setTimeout(() => {
-      // Re-check Pro at fire time — Clerk may have corrected a stale false.
-      if (!isProRef.current) setOpen(true);
+      setOpen(true);
     }, OPEN_DELAY_MS);
     return () => window.clearTimeout(t);
-  }, [spinResultOpen, isLoaded, isPro]);
+  }, [spinResultOpen]);
 
   const handleLater = () => {
     markSupportPromptSeen();
@@ -70,7 +60,6 @@ export function SupportPrompt({ spinResultOpen }: SupportPromptProps) {
   const handleSupport = () => {
     markSupportPromptSeen();
     setOpen(false);
-    setLocation("/pricing?src=support_prompt");
   };
 
   // Escape / overlay-click closes for THIS session only — it must NOT burn the
@@ -81,9 +70,7 @@ export function SupportPrompt({ spinResultOpen }: SupportPromptProps) {
         <DialogHeader>
           <DialogTitle>QuickWheel is free — and staying that way</DialogTitle>
           <DialogDescription>
-            All the core features are free forever. If you'd like to support the
-            app, you can upgrade to Pro — it helps me cover hosting costs and
-            build more free tools like this one. Either way, thanks for spinning! 🎡
+            All the core features are free forever. Thanks for spinning! 🎡
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
@@ -95,7 +82,7 @@ export function SupportPrompt({ spinResultOpen }: SupportPromptProps) {
             Maybe later
           </Button>
           <Button onClick={handleSupport} data-testid="button-support-pro">
-            Support QuickWheel
+            Thanks!
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -1,8 +1,8 @@
-import { FREE } from "@shared/entitlements";
+import { ENTITLEMENTS } from "@shared/entitlements";
 import { migrateSegment } from "@shared/schema";
 
 const STORAGE_KEY = "quickwheel_saved_wheels";
-const MAX_WHEELS = FREE.maxWheels; // 3 — anonymous users are always free tier
+const MAX_WHEELS = ENTITLEMENTS.maxWheels;
 
 export interface LocalWheel {
   id: string;
