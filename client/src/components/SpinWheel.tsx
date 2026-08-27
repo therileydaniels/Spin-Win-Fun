@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { CustomSegment } from "@shared/schema";
 import { adjustColor } from "@/lib/colorUtils";
+import { getRadialColumns } from "@/lib/wheelTextLayout";
 
 interface SpinWheelProps {
   segments: CustomSegment[];
@@ -9,6 +10,10 @@ interface SpinWheelProps {
   spinDuration: number;
   size?: number;
   claimedIds?: string[];
+  /** Render full labels even when a dense wheel would otherwise switch to
+   *  numbered/legend mode. Used by the SVG export and the OBS embed, which have
+   *  no legend to decode numbers against. */
+  forceLabels?: boolean;
 }
 
 function getContrastColor(hexColor: string): string {
@@ -47,76 +52,7 @@ function getContrastColor(hexColor: string): string {
   }
 }
 
-function truncateLabel(label: string, maxLen: number = 20): string {
-  if (label.length <= maxLen) return label;
-  return label.slice(0, maxLen - 2) + "...";
-}
-
-/**
- * Lay out text as one or more radial "columns" (each column is a single text string
- * that will be rotated 90° so its characters run along the slice from rim to center).
- *
- * Constraints:
- *   - Each column's character count × charWidth must fit in the available radial space.
- *   - All columns placed side-by-side must fit within the slice arc width.
- */
-function getRadialColumns(
-  label: string,
-  segmentCount: number,
-  radius: number
-): { columns: string[]; fontSize: number } {
-  // Text starts 4 px inside the slice's outer path edge and runs toward the hub.
-  // Using a fixed pixel offset (not a fraction) so small fonts still start at the rim.
-  const rimStart = radius - 4;      // distance from wheel center to text start
-  const hubEdge  = radius * 0.16;   // distance from wheel center to stop (just outside hub)
-  const availableRadial = rimStart - hubEdge; // ~164 px for radius=200
-
-  // Use the midpoint of the text span for arc-width calculation.
-  const textMidRadius = (rimStart + hubEdge) / 2;
-  const segmentAngle = (2 * Math.PI) / segmentCount;
-  const arcWidth = 2 * textMidRadius * Math.sin(segmentAngle / 2) * 0.80;
-
-  const charWidthFactor = 0.60;
-  const minFont = 9;
-  const maxFont = 26;
-
-  const words = label.split(' ');
-
-  // Candidate column groupings — fewest columns first (prefer bigger font).
-  const candidates: string[][] = [
-    [label],
-  ];
-  if (words.length >= 2) {
-    const mid = Math.ceil(words.length / 2);
-    candidates.push([words.slice(0, mid).join(' '), words.slice(mid).join(' ')]);
-  }
-  if (words.length >= 3) {
-    const a = Math.ceil(words.length / 3);
-    const b = Math.ceil(words.length * 2 / 3);
-    candidates.push([words.slice(0, a).join(' '), words.slice(a, b).join(' '), words.slice(b).join(' ')]);
-  }
-
-  for (let fs = maxFont; fs >= minFont; fs--) {
-    const colStep = fs * 1.3;
-    const maxCharsPerCol = Math.floor(availableRadial / (fs * charWidthFactor));
-
-    for (const columns of candidates) {
-      const longestCol = Math.max(...columns.map(c => c.length));
-      if (longestCol > maxCharsPerCol) continue;
-
-      const totalWidth = (columns.length - 1) * colStep + fs;
-      if (totalWidth <= arcWidth) {
-        return { columns, fontSize: fs };
-      }
-    }
-  }
-
-  // Fallback: one truncated column at minimum font.
-  const maxChars = Math.max(3, Math.floor(availableRadial / (minFont * charWidthFactor)));
-  return { columns: [label.slice(0, maxChars)], fontSize: minFont };
-}
-
-export function SpinWheel({ segments, rotation, isSpinning, spinDuration, size, claimedIds = [] }: SpinWheelProps) {
+export function SpinWheel({ segments, rotation, isSpinning, spinDuration, size, claimedIds = [], forceLabels = false }: SpinWheelProps) {
   const segmentAngle = 360 / segments.length;
   const viewBoxSize = 500;
   const radius = 200;
@@ -129,14 +65,20 @@ export function SpinWheel({ segments, rotation, isSpinning, spinDuration, size, 
   // segment count change, since those are the only inputs to the layout.
   const segmentCount = segments.length;
   const columnsById = useMemo(() => {
-    const map: Record<string, { columns: string[]; fontSize: number }> = {};
+    const map: Record<string, { columns: string[]; fontSize: number; fits: boolean }> = {};
     for (const segment of segments) {
-      const displayLabel = truncateLabel(segment.label);
-      map[segment.id] = getRadialColumns(displayLabel, segmentCount, radius);
+      map[segment.id] = getRadialColumns(segment.label, segmentCount, radius);
     }
     return map;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [segments.map(s => `${s.id}:${s.label}`).join("|"), segmentCount, radius]);
+
+  // All-or-nothing: if any label can't render legibly in-slice, the whole wheel
+  // switches to numbers (decoded via the on-screen legend). `forceLabels` opts
+  // out — the export and OBS embed always show real labels since they have no
+  // legend to pair numbers with.
+  const legendMode = !forceLabels && Object.values(columnsById).some(c => !c.fits);
+  const numberFontSize = segmentCount > 16 ? 18 : 22;
 
   function polarToCartesian(cx: number, cy: number, r: number, angleDegrees: number) {
     const angleRadians = ((angleDegrees - 90) * Math.PI) / 180;
@@ -234,38 +176,62 @@ export function SpinWheel({ segments, rotation, isSpinning, spinDuration, size, 
 
               {/*
                 Outer group: rotates the local frame so this slice's bisector
-                points straight up (-Y). Inner rotate(90) on each text element
-                then tips the characters 90° CW so they run rim→center.
-                textAnchor="start" anchors the first character at rimAnchorY.
+                points straight up (-Y).
               */}
               <g transform={`rotate(${midAngle}, ${centerX}, ${centerY})`}>
-                {columns.map((col, colIndex) => {
-                  const xOffset = (colIndex - (columns.length - 1) / 2) * colStep;
-                  const tx = centerX + xOffset;
-                  const ty = rimAnchorY;
-                  return (
-                    <text
-                      key={colIndex}
-                      x={tx}
-                      y={ty}
-                      transform={`rotate(90, ${tx}, ${ty})`}
-                      textAnchor="start"
-                      dominantBaseline="middle"
-                      fontSize={fontSize}
-                      fontWeight="700"
-                      fill={textColor}
-                      className="pointer-events-none select-none"
-                      style={{
-                        textShadow: isLightText
-                          ? "0 2px 4px rgba(0,0,0,0.4)"
-                          : "0 1px 2px rgba(255,255,255,0.4)",
-                        fontFamily: "Inter, system-ui, sans-serif",
-                      }}
-                    >
-                      {col}
-                    </text>
-                  );
-                })}
+                {legendMode ? (
+                  // Dense wheel: show the slice number (upright in the rotated
+                  // frame) near the rim; the legend decodes it to a full label.
+                  <text
+                    x={centerX}
+                    y={centerY - radius * 0.78}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    fontSize={numberFontSize}
+                    fontWeight="700"
+                    fill={textColor}
+                    className="pointer-events-none select-none"
+                    style={{
+                      textShadow: isLightText
+                        ? "0 2px 4px rgba(0,0,0,0.4)"
+                        : "0 1px 2px rgba(255,255,255,0.4)",
+                      fontFamily: "Inter, system-ui, sans-serif",
+                    }}
+                  >
+                    {index + 1}
+                  </text>
+                ) : (
+                  // Inner rotate(90) tips each column 90° CW so it runs
+                  // rim→center. textAnchor="start" anchors the first character
+                  // at rimAnchorY.
+                  columns.map((col, colIndex) => {
+                    const xOffset = (colIndex - (columns.length - 1) / 2) * colStep;
+                    const tx = centerX + xOffset;
+                    const ty = rimAnchorY;
+                    return (
+                      <text
+                        key={colIndex}
+                        x={tx}
+                        y={ty}
+                        transform={`rotate(90, ${tx}, ${ty})`}
+                        textAnchor="start"
+                        dominantBaseline="middle"
+                        fontSize={fontSize}
+                        fontWeight="700"
+                        fill={textColor}
+                        className="pointer-events-none select-none"
+                        style={{
+                          textShadow: isLightText
+                            ? "0 2px 4px rgba(0,0,0,0.4)"
+                            : "0 1px 2px rgba(255,255,255,0.4)",
+                          fontFamily: "Inter, system-ui, sans-serif",
+                        }}
+                      >
+                        {col}
+                      </text>
+                    );
+                  })
+                )}
               </g>
             </g>
           );

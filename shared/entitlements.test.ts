@@ -4,7 +4,7 @@ import { canSaveWheel, isSegmentCountAllowed, ENTITLEMENTS } from "./entitlement
 describe("ENTITLEMENTS", () => {
   it("defines the flat app-wide caps", () => {
     expect(ENTITLEMENTS.maxWheels).toBe(10);
-    expect(ENTITLEMENTS.maxSegments).toBe(12);
+    expect(ENTITLEMENTS.maxSegments).toBe(20);
     expect(ENTITLEMENTS.export).toBe(true);
     expect(ENTITLEMENTS.obs).toBe(true);
     expect(ENTITLEMENTS.presentation).toBe(true);
@@ -25,7 +25,7 @@ describe("canSaveWheel", () => {
 
 describe("isSegmentCountAllowed", () => {
   it("respects the max", () => {
-    expect(isSegmentCountAllowed(12)).toBe(true);
-    expect(isSegmentCountAllowed(13)).toBe(false);
+    expect(isSegmentCountAllowed(20)).toBe(true);
+    expect(isSegmentCountAllowed(21)).toBe(false);
   });
 });

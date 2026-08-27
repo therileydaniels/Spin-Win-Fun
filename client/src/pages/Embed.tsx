@@ -159,6 +159,7 @@ export default function Embed() {
           isSpinning={isSpinning}
           spinDuration={spinDuration}
           size={size}
+          forceLabels
         />
       </div>
 

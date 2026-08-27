@@ -20,7 +20,7 @@ export interface Entitlements {
 
 export const ENTITLEMENTS: Entitlements = {
   maxWheels: 10,
-  maxSegments: 12,
+  maxSegments: 20,
   export: true,
   obs: true,
   presentation: true,

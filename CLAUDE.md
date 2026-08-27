@@ -10,7 +10,7 @@ A prize wheel spinner PWA. Users customize wheel segments, spin to pick a winner
 - **PWA:** Vite PWA plugin, manifest + service worker in `public/`
 
 ## Entitlements
-Everyone gets the same flat set of limits — there is no free/paid tier. Source of truth: `shared/entitlements.ts` — `ENTITLEMENTS` (10 wheels, 12 segments, export/OBS/presentation mode/custom colors all enabled, no branding watermark). Client reads it via `useEntitlements()`. The wheel cap is enforced in `localWheelStorage.ts` (`saveWheelToLocal`/`duplicateLocalWheel`); the segment cap is enforced in `useCustomSegments.ts`. Hitting either cap shows a plain error/toast — there's no upsell.
+Everyone gets the same flat set of limits — there is no free/paid tier. Source of truth: `shared/entitlements.ts` — `ENTITLEMENTS` (10 wheels, 20 segments, export/OBS/presentation mode/custom colors all enabled, no branding watermark). Client reads it via `useEntitlements()`. The wheel cap is enforced in `localWheelStorage.ts` (`saveWheelToLocal`/`duplicateLocalWheel`); the segment cap is enforced in `useCustomSegments.ts`. Hitting either cap shows a plain error/toast — there's no upsell.
 
 ## Key Routes
 | Path | Component | Notes |
@@ -34,8 +34,12 @@ Probabilities are normalized weights (not percentages). Equal odds = all 1.0.
 ```
 Stored in `localStorage` only (`localWheelStorage.ts`), IDs are `crypto.randomUUID()` strings. Capped at `ENTITLEMENTS.maxWheels` (10) per browser.
 
+## Dense wheels (legend mode)
+Text layout lives in `client/src/lib/wheelTextLayout.ts`. `getRadialColumns` lays a label out as radial spoke columns and reports `fits` (legible in-slice: font ≥ `FIT_MIN_FONT`, ≤2 columns, untruncated). `shouldUseLegend(segments)` is true when **any** label fails to fit — all-or-nothing. When true, `SpinWheel` renders each slice's **number** (index+1) instead of its label, and `Home.tsx` shows `WheelLegend.tsx` (a numbered `number → label` key, side/below the wheel; compact in presentation mode). Winner readouts always use the full `label`. `SpinWheel`'s `forceLabels` prop opts out of legend mode (always real labels) — used by the OBS embed (`Embed.tsx`, no legend to decode numbers) and the export wheel. `FIT_MIN_FONT` in `wheelTextLayout.ts` is the tuning knob for how eagerly the legend triggers.
+
 ## Core Components
-- `SpinWheel.tsx` — pure SVG wheel renderer; `data-testid="wheel-svg"` on the main SVG, `data-testid="wheel-pointer"` on the pointer overlay div
+- `SpinWheel.tsx` — pure SVG wheel renderer; `data-testid="wheel-svg"` on the main SVG, `data-testid="wheel-pointer"` on the pointer overlay div. `forceLabels` bypasses legend mode.
+- `WheelLegend.tsx` — numbered key shown beside/below a dense (legend-mode) wheel; `data-testid="wheel-legend"`
 - `SpinButton.tsx` — animated spin trigger
 - `ProbabilityPanel.tsx` — settings sidebar (add/remove/rename/recolor segments, save, share, OBS embed)
 - `WheelHeader.tsx` — top nav with history toggle, settings toggle
@@ -46,7 +50,7 @@ Stored in `localStorage` only (`localWheelStorage.ts`), IDs are `crypto.randomUU
 - `useSound` — win sound toggle
 
 ## SVG Export
-`handleDownloadSvg` in `Home.tsx` composites the wheel SVG (`data-testid="wheel-svg"`) and pointer SVG (`data-testid="wheel-pointer" > svg`) into a single combined SVG document. It uses `getBoundingClientRect` to position each piece and scales each from its own viewBox (wheel 500×500, pointer 40×52) into the shared CSS-pixel space, then downloads it as an `.svg` file. The "Save as SVG" button appears below the Spin button when not in presentation mode.
+`handleDownloadSvg` in `Home.tsx` composites the wheel SVG (`data-testid="wheel-svg"`) and pointer SVG (`data-testid="wheel-pointer" > svg`) into a single combined SVG document. It reads from a **hidden, upright, full-label export wheel** (`[data-export-wheel]`, a `forceLabels` `SpinWheel` rendered off-screen at `EXPORT_WHEEL_SIZE` = 1200px), not the on-screen wheel — so exports are always high-res and show real labels even when the visible wheel is in numbered/legend mode. It uses `getBoundingClientRect` to position each piece and scales each from its own viewBox (wheel 500×500, pointer 40×52) into the shared CSS-pixel space, then downloads it as an `.svg` file. The "Save as SVG" button appears below the Spin button when not in presentation mode.
 
 ## Conventions
 - Wheel SVG uses a 500×500 viewBox, radius 200, center at (250, 250)

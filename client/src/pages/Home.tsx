@@ -1,5 +1,7 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { SpinWheel } from "@/components/SpinWheel";
+import { WheelLegend } from "@/components/WheelLegend";
+import { shouldUseLegend } from "@/lib/wheelTextLayout";
 import { SpinButton } from "@/components/SpinButton";
 import { WinnerModal } from "@/components/WinnerModal";
 import { ProbabilityPanel } from "@/components/ProbabilityPanel";
@@ -21,6 +23,10 @@ import { SupportPrompt } from "@/components/SupportPrompt";
 import { useQueryClient } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Settings, ChevronLeft, Mail, Download } from "lucide-react";
+
+// Off-screen render size for the SVG export. Larger than the on-screen wheel so
+// dense/legend-mode wheels still export with sharp, readable full labels.
+const EXPORT_WHEEL_SIZE = 1200;
 
 // Matches the two known wheel-cap messages: server's 409 ("Wheel limit
 // reached (N)") and the anonymous local-storage cap ("You can save up to N
@@ -82,6 +88,10 @@ export default function Home() {
   const [noRepeatEnabled, setNoRepeatEnabled] = useState(false);
   const [claimedIds, setClaimedIds] = useState<string[]>([]);
   const [showChangelog, setShowChangelog] = useState(false);
+
+  // Dense wheels (a label too long to render legibly in-slice) switch to
+  // numbered slices decoded by the on-screen legend.
+  const legendMode = useMemo(() => shouldUseLegend(segments), [segments]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -263,8 +273,12 @@ export default function Home() {
   }, [getWheelData, currentWheelName, toast]);
 
   const handleDownloadSvg = useCallback(() => {
-    const wheelSvgEl = document.querySelector<SVGSVGElement>('[data-testid="wheel-svg"]');
-    const pointerEl = document.querySelector<HTMLElement>('[data-testid="wheel-pointer"]');
+    // Read from the hidden, upright, full-label export wheel (rendered large so
+    // even dense/legend-mode wheels export with readable labels), not the
+    // on-screen wheel — which may be spun and showing numbers.
+    const exportRoot = document.querySelector<HTMLElement>('[data-export-wheel]');
+    const wheelSvgEl = exportRoot?.querySelector<SVGSVGElement>('[data-testid="wheel-svg"]');
+    const pointerEl = exportRoot?.querySelector<HTMLElement>('[data-testid="wheel-pointer"]');
     if (!wheelSvgEl || !pointerEl) {
       toast({ title: "Couldn't save the image", description: "Try again in a moment.", variant: "destructive" });
       return;
@@ -472,6 +486,16 @@ export default function Home() {
             )}
           </div>
 
+          {!isLoading && legendMode && (
+            <div className="w-full max-w-[340px]">
+              <WheelLegend
+                segments={segments}
+                claimedIds={noRepeatEnabled ? claimedIds : []}
+                compact={presentationMode}
+              />
+            </div>
+          )}
+
           <SpinButton
             onClick={handleSpin}
             disabled={!canSpin || isLoading}
@@ -591,6 +615,35 @@ export default function Home() {
         onSave={handleSaveNew}
         defaultName={currentWheelName || "My Wheel"}
       />
+
+      {/*
+        Hidden, upright, full-label wheel rendered large solely as the source for
+        the SVG export (handleDownloadSvg reads its inner SVGs). forceLabels keeps
+        real labels even when the visible wheel is in numbered/legend mode.
+      */}
+      <div
+        data-export-wheel
+        aria-hidden
+        className="pointer-events-none"
+        style={{
+          position: "fixed",
+          left: -99999,
+          top: 0,
+          width: EXPORT_WHEEL_SIZE,
+          height: EXPORT_WHEEL_SIZE,
+          opacity: 0,
+          overflow: "hidden",
+        }}
+      >
+        <SpinWheel
+          segments={segments}
+          rotation={0}
+          isSpinning={false}
+          spinDuration={0}
+          size={EXPORT_WHEEL_SIZE}
+          forceLabels
+        />
+      </div>
     </div>
   );
 }
