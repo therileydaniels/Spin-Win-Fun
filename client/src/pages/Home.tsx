@@ -480,7 +480,6 @@ export default function Home() {
                   rotation={rotation}
                   isSpinning={isSpinning}
                   spinDuration={spinDuration}
-                  claimedIds={noRepeatEnabled ? claimedIds : []}
                 />
               </div>
             )}

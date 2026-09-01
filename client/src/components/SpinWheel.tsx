@@ -9,7 +9,6 @@ interface SpinWheelProps {
   isSpinning: boolean;
   spinDuration: number;
   size?: number;
-  claimedIds?: string[];
   /** Render full labels even when a dense wheel would otherwise switch to
    *  numbered/legend mode. Used by the SVG export and the OBS embed, which have
    *  no legend to decode numbers against. */
@@ -52,7 +51,7 @@ function getContrastColor(hexColor: string): string {
   }
 }
 
-export function SpinWheel({ segments, rotation, isSpinning, spinDuration, size, claimedIds = [], forceLabels = false }: SpinWheelProps) {
+export function SpinWheel({ segments, rotation, isSpinning, spinDuration, size, forceLabels = false }: SpinWheelProps) {
   const segmentAngle = 360 / segments.length;
   const viewBoxSize = 500;
   const radius = 200;
@@ -158,7 +157,6 @@ export function SpinWheel({ segments, rotation, isSpinning, spinDuration, size, 
           const midAngle = startAngle + segmentAngle / 2;
           const path = describeArc(centerX, centerY, radius, startAngle, endAngle);
 
-          const isClaimed = claimedIds.includes(segment.id);
           const { columns, fontSize } = columnsById[segment.id];
           const textColor = getContrastColor(segment.color);
           const isLightText = textColor === '#FFFFFF';
@@ -169,7 +167,7 @@ export function SpinWheel({ segments, rotation, isSpinning, spinDuration, size, 
           const rimAnchorY = centerY - (radius - 4);
 
           return (
-            <g key={segment.id} opacity={isClaimed ? 0.35 : 1}>
+            <g key={segment.id}>
               <path d={path} fill={`url(#segmentGradient-${segment.id})`} stroke="rgba(0,0,0,0.3)" strokeWidth="1">
                 <title>{segment.label}</title>
               </path>

@@ -55,7 +55,7 @@ Text layout lives in `client/src/lib/wheelTextLayout.ts`. `getRadialColumns` lay
 ## Conventions
 - Wheel SVG uses a 500×500 viewBox, radius 200, center at (250, 250)
 - Segment gradients use IDs `segmentGradient-{id}` — always unique per segment
-- `claimedIds` tracks no-repeat mode; segments at 0.35 opacity when claimed
+- `claimedIds` tracks no-repeat mode (claimed segments are excluded from the next spin in `Home.tsx`'s `handleSpin`); the wheel does **not** visually dim them
 - Share links encode wheel data as base64 in `?wheel=` query param
 - OBS embed link: `/app/embed?wheel=<encoded>`
 - Changelog version gating via `CHANGELOG_VERSION` in `lib/changelog.ts`
