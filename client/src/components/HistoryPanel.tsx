@@ -62,9 +62,6 @@ export const HistoryPanel = memo(function HistoryPanel({ entries, onClose, onCle
               />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">{entry.label}</p>
-                <p className="text-xs text-muted-foreground">
-                  {entry.timestamp.toLocaleTimeString()}
-                </p>
               </div>
             </div>
           ))}
