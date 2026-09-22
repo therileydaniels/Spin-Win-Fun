@@ -1,0 +1,73 @@
+# QuickWheel
+
+> Free customizable spin wheel for streamers, content creators, and live events.
+
+QuickWheel is a web-based wheel spinner at https://quickwheel.co that lets you create custom prize wheels with weighted probabilities, presentation mode for streaming, and instant sharing — no account required.
+
+## What It Does
+
+- Customizable wheel segments with colors and labels
+- Adjustable probabilities (weight outcomes without your audience knowing)
+- Presentation mode: full-screen, clean display for OBS, Streamlabs, or screen share
+- Save and manage multiple wheels locally in your browser
+- Share wheels via URL — recipients get an exact copy
+- Embed wheels on your website or as an OBS browser source
+- Export wheels as SVG images
+- Works on desktop, mobile, and as an installable PWA
+- Dark and light themes
+
+## Who It's For
+
+- **Streamers** (Twitch, YouTube Live, Kick) — spin wheels for giveaways, sub rewards, viewer games
+- **Content creators** — random picks for videos, collabs, challenge wheels
+- **Live event hosts** — audience engagement, prize selection, icebreakers
+- **Teachers and presenters** — random student picker, topic selector
+- **Anyone** who needs a decision wheel with controlled outcomes
+
+## How It Works
+
+1. Add segments to your wheel (names, colors, weights)
+2. Spin — the wheel lands based on your probability settings
+3. Share the wheel URL or embed it in your stream
+
+## Key Differentiators vs Other Wheel Spinners
+
+- Built specifically for streaming and live content
+- Outcome weighting (looks random to viewers, you control the odds)
+- Presentation mode hides editing controls for a clean on-screen look
+- No account or signup required
+- No ads, no paywalls on core features
+- Works as OBS browser source natively
+
+## Links
+
+- App: https://quickwheel.co/app
+- Landing page: https://quickwheel.co/
+- Privacy policy: https://quickwheel.co/privacy
+- Terms of service: https://quickwheel.co/terms
+
+## FAQ
+
+### What is QuickWheel?
+QuickWheel is a free, customizable wheel spinner and random picker built for content creators, streamers, and live events. It features presentation mode, weighted outcomes, multi-wheel management, and embeddable wheels. No account required.
+
+### Is QuickWheel free?
+Yes. QuickWheel is free to use with no signup required. The core wheel spinner is completely free.
+
+### Can I use it for live streaming?
+Yes. Presentation Mode hides all editing controls and gives you a clean, full-screen wheel for OBS, Streamlabs, or any streaming software.
+
+### Can I control what the wheel lands on?
+Yes. You can weight segments to land more or less often. Your audience sees a natural spin while you control the experience.
+
+### Do I need an account?
+No. Start spinning immediately with zero signup. Wheels save locally in your browser.
+
+### Does it work on mobile?
+Yes. Works on any device with a browser. Also available as an installable PWA.
+
+### Can I use it as an OBS browser source?
+Yes. Copy your wheel's URL and add it as a browser source in OBS or Streamlabs. Presentation mode provides a clean display for your stream layout.
+
+### Can I embed it on my website?
+Yes. QuickWheel supports embedding via URL on your website, landing page, or fan hub.

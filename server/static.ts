@@ -32,7 +32,7 @@ export function serveStatic(app: Express) {
   // is only mounted at /app below, so these 404'd at the domain root without
   // this — search engines fetch /robots.txt and /sitemap.xml at the root by
   // convention regardless of what's inside robots.txt.
-  const rootAssets = ["favicon-32x32.png", "robots.txt", "sitemap.xml", "og-image.png", "logo.png"];
+  const rootAssets = ["favicon-32x32.png", "robots.txt", "sitemap.xml", "og-image.png", "logo.png", "llms.txt"];
   for (const asset of rootAssets) {
     app.get(`/${asset}`, (_req, res) => {
       res.sendFile(path.resolve(distPath, asset));
